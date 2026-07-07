@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:anypoint-mq="http://www.mulesoft.org/schema/mule/anypoint-mq"
+	xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/anypoint-mq http://www.mulesoft.org/schema/mule/anypoint-mq/current/mule-anypoint-mq.xsd">
+	
+	<flow name="process-fq-flat-file-flow" doc:id="8684ceb4-9d8d-41d6-bd63-7e6bd8325180" >
+		<logger level="INFO" doc:name="Log Request" doc:id="428ff4b3-ba68-4720-b507-95115eb22755" message="#[&quot;Flat file upload started for :&quot; ++ &quot;\'QuoteId\': &quot; ++ (attributes.properties.quoteId default &quot;&quot;) ++ &quot;\'Transaction\': &quot; ++ correlationId]" />
+		<ee:transform doc:name="Capture Properties" doc:id="3e8020d1-d398-48f7-8e66-8c0b98192638">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="ackToken"><![CDATA[%dw 2.0
+output application/java
+---
+attributes.ackToken]]></ee:set-variable>
+				<ee:set-variable variableName="quoteId"><![CDATA[attributes.properties.quoteId]]></ee:set-variable>
+				<ee:set-variable variableName="corrId"><![CDATA[attributes.properties.'correlationId']]></ee:set-variable>
+				<ee:set-variable variableName="origPayload"><![CDATA[payload]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<validation:is-not-null doc:name="Validate if QuoteId Is not null" doc:id="c628837e-06b1-40c2-aaeb-4c4929ec0aad" value="#[vars.quoteId]" message='"Quote ID cannot be null"' />
+		<flow-ref doc:name="cache-fq-response-sf" doc:id="7a907812-ab9e-423c-bc3d-1d76037dfc67" name="cache-fq-response-sf" />
+		<anypoint-mq:ack doc:name="Ack" doc:id="3109ec32-db8b-467d-9112-fbb20deda118" config-ref="Anypoint_MQ_Config" ackToken="#[vars.ackToken]" />
+		<logger level="INFO" doc:name="Log Response" doc:id="62883809-b2ef-431b-b4dd-fe7a5da25df4" message="#[&quot;Flat file upload completed for : &quot; ++ &quot;\'QuoteId\': &quot; ++ (vars.quoteId default &quot;&quot;) ++ &quot;\'Transaction\': &quot; ++ correlationId]" />
+		<error-handler ref="mq-error-handler" />
+	</flow>
+	
+	
+	</mule>

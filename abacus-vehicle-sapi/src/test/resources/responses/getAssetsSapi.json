@@ -1,0 +1,95 @@
+[
+  {
+    "model": {
+      "id": 5601,
+      "externalModelId": null,
+      "code": "W177",
+      "name": "Mercedes-AMG A 35 4MATIC",
+      "localDescription": "Mercedes-AMG A 35 4MATIC",
+      "isActive": true,
+      "isSample": null,
+      "variantCode": "1770511_000-804_054",
+      "externalDescription": null,
+      "mpName": null,
+      "baumusterNumber": "1770511",
+      "weight": 1570,
+      "capacity": 1991,
+      "engineCc": 1991,
+      "engineType": "Petrol",
+      "updatedOn": "2024-01-15T00:00:27.6621581+00:00",
+      "createdOn": "2023-08-10T10:54:55.399364+00:00",
+      "updatedBy": null,
+      "createdBy": null,
+      "modelClass": {
+        "externalCode": "A-KLASSE",
+        "description": "Classe  A",
+        "isActive": true,
+        "externalDescription": null,
+        "updatedOn": "2024-07-18T07:47:58.5755188+00:00",
+        "createdOn": "2021-09-30T00:00:02.8004201+00:00",
+        "updatedBy": null,
+        "createdBy": null,
+        "modelBrand": {
+          "externalCode": "00001",
+          "description": "Mercedes-Benz",
+          "localDescription": "Mercedes-Benz",
+          "isActive": true,
+          "createdOn": "2021-04-16T09:41:01.1116115+00:00",
+          "createdBy": null,
+          "modelType": {
+            "externalCode": "PC",
+            "description": "PC",
+            "isActive": true
+          }
+        }
+      },
+      "horsepower": 306,
+      "indemnities": [],
+      "bodyType": "KOMPAKT-LIMOUSINE",
+      "modelType": "Limousine compacta",
+      "range": "W177",
+      "modelYear": 202301,
+      "nstCode": "000",
+      "vxModels": null,
+      "modelYearCode": "804",
+      "changeYearCode": "054",
+      "baumusterGroupId": null,
+      "technicalInformation": {
+        "countryName": "PT"
+      },
+      "modelSource": "MVIS",
+      "bodyBuilders": [
+        {
+          "code": "Tester",
+          "externalCode": "Tester",
+          "description": "Tester",
+          "isActive": true
+        }
+      ],
+      "modelOptions": [],
+      "basePrice": {
+        "price": {
+          "amountExclusive": 48381.49
+        }
+      },
+      "lineCode": "DL3"
+    },
+    "vehicles": [
+      {
+        "vin": "W1V44781313751184",
+        "basePrice": {
+			"price": {
+					"amountExclusive": 30000.0
+				}
+			},
+			"retailOptionPrices": [
+				{
+					"price": {
+						"amountExclusive": 6015.75
+					}
+				}
+			]
+      	}
+    ]
+  }
+]

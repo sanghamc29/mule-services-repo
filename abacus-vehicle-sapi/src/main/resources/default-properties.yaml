@@ -1,0 +1,132 @@
+custom-error-code-prefix: "ORG_MB"
+debugCtgry: "com.mercedes-benz.com.abacus-vehicle-sapi"
+defaultLanguage: "en-US"
+application:
+ name: "${project.artifactId}"
+api:
+ name: "${project.artifactId}"
+ instanceId: "19558142" #this should be configured as a runtime property via Runtime Manager
+ version: "${api.build.version}"
+ ramlVersion: "${raml.version}"
+ orgId: "${orgId}"
+ spec: "resource::${api.orgId}:${api.name}:${api.ramlVersion}:raml:zip:api.raml"
+ http:
+  listener:
+   path: "/api/${api.name}/${api.version}/*"
+   host: "0.0.0.0"
+   readTimeout: "300000"
+
+#property http.port is replaced by CloudHub 2.0 during the deployment
+http:
+  port: "8081"
+  
+log:
+  payloadFlag: "false"
+
+interestType:
+  xirr: "xirr"
+  euribor: "euribor"
+
+abacus-sys:
+  protocol: "HTTPS"
+  host: ".dev.eu.abacus.i.mercedes-benz.com"
+  port: "443"
+  basePath: "/api/"
+  responseTimeout: "30000"
+  getToken:
+   path: "/AbacusAdminService/v1/api/Account/Login"
+   method: "POST"
+   timeout: "15000"
+  getAllAssets:
+   path: "/AssetService/v3/api/ExternalAPI/GetAll"
+   method: "GET"
+   #timeout: "15000"
+   timeout: "300000"
+  getAssetsByVin:
+   path: "/Assetservice/v3/api/Model/GetByVin"
+   method: "GET"
+   #timeout: "15000"
+   timeout: "300000"
+  calculatePurchasePrice:
+   path: "/AbacusService/v3/api/Calculator/CalculatePurchasePrice"
+   method: "POST"
+   timeout: "15000"
+  recursiveSearch:
+   path: "/AbacusconfigService/v3/api/ProductNode/RecursiveSearch"
+   method: "POST"
+   timeout: "15000"
+  financeQuote:
+   path: "/AbacusService/v2/api/FinanceQuote"
+   method: "POST"
+   timeout: "30000"
+  getFinanceQuote:
+   path: "/AbacusFlowService/v1/api/OcapiQuote/GetFinanceQuote"
+   method: "POST"
+   timeout: "10000" 
+  checkXIRR:
+   path: "/AbacusService/v3/api/Evaluate/FinanceParameters"
+   method: "POST"
+   timeout: "10000"
+   
+retry: 
+  frq: "3"
+  intrvl: "5000"
+  
+reconn:
+  attempt: "2"
+  intrvl: "2000"
+  
+token-os:
+ entries: "1"
+ ttl: "30"
+ expiry: "30"
+ 
+#Campaign Sections 
+campaign:
+  sections: "CustomerTypeSection,AssetGroupSection,EndValueSection,DealershipGroupSection,InterestRateTypeSection,PaymentDaySection,TermsSection"
+  
+#Until Succesful Properties
+until:
+  retries: "3"
+  milliseconds: "5000"
+
+
+#Flag to identify product node errors
+isProductErrorRequired: "true"
+fileName: "AbacusFQResponse"
+
+mq:
+  url: "https://mq-eu-west-1.anypoint.mulesoft.com/api/v1/organizations/c83a2291-ce49-4c83-a453-39a63be34c6c/environments/e52d7089-ab1c-412f-9a8e-f189d1f94417"
+  clientId: "b7f360d11e87417c88ef847340ff20b2"
+  ackTimeout: "15000"
+  queue: "Q.ABACUS.SFDC.QUOTE-CALCULATION.DEV.V1"
+  dlq: "DLQ.ABACUS.SFDC.QUOTE-CALCULATION.DEV.V1"
+  prefetch: "30"
+  redeliveryCount: "3"
+  tripTimeout: "5000"
+  threshold: "3"
+  errorTypes: "SALESFORCE-COMPOSITE:CONNECTIVITY,SALESFORCE-COMPOSITE:TRANSACTION, SALESFORCE-COMPOSITE:TRANSFORMATION, SALESFORCE-COMPOSITE:UNKNOWN, SALESFORCE-COMPOSITE:VALIDATION, STREAM_MAXIMUM_SIZE_EXCEEDED"
+  
+sf:
+  keystore: "${app.home}/ms-to-sf.jks"
+  certAlias: ""
+  principal: "mulesoft@salesforce.com.integrationuser.devint"
+  aud: "https://test.salesforce.com"
+  tokenEndpoint: "https://oneops-mbm--devint.sandbox.my.salesforce.com/services/oauth2/token"
+  restApiVersion: "v60.0"
+  responseTimeoutInSec: "10"
+  connTimeoutInSec: "10"
+  
+  
+#Abacus
+
+abacus:
+  tokenUrl: "https://sso-int.mercedes-benz.com/as/token.oauth2"
+  clientId: "8c4a384f-e761-4af7-8a88-b2f000e17b1d"
+  isExactVariantCodeMatch: "true"
+  errorCode: "MB:ABACUS_DATA_VALIDATION"
+  systemErrorCodes: "502,503,504"
+  error:
+    "502": "The system received a bad gateway response from the downstream service. Please try again shortly"
+    "503": "The downstream service is temporarily unavailable."
+    "504": "The downstream service timed out waiting for a response."

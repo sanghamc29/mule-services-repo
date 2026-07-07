@@ -1,0 +1,11 @@
+abacus:
+  clientSecret: "![pSqqNTzwZBagSgb31hRAB9SW2GqWj6GlnA3rn0M+VnCqkCwlpYBPsdk3qzaJ79gYZKNNIQNOArBolo6pSEZeEc0G0j5Rt9uF]"
+ 
+ 
+mq:
+  clientSecret: "![GSdwl0bd9/xIlGmofMz/iznLP+ikwCLxIPZlf80iuov8DAQ+ODOvsw==]"
+  
+sf:
+  storePass: "![FRzZ76NQd0MDTkInXKML0A==]"
+  consumerKey: "![wARYQe8A2JC9pOxf6ByXJ0Nl7AdmOrOPWDyEgBkEJYo6CcZ87WjFx6ngr1nUKZeM4+tONTxSoeQD73e0IZRqXeqaIUJc1UD3hM+o3lvkswBBi3D8UPFu0g==]"
+  

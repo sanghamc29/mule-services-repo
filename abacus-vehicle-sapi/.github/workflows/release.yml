@@ -1,0 +1,63 @@
+name: Build Release Candidate
+
+on: 
+  workflow_dispatch:
+    inputs:
+      region:
+        description: 'Select the Region'
+        required: true
+        default: 'eu'
+        type: choice
+        options:
+          - eu
+          - us
+          - all
+      
+env:
+  JAVA_VERSION: 17
+  MULE_ARTIFACTORY_USER: ${{ secrets.MULE_REPO_USER }}
+  MULE_ARTIFACTORY_PSSWD: ${{ secrets.MULE_REPO_PSSWD }}
+  MB_ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_REPO_USERNAME }}
+  MB_ARTIFACTORY_PSSWD: ${{ secrets.ARTIFACTORY_REPO_TOKEN }}
+  MULE_ENCRYPTION_KEY: ${{ secrets.MULE_SECURED_PROP_ENCRYPTION_KEY }}
+  ANYPOINT_EXCHANGE_MAVEN_APP_ID: ${{ secrets.ANYPOINT_EXCHANGE_MAVEN_APP_ID }}
+  ANYPOINT_EXCHANGE_MAVEN_APP_SECRET: ${{ secrets.ANYPOINT_EXCHANGE_MAVEN_APP_SECRET }}
+  
+jobs:
+  release:
+    runs-on: [self-hosted, aks-gha-runners]
+    # can run only against DEV branch and Release branch
+    if: ${{ github.ref == 'refs/heads/dev' || startsWith(github.ref, 'refs/heads/release') }}
+
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'maven'
+      
+      - name: Echo Maven Var
+        run:  echo ${{ env.MAVEN_OPTS }}
+      
+      - name: Echo Input Logs
+        run: |
+          echo "Triggered Branch: ${{ github.ref }}"
+          echo "Triggered By: ${{ github.actor }}"
+          echo "Selected Region: ${{ github.event.inputs.region }}"
+          echo "Project name is ${{ github.repository }}"
+
+      - name: Setup Git
+        run: |
+          git config user.name "Release Tagger"
+          git config user.email "release.tagger@mbm.com"
+          git config --global url."https://x-access-token:${{secrets.GITHUB_TOKEN}}@git.i.mercedes-benz.com/".insteadOf "https://git.i.mercedes-benz.com/"
+      
+      - name: Release Prepare
+        run:  mvn clean release:prepare -s settings.xml -Darguments="-Dencryption.key=${{ env.MULE_ENCRYPTION_KEY }}" -DtagNameFormat="@{project.artifactId}-@{project.version}-${{ github.event.inputs.region }}"
+        
+      - name: Release Perform
+        run: mvn release:perform -s settings.xml -Darguments="-Dencryption.key=${{ env.MULE_ENCRYPTION_KEY }}"
+        

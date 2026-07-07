@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<sub-flow name="post-calculate-purchase-price" doc:id="96a75414-876e-4b58-a514-c00b185658fb" >
+        
+		<ee:transform doc:name="Request" doc:id="20d61ca8-48ee-4b9c-84f0-13227229aff0">
+			<ee:message>
+				<ee:set-payload resource="dataweaves/p-purchase-price-request.dwl" />
+			</ee:message>
+		</ee:transform>
+        
+		<logger level="DEBUG" doc:name="Log Request" doc:id="f39022cf-7920-4b85-a7b8-309fa6b09ee0" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.corrId ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode ++ &#10;&quot;Calculate Purchase Price Start: &quot; ++ now()]" category="${debugCtgry}" />
+		<until-successful maxRetries="${until.retries}" doc:name="Until Successful" doc:id="bd4d69e4-4d8f-44f7-8ff2-1c92273fd987" millisBetweenRetries="${until.milliseconds}">
+			<try doc:name="Try" doc:id="28253f9d-a7f2-4e76-83ac-44d3d3976f3a">
+		
+		<http:request method="${abacus-sys.calculatePurchasePrice.method}" doc:name="Abacus Request" doc:id="e0a7702a-66ac-4821-824d-243f9fb09876" config-ref="HTTP_Request-configuration" path="${abacus-sys.calculatePurchasePrice.path}" sendCorrelationId="ALWAYS" correlationId="#[vars.corrId]" responseTimeout="${abacus-sys.calculatePurchasePrice.timeout}">
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	
+	("Accept-Language": vars.languageCode) if vars.lang != '',
+	"Content-Type": "application/json"
+}]]]></http:headers>
+		</http:request>
+				<error-handler ref="abacus-error-handler" />
+		</try>
+		</until-successful>
+		<validation:is-true doc:name="Validate Failure as null" doc:id="0071ec4a-3eec-4c03-9d2e-eb8910f73059" expression="#[vars.isFailure == null]" message="#[vars.errorObject.description]" />
+		
+		<logger level="DEBUG" doc:name="Log Response" doc:id="c49baddf-7ce0-45ea-9029-9f049c158541" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.corrId ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode ++ &#10;&quot;Calculate Purchase Price End: &quot; ++ now() ++&#10;&quot;Payload: &quot; ++ payload]" category="${debugCtgry}"/>
+		<ee:transform doc:name="Response" doc:id="8ff9dc3e-80ca-4b3b-81fe-b65f7cff8c45" >
+			<ee:message >
+				<ee:set-payload resource="dataweaves/p-purchase-price-response.dwl" />
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+</mule>

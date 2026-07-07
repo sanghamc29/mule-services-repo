@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="api-suite.xml" />
+	<munit:test name="upload-fqresponse-flat-file-sf-test" doc:id="1ffe77df-f7ec-44c5-8ac1-aec842f43e46" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="75a7e2bf-4e2b-4d6c-bfe8-338e998fe460" >
+				<munit:payload value="#[output application/json --- readUrl('classpath://uploadfqresponseflatfilesftest/set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json" />
+				<munit:attributes value="#[readUrl('classpath://uploadfqresponseflatfilesftest/set-event_attributes.dwl')]" />
+			</munit:set-event>
+			<munit-tools:mock-when doc:name="Mock ACK" doc:id="6c579c2b-d0ae-461e-861f-cf8ea9c14006" processor="anypoint-mq:ack" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Ack" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="Anypoint_MQ_Config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- (readUrl('classpath://responses/fileContentCompositeResponse.json','application/json'))]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock SF Composite Request - Query" doc:id="7f812d2f-e2c8-4cf9-b657-3577ea3c6809" processor="salesforce-composite:execute-composite-request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Execute composite request - Query" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="Salesforce_Composite_Config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- []]" />
+					<munit-tools:variables >
+						<munit-tools:variable key="queryResponse" value="#[output application/json --- (readUrl('classpath://responses/fileContentCompositeRequest.json','application/json'))]" mediaType="application/json" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock SF Composite Response" doc:id="a6f19350-b471-4705-8998-92b3627750bd" processor="salesforce-composite:execute-composite-request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Execute composite request - Upsert" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="Salesforce_Composite_Config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- (readUrl('classpath://responses/fileContentCompositeResponse.json','application/json'))]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to upload-fqresponse-flat-file-sf" doc:id="ef149903-5bad-474a-a470-3015f3e40d5c" name="upload-fqresponse-flat-file-sf"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="c1c77640-0bca-489e-a287-be7f7b0c6b38" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import uploadfqresponseflatfilesftest::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="upload-fqresponse-flat-file-sf-failure-test" doc:id="428ca238-fc3b-46bf-bc87-7856c1ee8198" expectedErrorType="SALESFORCE-COMPOSITE:CONNECTIVITY">
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="03ea96d3-6990-4c62-9397-4eef478c95e0" >
+				<munit:payload value="#[output application/json --- readUrl('classpath://uploadfqresponseflatfilesftest/set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json" />
+				<munit:attributes value="#[readUrl('classpath://uploadfqresponseflatfilesftest/set-event_attributes.dwl')]" />
+			</munit:set-event>
+			<munit-tools:mock-when doc:name="Mock NACK" doc:id="b4fb0c3b-68a6-44ba-bc2c-3b7ddc982134" processor="anypoint-mq:nack" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Nack to send to original queue" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="Anypoint_MQ_Config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- (readUrl('classpath://responses/fileContentCompositeResponse.json','application/json'))]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock SF Composite Request - Query" doc:id="4b15d8bf-80f2-4671-8128-4f42b2d2e899" processor="salesforce-composite:execute-composite-request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Execute composite request - Query" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="Salesforce_Composite_Config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- []]" />
+					<munit-tools:error typeId="SALESFORCE-COMPOSITE:CONNECTIVITY" />
+					<munit-tools:variables >
+						<munit-tools:variable key="queryResponse" value="#[output application/json --- (readUrl('classpath://responses/fileContentCompositeRequest.json','application/json'))]" mediaType="application/json" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to upload-fqresponse-flat-file-sf" doc:id="6a547e66-aa4a-4b0d-8c8e-20ac8c3e3f74" name="upload-fqresponse-flat-file-sf" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="c304b3ab-b33e-4bd4-92a5-64e9382a3a1d" message="The payload does not match" >
+				<munit-tools:that ><![CDATA[#[payload]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="upload-fqresponse-flat-file-sf-redelivery-failure-test" doc:id="1cd7d927-a84e-49e2-bfef-5da765c430fc">
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="d5ee3024-8778-44b0-94cd-cfa9cffb6990" >
+				<munit:payload value="#[output application/json --- readUrl('classpath://uploadfqresponseflatfilesftest/set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json" />
+				<munit:attributes value="#[readUrl('classpath://uploadfqresponseflatfilesftest/set-event_attributes.dwl')]" />
+			</munit:set-event>
+			<munit-tools:mock-when doc:name="Mock DLQ" doc:id="a076a1fe-8f2c-49a3-b91c-6db87a8f8c93" processor="anypoint-mq:publish" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Publish To DLQ" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="Anypoint_MQ_Config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- (readUrl('classpath://responses/fileContentCompositeResponse.json','application/json'))]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock SF Composite Request - Query" doc:id="54c394c6-2a9e-4508-becc-50de85e0cd67" processor="salesforce-composite:execute-composite-request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Execute composite request - Query" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="Salesforce_Composite_Config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- []]" />
+					<munit-tools:error typeId="REDELIVERY_EXHAUSTED" />
+					<munit-tools:variables >
+						<munit-tools:variable key="queryResponse" value="#[output application/json --- (readUrl('classpath://responses/fileContentCompositeRequest.json','application/json'))]" mediaType="application/json" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock ACK" doc:id="8fd5251c-c91d-48c3-82cd-feaab453d61e" processor="anypoint-mq:ack" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Ack the Original Message" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="Anypoint_MQ_Config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- (readUrl('classpath://responses/fileContentCompositeResponse.json','application/json'))]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to upload-fqresponse-flat-file-sf" doc:id="9f63fd6f-a366-4f85-94c2-f68be9335685" name="upload-fqresponse-flat-file-sf" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="725647ba-1cb3-45f0-ae4a-bec0d8b1ae10" message="The payload does not match" >
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import uploadfqresponseflatfilesftest::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="upload-fqresponse-flat-file-sf-bus-failure-test" doc:id="6d801b89-75c1-4e1c-8c44-fe0ceb033a81" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="d39d0f1d-bd15-4e48-810d-411196607ddf" >
+				<munit:payload value="#[output application/json --- readUrl('classpath://uploadfqresponseflatfilesftest/set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json" />
+				<munit:attributes value="#[readUrl('classpath://uploadfqresponseflatfilesftest/set-event_attributes.dwl')]" />
+			</munit:set-event>
+			<munit-tools:mock-when doc:name="Mock ACK" doc:id="36f452a3-5097-4d20-9f7a-3fb3cf8b8384" processor="anypoint-mq:ack" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Ack the Original Message" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="Anypoint_MQ_Config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- 'Success']" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock SF Composite Request - Query" doc:id="4630a1cc-8a5d-4482-a27c-44f14f0035db" processor="salesforce-composite:execute-composite-request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Execute composite request - Query" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="Salesforce_Composite_Config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- []]" />
+					<munit-tools:variables >
+						<munit-tools:variable key="queryResponse" value="#[output application/json --- (readUrl('classpath://responses/fileContentCompositeRequest.json','application/json'))]" mediaType="application/json" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock SF Composite Response" doc:id="e95b3203-7d17-4dbd-95a2-f2b74caefe4c" processor="salesforce-composite:execute-composite-request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Execute composite request - Upsert" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="Salesforce_Composite_Config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- (readUrl('classpath://responses/fileContentFailedCompositeResponse.json','application/json'))]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock DLQ" doc:id="05e08718-0a3e-4076-85a3-fb8a74e645b8" processor="anypoint-mq:publish" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Publish To DLQ" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="Anypoint_MQ_Config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- 'Success']" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to upload-fqresponse-flat-file-sf" doc:id="64f9eaa3-8c62-40f8-ab30-89072bedb605" name="upload-fqresponse-flat-file-sf" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="781a55dd-e1ca-409f-ae0f-b18485fb3cc1" message='#["Payload not matched"]' expression="#[payload]" is="#[MunitTools::equalTo('Success')]" />
+		</munit:validation>
+	</munit:test>
+
+</mule>

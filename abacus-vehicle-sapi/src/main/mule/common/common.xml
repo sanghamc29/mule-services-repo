@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:anypoint-mq="http://www.mulesoft.org/schema/mule/anypoint-mq" xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.mulesoft.org/schema/mule/anypoint-mq http://www.mulesoft.org/schema/mule/anypoint-mq/current/mule-anypoint-mq.xsd">
+	<sub-flow name="calculate-finance-quote" doc:id="e7d146c0-51d9-409a-825d-49198ef57859">
+	<until-successful maxRetries="${until.retries}" doc:name="Until Successful" doc:id="82f86065-b606-4de5-8d91-ca06269c0297" millisBetweenRetries="${until.milliseconds}">
+			<try doc:name="Try" doc:id="81d073e2-9859-456f-9660-c79c53e263bd">
+		
+		<http:request method="${abacus-sys.financeQuote.method}" doc:name="Abacus Post Finance Quote" doc:id="92b5bf31-f41e-4826-884c-6b95aa4e5d50" config-ref="HTTP_Request-configuration" path="${abacus-sys.financeQuote.path}" sendCorrelationId="ALWAYS" correlationId="#[vars.corrId]" responseTimeout="${abacus-sys.financeQuote.timeout}">
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	
+	("Accept-Language": vars.languageCode) if vars.languageCode != '',
+	"Content-Type": "application/json"
+}]]]></http:headers>
+		</http:request>
+				<error-handler ref="abacus-error-handler" />
+		</try>
+		</until-successful>
+
+</sub-flow>
+	<sub-flow name="publish-finance-quote-response-to-mq" doc:id="20cef166-7cd0-4840-a485-9615cca3f676" >
+		<anypoint-mq:publish doc:name="Publish - FQ Response to MQ" doc:id="d76494b6-361c-4430-988b-c56b4153e2fb" config-ref="Anypoint_MQ_Config" destination="${mq.queue}" target="vMqResponse" >
+			<anypoint-mq:properties ><![CDATA[#[output application/json
+---
+{
+	"correlationId" : vars.corrId,
+	("quoteId" : vars.quoteId) if vars.quoteId != null 
+}]]]></anypoint-mq:properties>
+		</anypoint-mq:publish>
+	</sub-flow>
+	
+</mule>

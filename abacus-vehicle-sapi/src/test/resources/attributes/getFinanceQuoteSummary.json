@@ -1,0 +1,36 @@
+{
+  "headers": {
+    "content-type": "application/json",
+    "x-country-code": "pt",
+    "x-correlation-id": "123",
+    "x-client-id": "eebcfb2a9fc44fea9588b59fca67cae3",
+    "x-client-secret": "be1bBDF9e5D84f58aD7b0D2435fCc536",
+    "user-agent": "PostmanRuntime/7.41.2",
+    "accept": "*/*",
+    "cache-control": "no-cache",
+    "postman-token": "e050ee59-4a40-45b0-aea9-d0ecad276b08",
+    "host": "localhost:8081",
+    "accept-encoding": "gzip, deflate, br",
+    "connection": "keep-alive"
+  },
+  "clientCertificate": null,
+  "method": "GET",
+  "scheme": "http",
+  "queryParams": {
+    
+  },
+  "requestUri": "/api/abacus-vehicle-sapi/v1/quotes/13X76000000Cl0vEAC/finance/89177dec59244990b48ed192ba6c9a9a",
+  "queryString": "",
+  "version": "HTTP/1.1",
+  "maskedRequestPath": "/quotes/13X76000000Cl0vEAC/finance/89177dec59244990b48ed192ba6c9a9a",
+  "listenerPath": "/api/abacus-vehicle-sapi/v1/*",
+  "relativePath": "/api/abacus-vehicle-sapi/v1/quotes/13X76000000Cl0vEAC//finance/89177dec59244990b48ed192ba6c9a9a",
+  "localAddress": "/127.0.0.1:8081",
+  "uriParams": {
+    "applicationId": "13X76000000Ce92EAC"
+  },
+  "rawRequestUri": "/api/abacus-vehicle-sapi/v1/quotes/13X76000000Cl0vEAC//finance/89177dec59244990b48ed192ba6c9a9a",
+  "rawRequestPath": "/api/abacus-vehicle-sapi/v1/quotes/13X76000000Cl0vEAC//finance/89177dec59244990b48ed192ba6c9a9a",
+  "remoteAddress": "/127.0.0.1:62606",
+  "requestPath": "/api/abacus-vehicle-sapi/v1/quotes/13X76000000Cl0vEAC//finance/89177dec59244990b48ed192ba6c9a9a"
+}

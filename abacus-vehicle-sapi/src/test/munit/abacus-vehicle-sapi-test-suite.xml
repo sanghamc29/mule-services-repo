@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="   http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd   http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd   http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="abacus-vehicle-sapi-test-suite.xml">
+		<munit:parameterizations file="test-parameters.yaml"/>
+	</munit:config>
+	<munit:test doc:id="74558fda-e0a2-4a77-9f62-4264007b7232" name="abacus-vehicle-sapi-test-suite">
+		<munit:behavior>
+			<munit-tools:mock-when doc:id="041dcbca-f284-40f2-85d8-6a1412aaea2c" doc:name="Mock when" processor="${processor}">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="${mockCall}" attributeName="${mockAttributeName}" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:payload value="#[output application/json --- (readUrl('classpath://${mockCallOutput}','application/json'))]"/>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="41698a7b-b4f6-43f3-ae8e-f311cec272c6" processor="${processor1}" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="${mockCall1}" attributeName="${mockAttributeName}" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- (readUrl('classpath://${mockCallOutput}','application/json'))]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="42e33d10-ebea-4bdf-8040-7c45da2a3cf9" processor="flow-ref" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Fetch Finance Quote" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="225d26c4-a1d7-4cab-86b5-6f7c5716bc62" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- (readUrl('classpath://${mockCall2Output}','application/json'))]" />
+					<munit-tools:variables >
+						<munit-tools:variable key="origPayload" value="#[output application/json --- (readUrl('classpath://${mockCall2Output}','application/json'))]" mediaType="application/json" />
+						<munit-tools:variable key="#['countryCode']" value="#['pt']" />
+						<munit-tools:variable key="#['corrId']" value="#['21832a90-f2ea-4b78-800c-32f92cf39197']" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="85c16461-ac1b-4193-9f14-54c880a9565c" processor="${processor}" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="${mockCall3}" attributeName="${mockAttributeName}" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- (readUrl('classpath://${mockCall3Output}','application/json'))]" />
+					<munit-tools:attributes value='#[output application/java --- {&#10;	"statusCode": 204&#10;}]' />
+					<munit-tools:variables >
+						<munit-tools:variable key="origPayload" value="#[output application/json --- (readUrl('classpath://${mockCall2Output}','application/json'))]" mediaType="application/json" />
+						<munit-tools:variable key="#['countryCode']" value="#['pt']" />
+						<munit-tools:variable key="#['corrId']" value="#['21832a90-f2ea-4b78-800c-32f92cf39197']" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<munit:set-event doc:id="40c7aa7a-c3f3-4b35-b1fe-5b88c7c157e6" doc:name="Set Event">
+				<munit:payload value="#[output application/json --- (readUrl('classpath://${inPayload}','application/json'))]" mediaType="application/json" />
+				<munit:attributes value="#[output application/json --- readUrl('classpath://${inAttributes}','application/json')]" />
+				<munit:variables >
+					<munit:variable key="countryCode" value="pt" />
+				</munit:variables>
+			</munit:set-event>
+			<flow-ref doc:id="6d3bc61f-a557-4053-8ab0-0a82783bfcdc" doc:name="Flow Reference" name="${flowName}" />
+		</munit:execution>
+		<munit:validation>
+			<set-variable doc:id="d2b5e2a3-a02a-4853-a131-27b60bedc936" doc:name="out Payload" value="#[output application/json --- readUrl('classpath://${outPayload}','application/json')]" variableName="outPayload"/>
+			<munit-tools:assert-that doc:id="5a5e0cda-addc-4bec-a192-23f272c9aa28" doc:name="Assert that" expression="#[payload]" is="#[MunitTools::equalTo(vars.outPayload)]" message="#[&quot;Payload not matched&quot;]"/>
+		</munit:validation>
+	</munit:test>
+
+</mule>

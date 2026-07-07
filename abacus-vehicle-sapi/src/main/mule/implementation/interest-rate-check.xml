@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+	<sub-flow name="interest-rate-check" doc:id="d69ceace-b7c4-47db-9110-8a8c93999c06" >
+		<flow-ref doc:name="Fetch Finance Quote" doc:id="225d26c4-a1d7-4cab-86b5-6f7c5716bc62" name="fetch-finance-quote" target="origPayload"/>
+		<choice doc:name="Check if Quote exists" doc:id="a45a730e-7bb3-43b9-a79a-e23002143907" >
+			<when expression="#[isEmpty(vars.origPayload)]">
+				<raise-error doc:name="Raise 'QUOTE_NOT_FOUND' error" doc:id="9223b913-8556-477a-8131-7aecc3447043" type="ORG_MB:QUOTE_NOT_FOUND" description="No Quote found against ApplicationId provided"/>
+			</when>
+			<otherwise >
+				<logger level="DEBUG" doc:name="Default Logger" doc:id="96a56800-f7cb-4f10-a50a-fff1d42ddd01" message="Quote Exists for applicationId #[vars.applicationId]"/>
+			</otherwise>
+		</choice>
+		<ee:transform doc:name="Prepare XIRR Request" doc:id="cafcfa3f-4c22-4959-b4d8-f744f99cb6c9">
+					<ee:message>
+						<ee:set-payload resource="dataweaves/p-check-xirr-request.dwl" />
+					</ee:message>
+				</ee:transform>
+		<flow-ref doc:name="Check XIRR" doc:id="02633c87-8d46-41f1-85e8-0d5024cfda20" name="Check-XIRR" />
+		<logger level="DEBUG" doc:name="Log Request" doc:id="aa4ef90e-528b-4619-8776-3968a5cd74cb" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.corrId ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode ++ &#10;&quot;Calculate Finance Quote Start: &quot; ++ now()]" category="${debugCtgry}" />
+		<validation:is-true doc:name="Validate Failure as null" doc:id="1bf9ae10-1e16-4ff2-8692-b1edc20481b0" expression="#[vars.isFailure == null]" message="#[vars.errorObject.description]" />
+		<logger level="DEBUG" doc:name="Log Response" doc:id="30e0df82-779d-420e-8a80-7ba4086dfacc" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.corrId ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode ++ &#10;&quot;Calculate Finance Quote End: &quot; ++ now()]" category="${debugCtgry}" />
+		<ee:transform doc:name="Set Variables" doc:id="039b7a3a-9e79-496d-be47-2247b3a92185">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="xirrSpreadResponse" ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<choice doc:name="Route based on interest type" doc:id="0bdd3e10-31b4-438e-a6f6-e7dc0cc72c10" >
+			<when expression="#[(vars.interestRateType == p('interestType.euribor'))]">
+				<ee:transform doc:name="Updated Euribor and Spread Request" doc:id="e11f25e9-af41-4103-9b6a-722c50d90bdd">
+					<ee:message>
+						<ee:set-payload resource="dataweaves/p-updated-euribor-flat-file-response.dwl" />
+					</ee:message>
+				</ee:transform>
+				<flow-ref doc:name="Publish Finance Quote Response to MQ" doc:id="3278e800-c00c-4198-841c-ccc865adf497" name="publish-finance-quote-response-to-mq" />
+			</when>
+			<otherwise>
+				<logger level="INFO" doc:name="Default logger" doc:id="189ae4b5-aaea-4cc2-a7c2-264d60dc3e9e" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.corrId ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode ++ &#10;&quot; XIRR Check is Succesful and self healed &quot; ++ now()]"/>
+			</otherwise>
+		</choice>
+		<ee:transform doc:name="Prepare Interest Rate response" doc:id="0345c91e-8958-4908-9f6f-227f48159ede">
+					<ee:message>
+						<ee:set-payload resource="dataweaves/p-interest-rate-summary.dwl" />
+					</ee:message>
+				</ee:transform>
+	</sub-flow>
+	<sub-flow name="Check-XIRR" doc:id="d60ed0d0-97ca-4d94-b025-fac09cdf903c" >
+		<until-successful maxRetries="5" doc:name="Until Successful" doc:id="32b671a3-703f-449e-93e7-2c2fa33e77b3" >
+			<try doc:name="Try" doc:id="3b09cea7-2b04-4fcf-b818-372ad9c98e4e">
+			<http:request method="${abacus-sys.checkXIRR.method}" doc:name="Abacus XIRR API" doc:id="529a0bfe-11c6-4045-9b2e-973514bec5e8" config-ref="HTTP_Request-configuration" path="${abacus-sys.checkXIRR.path}" sendCorrelationId="ALWAYS" correlationId="#[vars.corrId]" responseTimeout="${abacus-sys.calculatePurchasePrice.timeout}">
+					<http:headers><![CDATA[#[output application/java
+---
+{
+	
+	("Accept-Language": vars.languageCode) if vars.lang != '',
+	"Content-Type": "application/json"
+}]]]></http:headers>
+				</http:request>
+			<error-handler ref="abacus-error-handler" />
+		</try>
+		</until-successful>
+	</sub-flow>
+</mule>

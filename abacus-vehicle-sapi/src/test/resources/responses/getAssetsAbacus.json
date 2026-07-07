@@ -1,0 +1,140 @@
+{
+    "data": {
+        "assetClass": [
+            {
+                "id": 400,
+                "externalCode": "A-KLASSE",
+                "description": "Classe  A",
+                "isActive": true,
+                "updatedOn": "2024-07-18T07:47:58.5755188+00:00",
+                "createdOn": "2021-09-30T00:00:02.8004201+00:00",
+                "brandId": 1
+            },
+            {
+                "id": 40,
+                "externalCode": "A-KLASSE",
+                "description": "Classe  A",
+                "isActive": true,
+                "updatedOn": "2024-07-18T07:47:58.5755188+00:00",
+                "createdOn": "2021-09-30T00:00:02.8004201+00:00",
+                "brandId": 2
+            }
+        ],
+        "assetType": [
+            {
+                "id": 2,
+                "externalCode": "PC",
+                "description": "PC",
+                "isActive": true
+            },
+            {
+                "id": 23,
+                "externalCode": "VAN",
+                "description": "Vans",
+                "isActive": true
+            }
+        ],
+        "assetBrand": [
+            {
+                "id": 2,
+                "externalCode": "00001",
+                "description": "Mercedes-Benz",
+                "localDescription": "Mercedes-Benz",
+                "isActive": true,
+                "createdOn": "2021-04-16T09:41:01.1116115+00:00",
+                "assetTypeId": 2
+            }],
+            "assetModel": [
+            {
+                "id": 5601,
+                "source": "MVIS",
+                "code": "W177",
+                "description": "Mercedes-AMG A 35 4MATIC",
+                "localDescription": "Mercedes-AMG A 35 4MATIC",
+                "isActive": true,
+                "variantCode": "1770511_000-804_054",
+                "baumusterNumber": "1770511",
+                "weight": 1570,
+                "capacity": 1991,
+                "engineCc": 1991,
+                "engineTypeId": 2,
+                "lineCode": "DL3",
+                "engineType": {
+                    "id": 2,
+                    "externalCode": "2",
+                    "description": "Petrol",
+                    "displayOrder": 2,
+                    "isActive": true
+                },
+                "updatedOn": "2024-01-15T00:00:27.6621581+00:00",
+                "createdOn": "2023-08-10T10:54:55.399364+00:00",
+                "assetClassId": 40,
+                "modelYears": [
+                    {
+                        "id": 5985,
+                        "modelId": 5601,
+                        "year": 202301,
+                        "validFrom": "2023-08-12T00:00:19.4897977",
+                        "validTo": "9999-12-31T00:00:00",
+                        "assetPrices": [
+                            {
+                                "id": 5984,
+                                "externalCode": 0,
+                                "price": 48381.49,
+                                "basePrice": 48381.49,
+                                "priceSegmentId": 1,
+                                "priceSegment": {
+                                    "id": 1,
+                                    "externalCode": "00001",
+                                    "description": "New",
+                                    "isActive": true,
+                                    "displayOrder": 1,
+                                    "isBase": false
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "modelOptions": [],
+                "horsepower": 306.00,
+                "indemnities": [],
+                "bodyType": "KOMPAKT-LIMOUSINE",
+                "modelType": "Limousine compacta",
+                "range": "W177",
+                "modelYear": 202301,
+                "nstCode": "000",
+                "modelYearCode": "804",
+                "changeYearCode": "054",
+                "technicalInformation": {
+                    "countryName": "PT"
+                },
+                "associatedVins": [ {
+                        "id": 198,
+                        "vinNumber": "W1V44781313751184",
+                        "modelId": 6565,
+                        "api": "MVIS",
+                        "createdOn": "2024-07-30T13:46:42.3851868+00:00",
+                        "basePrice": 30000.0,
+                        "dlOptionPrice": 6015.75
+                    }],
+                "bodyBuilderOptions": [
+                    {
+                        "id": 1,
+                        "externalCode": "Tester",
+                        "code": "Tester",
+                        "description": "Tester",
+                        "isActive": true,
+                        "translations": [
+                            {
+                                "id": 2,
+                                "locale": "de-DE",
+                                "description": "TVN Test 3"
+                            }
+                        ]
+                    }]
+            }]
+
+            
+},
+    "hasErrors": false
+}

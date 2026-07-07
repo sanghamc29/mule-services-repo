@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:tracing="http://www.mulesoft.org/schema/mule/tracing" xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:anypoint-mq="http://www.mulesoft.org/schema/mule/anypoint-mq" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd  http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/anypoint-mq http://www.mulesoft.org/schema/mule/anypoint-mq/current/mule-anypoint-mq.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.mulesoft.org/schema/mule/tracing http://www.mulesoft.org/schema/mule/tracing/current/mule-tracing.xsd">
+    
+	<flow name="api-main">
+        <http:listener path="${api.http.listener.path}" config-ref="HTTP_Listener-config">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <logger level="INFO" doc:name="Log Request" doc:id="b8e5188f-8aa9-4d99-8e11-c88424061e6f" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ attributes.headers.'x-correlation-id' default &quot;&quot; ++&#10;&quot;\'CountryCode\': &quot; ++ attributes.headers.'x-country-code' default &quot;&quot; ++ &#10;&quot; \'HTTP Method\': &quot; ++ attributes.method default &quot;&quot; ++ &#10;&quot; \'URI\': &quot; ++ attributes.requestUri default &quot;&quot;++ &#10;(if(p('log.payloadFlag') == 'true') (&quot;\'Payload\': &quot; ++ write(payload,&quot;application/json&quot;)) else &quot;&quot;)]" />
+        <ee:transform doc:name="Capture Properties" doc:id="e071dcf6-7447-4b70-ba97-b62bc4e5634d">
+            <ee:message />
+            <ee:variables>
+                <ee:set-variable variableName="corrId"><![CDATA[attributes.headers.'x-correlation-id']]></ee:set-variable>
+                <ee:set-variable variableName="countryCode"><![CDATA[lower(attributes.headers.'x-country-code')]]></ee:set-variable>
+				<ee:set-variable variableName="languageCode" ><![CDATA[%dw 2.0
+import p from Mule
+output application/java
+fun nullCheck(data)= data != null and !(isEmpty(trim(data)))
+---
+if(nullCheck(attributes.headers.'accept-language'))
+	attributes.headers.'accept-language'
+else
+   p('defaultLanguage')]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <apikit:router config-ref="api-config" />
+        <logger level="INFO" doc:name="Log Response" doc:id="861b87d7-3c8a-447b-a8f8-0910619f5297" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.corrId ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode ++ &#10;&quot; \'Response HTTP Status\': &quot; ++ vars.httpStatus ++&#10;(if(p('log.payloadFlag') == 'true') (&quot;\'Payload\': &quot; ++ write(payload,&quot;application/json&quot;)) else &quot;&quot;)]" />
+        <error-handler ref="global-error-handler" />
+    </flow>
+	<flow name="get:\assets:api-config">
+        <ee:transform doc:name="Capture Last Updated, Vin Number and flow name" doc:id="953a50ad-7894-42d4-9a78-edbd6137dd1b">
+            <ee:message />
+            <ee:variables>
+                <ee:set-variable variableName="lastUpdated"><![CDATA[attributes.queryParams.last_updated_time]]></ee:set-variable>
+				<ee:set-variable variableName="flowName" ><![CDATA['get-all-assets']]></ee:set-variable>
+				<ee:set-variable variableName="vinNumber" ><![CDATA[attributes.queryParams.vin]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <flow-ref doc:name="Get Asset Data" doc:id="ffb24852-9dae-40e0-bcf4-9c99cc8b5215" name="get-all-assets" />
+    </flow>
+    <flow name="post:\purchasePrice:application\json:api-config">
+        <ee:transform doc:name="Capture flow name and payload" doc:id="fba1d36b-f69d-4d03-90c6-8f40e73054e4">
+			<ee:message />
+			<ee:variables>
+				<ee:set-variable variableName="lastUpdated"><![CDATA[attributes.queryParams.last_updated_time]]></ee:set-variable>
+				<ee:set-variable variableName="flowName"><![CDATA['post-calculate-purchase-price']]></ee:set-variable>
+				<ee:set-variable variableName="origPayload" ><![CDATA[payload]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="Calculate Purchase Price" doc:id="7ddbc1b1-4008-4835-a6f6-67b222c2fb64" name="post-calculate-purchase-price" />
+    </flow>
+    <flow name="post:\products\search:application\json:api-config">
+        <ee:transform doc:name="Capture flow name and payload" doc:id="c0b14a06-465d-4f21-80c7-750501306529">
+			<ee:message />
+			<ee:variables>
+				<ee:set-variable variableName="flowName"><![CDATA['get-all-products-modelcode-subflow']]></ee:set-variable>
+				<ee:set-variable variableName="origPayload" ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="get-all-products-modelcode-subflow" doc:id="b0cca71c-bbbd-49d5-a9fd-5b4073f0f99a" name="get-all-products-modelcode-subflow"/>
+		<error-handler ref="global-error-handler" />
+    </flow>
+    <flow name="post:\quotes:application\json:api-config">
+        <ee:transform doc:name="Capture flow name and payload" doc:id="d4870067-1174-41d9-8955-ec2db92b3b92">
+			<ee:message />
+			<ee:variables>
+				<ee:set-variable variableName="flowName"><![CDATA['post-finance-quote']]></ee:set-variable>
+				<ee:set-variable variableName="origPayload"><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+				<ee:set-variable variableName="quoteId" ><![CDATA[payload.quoteId]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="Fetch Finance Quote" doc:id="6536fbda-e80a-4636-8eed-7b01da5fc854" name="post-finance-quote" />
+    </flow>
+    <flow name="get:\quotes\(applicationId):application\json:api-config">
+        <ee:transform doc:name="Capture flow name and payload" doc:id="a3c87168-0d45-49a4-8bdb-78f90d2d2db0">
+			<ee:message />
+			<ee:variables>
+				<ee:set-variable variableName="flowName"><![CDATA['get-finance-quote']]></ee:set-variable>
+				<ee:set-variable variableName="applicationId" ><![CDATA[%dw 2.0
+output application/json
+---
+attributes.uriParams.'applicationId']]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="Calculate Finance Quote" doc:id="69c8f860-9ec0-4c18-8c73-3d6afd0ca897" name="fetch-finance-quote" />
+    </flow>
+    <flow name="post:\quotes\(applicationId)\interestRates\check:application\json:api-config" doc:id="f1d849fd-1245-4d4b-ab5e-89204db61141">
+		<ee:transform doc:name="Capture flow name and payload" doc:id="6a4afef4-3f19-4c0c-9a0f-c86c75adeced">
+			<ee:message />
+			<ee:variables>
+				<ee:set-variable variableName="flowName"><![CDATA['interest-rate-check']]></ee:set-variable>
+				<ee:set-variable variableName="applicationId"><![CDATA[%dw 2.0
+output application/json
+---
+attributes.uriParams.'applicationId']]></ee:set-variable>
+				<ee:set-variable variableName="interestRateType"><![CDATA[%dw 2.0
+output application/json
+---
+payload.interestRateType]]></ee:set-variable>
+				<ee:set-variable variableName="quoteId" ><![CDATA[%dw 2.0
+output application/json
+---
+attributes.uriParams.'applicationId']]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="Interest Rate Check" doc:id="bfbec553-1c26-4a9e-b286-f4e2a9528ffe" name="interest-rate-check" />
+	</flow>
+	<flow name="upload-fqresponse-flat-file-sf" doc:id="c5343f8d-9430-4aba-8ee6-a1a2a071c308" >
+		<anypoint-mq:subscriber doc:name="Upload Finance Quote" doc:id="4aa4d8e1-b590-4076-a875-53f254f93f91" config-ref="Anypoint_MQ_Config" destination="${mq.queue}" acknowledgementMode="MANUAL" circuitBreaker="Circuit_breaker" acknowledgementTimeout="${mq.ackTimeout}">
+			<redelivery-policy maxRedeliveryCount="${mq.redeliveryCount}"/>
+			<anypoint-mq:subscriber-type >
+				<anypoint-mq:prefetch maxLocalMessages="${mq.prefetch}" />
+			</anypoint-mq:subscriber-type>
+		</anypoint-mq:subscriber>
+		<tracing:with-correlation-id doc:name="With CorrelationID" doc:id="99036b2f-a315-4867-a786-e7f8b295444f" correlationId="#[attributes.properties.correlationId]">
+			<flow-ref doc:name="process-fq-flat-file-flow" doc:id="42fb8062-691b-4521-98d4-143223254e2a" name="process-fq-flat-file-flow" />
+		</tracing:with-correlation-id>
+		
+		
+	</flow>
+	<flow name="get:\quotes\(applicationId)\finance\(financialCode):api-config" doc:id="f39a796d-778e-4488-a3fa-e31b5b380dd2" >
+		<ee:transform doc:name="Capture request parameters" doc:id="25d848ee-677c-4254-ac32-0b01b08ed13d" >
+			<ee:variables >
+				<ee:set-variable variableName="financialCode" ><![CDATA[attributes.uriParams.'financialCode']]></ee:set-variable>
+				<ee:set-variable variableName="quoteId" ><![CDATA[attributes.uriParams.'applicationId']]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="Get Finance Quote Summary" doc:id="cf773b2e-f372-4b0c-98c0-b0619c206f95" name="get-finance-quote-summary" />
+	</flow>
+</mule>

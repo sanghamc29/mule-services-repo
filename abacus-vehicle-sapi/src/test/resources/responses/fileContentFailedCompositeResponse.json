@@ -1,0 +1,16 @@
+{
+  "compositeResponse": [
+    {
+      "body": [{
+        "errorCode": "Invalid Field",
+        "message":"Invalid access reference",
+        "created": false
+      }],
+      "httpHeaders": {
+        "Location": "/services/data/v60.0/sobjects/ContentVersion/06876000001xX4GAAU"
+      },
+      "httpStatusCode": 400,
+      "referenceId": "refContentversionUpsert"
+    }
+  ]
+}

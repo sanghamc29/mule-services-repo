@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<sub-flow name="get-all-assets" doc:id="b230e916-df94-4104-914c-e97b9600c00a" >
+        
+		<logger level="DEBUG" doc:name="Log Request" doc:id="bb2be477-d9dd-4486-848a-d3c808314241" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.corrId ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode ++ &#10;&quot;Get Assets Start: &quot; ++ now()]" category="${debugCtgry}"/>
+		<until-successful maxRetries="${until.retries}" doc:name="Until Successful" doc:id="4b61be63-2341-41c4-8952-453c604399da" millisBetweenRetries="${until.milliseconds}">
+			<try doc:name="Try" doc:id="fdd6a8b9-6048-4bc0-ac9e-7126f8cfaa62">
+		
+		<http:request method="${abacus-sys.getAllAssets.method}" doc:name="Abacus Request" doc:id="2ea836f1-ea04-46df-8d58-2c47cb7390c9" config-ref="HTTP_Request-configuration" path="#[if (vars.vinNumber == null)p('abacus-sys.getAllAssets.path') else p('abacus-sys.getAssetsByVin.path')]" sendCorrelationId="ALWAYS" correlationId="#[vars.corrId]" responseTimeout="${abacus-sys.getAllAssets.timeout}">
+			<http:headers><![CDATA[#[output application/java
+---
+{	
+}]]]></http:headers>
+			<http:query-params><![CDATA[#[output application/java
+---
+{
+	"vinNumber" : vars.vinNumber,
+	"lastUpdated" : vars.lastUpdated
+}]]]></http:query-params>
+		</http:request>
+				<error-handler ref="abacus-error-handler" />
+		</try>
+		</until-successful>
+		<validation:is-true doc:name="Validate Failure as null" doc:id="ea17db94-fb12-4937-a9da-cbe8535992f9" expression="#[vars.isFailure == null]" message="#[vars.errorObject.description]" />
+		
+		<logger level="DEBUG" doc:name="Log Response" doc:id="8de778d3-3a49-4d85-9240-7ee4b742ece1" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.corrId ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode ++ &#10;&quot;Get Assets End: &quot; ++ now()]" category="${debugCtgry}"/>
+		<ee:transform doc:name="Response" doc:id="5a4b0cf1-676d-41d3-abbd-6a944c63cf2f" >
+			<ee:message >
+				<ee:set-payload resource="dataweaves/p-get-all-assets.dwl" />
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+</mule>

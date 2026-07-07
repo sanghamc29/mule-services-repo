@@ -1,0 +1,103 @@
+{
+  "basePrice": {
+    "amountInclusive": 123000.62,
+    "amountExclusive": 100000.5,
+    "amountTax": 23000.12,
+    "currency": ""
+  },
+  "manufacturerOptions": {
+    "amountInclusive": 0,
+    "amountExclusive": 0,
+    "amountTax": 0,
+    "currency": ""
+  },
+  "dealerOptions": {
+    "amountInclusive": 0,
+    "amountExclusive": 0,
+    "amountTax": 0,
+    "currency": ""
+  },
+  "totalPurchasePrice": {
+    "amountInclusive": 121770.62,
+    "amountExclusive": 99000.5,
+    "amountTax": 22770.12,
+    "currency": ""
+  },
+  "usedTotalPurchasePrice": {
+    
+  },
+  "purchasePriceWithoutBpm": {
+    
+  },
+  "vehicleCharges": {
+    "registrationTax": {
+      "amountInclusive": 122,
+      "amountExclusive": 100,
+      "amountTax": 22,
+      "currency": "EUR"
+    },
+    "registrationTaxable": {
+      "amountInclusive": 530,
+      "amountExclusive": 500,
+      "amountTax": 30,
+      "currency": "EUR"
+    },
+    "registrationExempt": {
+      "amountInclusive": 500,
+      "amountExclusive": 500,
+      "amountTax": 0,
+      "currency": "EUR"
+    }
+  },
+  "totalListPrice": {
+    "amountInclusive": 123000.62,
+    "amountExclusive": 100000.5,
+    "amountTax": 23000.12,
+    "currency": ""
+  },
+  "totalBodybuilderOptionsPrice": {
+    "amountInclusive": 615,
+    "amountExclusive": 500,
+    "amountTax": 115,
+    "currency": ""
+  },
+  "bodybuilderOptions": [
+    {
+      "code": "00001",
+      "externalCode": "1100",
+      "description": "Van",
+      "price": {
+        "amountInclusive": 122,
+        "amountExclusive": 100,
+        "amountTax": 22,
+        "currency": "EUR"
+      },
+      "uniqueId": "tester1"
+    },
+    {
+      "code": "00002",
+      "externalCode": "1200",
+      "description": "Mixed",
+      "price": {
+        "amountInclusive": 122,
+        "amountExclusive": 100,
+        "amountTax": 22,
+        "currency": "EUR"
+      },
+      "uniqueId": "tester2"
+    }
+  ],
+  "totalRegistrationTaxAmount": {
+    "amountInclusive": 500
+  },
+  "dealershipDiscount": {
+    "amountExclusive": 30250,
+    "pct": 0.5
+  },
+  "totalVehiclePurchasePrice": {
+    "amountInclusive": 38109.38,
+    "amountExclusive": 31239,
+    "amountTax": 6870.38,
+    "currency": "EUR"
+  }
+}

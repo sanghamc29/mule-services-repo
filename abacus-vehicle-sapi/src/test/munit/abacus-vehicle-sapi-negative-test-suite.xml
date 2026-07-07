@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="   http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd   http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd   http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="abacus-vehicle-sapi-negative-test-suite.xml">
+		<munit:parameterizations file="test-negative-parameters.yaml" />
+	</munit:config>
+	<munit:test doc:id="ced5373f-edd1-4736-a3b0-a5088c6bdd7f" name="abacus-sapi-negative-test-suite">
+		<munit:behavior>
+			<munit-tools:mock-when doc:id="b3fe08fb-a167-4397-a684-8b19439c535c" doc:name="Mock when" processor="${processor}">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute attributeName="${mockAttributeName}" whereValue="${mockCalls}"/>
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:error typeId="${errorType}"/>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<munit:set-event doc:id="a54cb080-859e-44a4-b37a-40ffc99d0c8c" doc:name="Set Event">
+				<munit:attributes value="#[output application/json --- readUrl('classpath://${attributes}','application/json')]"/>
+			</munit:set-event>
+			<flow-ref doc:id="fde7707d-8af0-4365-a02d-1b6d6f5a6043" doc:name="Flow Reference" name="${flowName}"/>
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-equals actual="#[vars.httpStatus as String]" doc:id="74ba6050-1233-45b5-8860-f8578b941a8b" doc:name="Assert equals" expected="${httpStatus}" message="#[&quot;HTTP Status not matched&quot;]"/>
+		</munit:validation>
+	</munit:test>
+</mule>

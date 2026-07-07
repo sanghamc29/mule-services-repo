@@ -1,0 +1,1130 @@
+{
+    "data": {
+        "productNodes": [
+            {
+                "id": 1,
+                "assetId": 5601,
+                "businessPartnerId": 7,
+                "referenceId": -1,
+                "status": 2,
+                "basicInformation": {
+                    "componentSection": "BasicInformation",
+                    "name": "Credit with Balloon",
+                    "description": "DON'T CHANGE! Actual Balloon Financing product type.",
+                    "effectiveDate": "2021-04-15T00:00:00+01:00",
+                    "expiryDate": "2040-12-01T23:59:59+00:00",
+                    "businessRulesId": 1,
+                    "status": 0,
+                    "fundingTypeId": 1,
+                    "dateComparison": 1,
+                    "finalSubmissionDate": "2040-12-31T23:59:59+00:00",
+                    "externalCode": "GPD13878",
+                    "translations": [],
+                    "createdOn": "2023-11-03T07:51:40.5015411+00:00",
+                    "createdBy": "ADKAHLE",
+                    "updatedOn": "2024-04-16T12:30:24.9474406+00:00",
+                    "updatedBy": "AbacusAdmin"
+                },
+                "sections": [],
+                "levelCode": "PT"
+            },
+            {
+                "id": 3,
+                "parentId": 37,
+                "assetId": 5601,
+                "businessPartnerId": 7,
+                "parentName": "Financing",
+                "referenceId": -3,
+                "status": 2,
+                "basicInformation": {
+                    "componentSection": "BasicInformation",
+                    "name": "Standard Crédito",
+                    "description": "DON'T CHANGE! Actual Financing product.",
+                    "effectiveDate": "2021-04-15T00:00:00+01:00",
+                    "expiryDate": "2040-12-01T23:59:59+00:00",
+                    "businessRulesId": 1,
+                    "status": 0,
+                    "fundingTypeId": 1,
+                    "dateComparison": 1,
+                    "finalSubmissionDate": "2040-12-31T23:59:59+00:00",
+                    "externalCode": "VCR",
+                    "subExternalCode": "VCR",
+                    "translations": [],
+                    "createdOn": "2024-01-16T05:57:40.3715025+00:00",
+                    "createdBy": "AbacusAdmin",
+                    "updatedOn": "2024-03-19T09:37:42.2138903+00:00",
+                    "updatedBy": "DOMIMU"
+                },
+                "sections": [
+                    {
+                        "assetConditions": [
+                            1,
+                            2,
+                            3,
+                            5
+                        ],
+                        "assetConditionCodes": [
+                            "00001",
+                            "00002",
+                            "00003",
+                            "00005"
+                        ],
+                        "id": 29115,
+                        "componentSection": "AssetConditionSection",
+                        "overrideType": 0,
+                        "useParent": false,
+                        "displayOrder": 2,
+                        "productNodeSection": 1,
+                        "createdOn": "2024-01-16T05:57:40.3715025+00:00",
+                        "createdBy": "AbacusAdmin"
+                    },
+                    {
+                        "assetGroupRailIds": [
+                            2
+                        ],
+                        "id": 29116,
+                        "componentSection": "AssetGroupSection",
+                        "overrideType": 0,
+                        "useParent": false,
+                        "displayOrder": 10,
+                        "productNodeSection": 2,
+                        "createdOn": "2024-01-16T05:57:40.3715025+00:00",
+                        "createdBy": "AbacusAdmin"
+                    },
+                    {
+                        "assetTypes": [
+                            2,
+                            23
+                        ],
+                        "assetTypeCodes": [
+                            "PC",
+                            "VAN"
+                        ],
+                        "id": 29117,
+                        "componentSection": "AssetTypeSection",
+                        "overrideType": 0,
+                        "useParent": false,
+                        "displayOrder": 1,
+                        "productNodeSection": 3,
+                        "createdOn": "2024-01-16T05:57:40.3715025+00:00",
+                        "createdBy": "AbacusAdmin"
+                    },
+                    {
+                        "bundleTypeGroupIds": [],
+                        "bundleTypeGroupCodes": [],
+                        "id": 29118,
+                        "componentSection": "BundleTypeGroupSection",
+                        "overrideType": 0,
+                        "useParent": false,
+                        "displayOrder": 12,
+                        "productNodeSection": 4,
+                        "createdOn": "2024-01-16T05:57:40.3715025+00:00",
+                        "createdBy": "AbacusAdmin"
+                    },
+                    {
+                        "dealerShipGroupRailIds": [
+                            56
+                        ],
+                        "id": 29120,
+                        "componentSection": "DealershipGroupSection",
+                        "overrideType": 0,
+                        "useParent": false,
+                        "displayOrder": 11,
+                        "productNodeSection": 6,
+                        "createdOn": "2024-01-16T05:57:40.3715025+00:00",
+                        "createdBy": "AbacusAdmin"
+                    },
+                    {
+                        "selectedInterestRateTypes": [
+                            {
+                                "selectedItem": 1,
+                                "isDefault": true
+                            },
+                            {
+                                "selectedItem": 2,
+                                "isDefault": false
+                            }
+                        ],
+                        "id": 29127,
+                        "componentSection": "InterestRateTypeSection",
+                        "overrideType": 0,
+                        "useParent": false,
+                        "displayOrder": 21,
+                        "productNodeSection": 47,
+                        "createdOn": "2024-01-16T05:57:40.3715025+00:00",
+                        "createdBy": "AbacusAdmin"
+                    },
+                    {
+                        "isRange": true,
+                        "dayRange": {
+                            "minimum": 1,
+                            "maximum": 31
+                        },
+                        "id": 29129,
+                        "componentSection": "PaymentDaySection",
+                        "overrideType": 0,
+                        "useParent": false,
+                        "displayOrder": 6,
+                        "productNodeSection": 10,
+                        "createdOn": "2024-01-16T05:57:40.3715025+00:00",
+                        "createdBy": "AbacusAdmin"
+                    },
+                    {
+                        "isApplicable": true,
+                        "endValueType": 0,
+                        "endValueCalculationBasis": 1,
+                        "guaranteedBy": 1,
+                        "rvConfigChartType": 2,
+                        "rvLookupRailId": 7,
+                        "isMileageRange": false,
+                        "isMileageApplicable": false,
+                        "id": 29132,
+                        "componentSection": "EndValueSection",
+                        "overrideType": 0,
+                        "useParent": false,
+                        "displayOrder": 8,
+                        "productNodeSection": 45,
+                        "createdOn": "2024-01-16T05:57:40.3715025+00:00",
+                        "createdBy": "AbacusAdmin"
+                    },
+                    {
+                        "isRange": true,
+                        "termRange": {
+                            "minimum": 2,
+                            "maximum": 96
+                        },
+                        "defaultValue": 2,
+                        "id": 29134,
+                        "componentSection": "TermsSection",
+                        "overrideType": 0,
+                        "useParent": false,
+                        "displayOrder": 7,
+                        "productNodeSection": 13,
+                        "createdOn": "2024-01-16T05:57:40.3715025+00:00",
+                        "createdBy": "AbacusAdmin"
+                    }
+                ],
+                "levelCode": "P"
+            },
+            {
+                "id": 4,
+                "parentId": 53,
+                "assetId": 5601,
+                "businessPartnerId": 7,
+                "parentName": "Finance Lease",
+                "referenceId": -4,
+                "status": 2,
+                "basicInformation": {
+                    "componentSection": "BasicInformation",
+                    "name": "Select & Drive Opção Vantagem LEA",
+                    "description": "DON'T CHANGE! Actual Finance Lease product.",
+                    "effectiveDate": "2021-04-15T00:00:00+01:00",
+                    "expiryDate": "2040-12-01T23:59:59+00:00",
+                    "businessRulesId": 1,
+                    "status": 0,
+                    "fundingTypeId": 1,
+                    "dateComparison": 1,
+                    "finalSubmissionDate": "2040-12-31T23:59:59+00:00",
+                    "externalCode": "LEA",
+                    "subExternalCode": "LEASER",
+                    "translations": [],
+                    "createdOn": "2024-04-16T06:25:42.6260391+00:00",
+                    "createdBy": "ETSCHEE",
+                    "updatedOn": "2024-04-16T06:25:55.1925373+00:00",
+                    "updatedBy": "ETSCHEE"
+                },
+                "sections": [
+                    {
+                        "assetConditions": [
+                            1,
+                            2,
+                            3,
+                            5
+                        ],
+                        "assetConditionCodes": [
+                            "00001",
+                            "00002",
+                            "00003",
+                            "00005"
+                        ],
+                        "id": 37617,
+                        "componentSection": "AssetConditionSection",
+                        "overrideType": 0,
+                        "useParent": false,
+                        "displayOrder": 2,
+                        "productNodeSection": 1,
+                        "createdOn": "2024-04-16T06:25:42.6260391+00:00",
+                        "createdBy": "ETSCHEE"
+                    },
+                    {
+                        "assetGroupRailIds": [
+                            2
+                        ],
+                        "id": 37618,
+                        "componentSection": "AssetGroupSection",
+                        "overrideType": 0,
+                        "useParent": false,
+                        "displayOrder": 10,
+                        "productNodeSection": 2,
+                        "createdOn": "2024-04-16T06:25:42.6260391+00:00",
+                        "createdBy": "ETSCHEE"
+                    },
+                    {
+                        "assetTypes": [
+                            2,
+                            23
+                        ],
+                        "assetTypeCodes": [
+                            "PC",
+                            "VAN"
+                        ],
+                        "id": 37619,
+                        "componentSection": "AssetTypeSection",
+                        "overrideType": 0,
+                        "useParent": false,
+                        "displayOrder": 1,
+                        "productNodeSection": 3,
+                        "createdOn": "2024-04-16T06:25:42.6260391+00:00",
+                        "createdBy": "ETSCHEE"
+                    },
+                    {
+                        "bundleTypeGroupIds": [],
+                        "bundleTypeGroupCodes": [],
+                        "id": 37620,
+                        "componentSection": "BundleTypeGroupSection",
+                        "overrideType": 0,
+                        "useParent": false,
+                        "displayOrder": 12,
+                        "productNodeSection": 4,
+                        "createdOn": "2024-04-16T06:25:42.6260391+00:00",
+                        "createdBy": "ETSCHEE"
+                    },
+                    {
+                        "dealerShipGroupRailIds": [
+                            56
+                        ],
+                        "id": 37623,
+                        "componentSection": "DealershipGroupSection",
+                        "overrideType": 0,
+                        "useParent": false,
+                        "displayOrder": 11,
+                        "productNodeSection": 6,
+                        "createdOn": "2024-04-16T06:25:42.6260391+00:00",
+                        "createdBy": "ETSCHEE"
+                    },
+                    {
+                        "selectedInterestRateTypes": [
+                            {
+                                "selectedItem": 2,
+                                "isDefault": false
+                            },
+                            {
+                                "selectedItem": 1,
+                                "isDefault": true
+                            }
+                        ],
+                        "id": 37630,
+                        "componentSection": "InterestRateTypeSection",
+                        "overrideType": 0,
+                        "useParent": false,
+                        "displayOrder": 21,
+                        "productNodeSection": 47,
+                        "createdOn": "2024-04-16T06:25:42.6260391+00:00",
+                        "createdBy": "ETSCHEE"
+                    },
+                    {
+                        "isRange": true,
+                        "dayRange": {
+                            "minimum": 1,
+                            "maximum": 31
+                        },
+                        "id": 37632,
+                        "componentSection": "PaymentDaySection",
+                        "overrideType": 0,
+                        "useParent": false,
+                        "displayOrder": 6,
+                        "productNodeSection": 10,
+                        "createdOn": "2024-04-16T06:25:42.6260391+00:00",
+                        "createdBy": "ETSCHEE"
+                    },
+                    {
+                        "isApplicable": true,
+                        "endValueType": 0,
+                        "endValueCalculationBasis": 1,
+                        "guaranteedBy": 1,
+                        "rvConfigChartType": 2,
+                        "rvLookupRailId": 7,
+                        "isMileageRange": true,
+                        "mileageRange": {
+                            "minimum": 5000,
+                            "maximum": 300000
+                        },
+                        "isMileageApplicable": true,
+                        "defaultMileageValue": 10000,
+                        "id": 37634,
+                        "componentSection": "EndValueSection",
+                        "overrideType": 0,
+                        "useParent": false,
+                        "displayOrder": 8,
+                        "productNodeSection": 45,
+                        "createdOn": "2024-04-16T06:25:42.6260391+00:00",
+                        "createdBy": "ETSCHEE"
+                    },
+                    {
+                        "isRange": false,
+                        "selectedTerms": [
+                            24,
+                            36,
+                            48,
+                            60
+                        ],
+                        "defaultValue": 24,
+                        "id": 37636,
+                        "componentSection": "TermsSection",
+                        "overrideType": 0,
+                        "useParent": false,
+                        "displayOrder": 7,
+                        "productNodeSection": 13,
+                        "createdOn": "2024-04-16T06:25:42.6260391+00:00",
+                        "createdBy": "ETSCHEE"
+                    }
+                ],
+                "levelCode": "P"
+            },
+            {
+                "id": 6,
+                "parentId": 57,
+                "assetId": 5601,
+                "businessPartnerId": 7,
+                "parentName": "Finance Lease Standard ALD",
+                "referenceId": -6,
+                "status": 2,
+                "basicInformation": {
+                    "componentSection": "BasicInformation",
+                    "name": "Product Condition Standard FL ALD Campaign",
+                    "description": "DON'T CHANGE! Actual Finance Lease campaign.",
+                    "effectiveDate": "2021-04-15T00:00:00+01:00",
+                    "expiryDate": "2027-05-01T23:59:59+01:00",
+                    "businessRulesId": 1,
+                    "status": 0,
+                    "fundingTypeId": 1,
+                    "dateComparison": 1,
+                    "finalSubmissionDate": "2027-05-01T23:59:59+01:00",
+                    "externalCode": "StdFlCampaignAld",
+                    "subExternalCode": "Test",
+                    "translations": [],
+                    "createdOn": "2024-03-19T10:10:29.8151315+00:00",
+                    "createdBy": "DOMIMU",
+                    "updatedOn": "2024-03-19T10:10:33.4887478+00:00",
+                    "updatedBy": "DOMIMU"
+                },
+                "sections": [
+                    {
+                        "assetGroupRailIds": [
+                            2
+                        ],
+                        "id": 29807,
+                        "componentSection": "AssetGroupSection",
+                        "overrideType": 0,
+                        "useParent": false,
+                        "displayOrder": 10,
+                        "productNodeSection": 2,
+                        "createdOn": "2024-01-17T17:17:49.2577915+00:00",
+                        "createdBy": "MARTIC"
+                    },
+                    {
+                        "assetTypes": [
+                            2
+                        ],
+                        "assetTypeCodes": [
+                            "PC"
+                        ],
+                        "id": 29808,
+                        "componentSection": "AssetTypeSection",
+                        "overrideType": 0,
+                        "useParent": false,
+                        "displayOrder": 1,
+                        "productNodeSection": 3,
+                        "createdOn": "2024-01-17T17:17:49.2577915+00:00",
+                        "createdBy": "MARTIC"
+                    },
+                    {
+                        "dealerShipGroupRailIds": [
+                            56
+                        ],
+                        "id": 29811,
+                        "componentSection": "DealershipGroupSection",
+                        "overrideType": 0,
+                        "useParent": false,
+                        "displayOrder": 11,
+                        "productNodeSection": 6,
+                        "createdOn": "2024-01-17T17:17:49.2577915+00:00",
+                        "createdBy": "MARTIC"
+                    },
+                    {
+                        "selectedInterestRateTypes": [
+                            {
+                                "selectedItem": 1,
+                                "isDefault": true
+                            },
+                            {
+                                "selectedItem": 2,
+                                "isDefault": false
+                            }
+                        ],
+                        "id": 29818,
+                        "componentSection": "InterestRateTypeSection",
+                        "overrideType": 0,
+                        "useParent": false,
+                        "displayOrder": 21,
+                        "productNodeSection": 47,
+                        "createdOn": "2024-01-17T17:17:49.2577915+00:00",
+                        "createdBy": "MARTIC"
+                    },
+                    {
+                        "isRange": false,
+                        "selectedDays": [
+                            5,
+                            20
+                        ],
+                        "dayRange": {
+                            "minimum": 0,
+                            "maximum": 0
+                        },
+                        "id": 29820,
+                        "componentSection": "PaymentDaySection",
+                        "overrideType": 0,
+                        "useParent": false,
+                        "displayOrder": 6,
+                        "productNodeSection": 10,
+                        "createdOn": "2024-01-17T17:17:49.2577915+00:00",
+                        "createdBy": "MARTIC"
+                    },
+                    {
+                        "isRange": true,
+                        "termRange": {
+                            "minimum": 24,
+                            "maximum": 96
+                        },
+                        "defaultValue": 48,
+                        "id": 29825,
+                        "componentSection": "TermsSection",
+                        "overrideType": 0,
+                        "useParent": false,
+                        "displayOrder": 7,
+                        "productNodeSection": 13,
+                        "createdOn": "2024-01-17T17:17:49.2577915+00:00",
+                        "createdBy": "MARTIC",
+                        "updatedOn": "2024-01-17T17:21:17.4585782+00:00",
+                        "updatedBy": "MARTIC"
+                    },
+                    {
+                        "assetConditions": [
+                            1,
+                            2,
+                            3,
+                            5
+                        ],
+                        "assetConditionCodes": [
+                            "00001",
+                            "00002",
+                            "00003",
+                            "00005"
+                        ],
+                        "id": 35359,
+                        "componentSection": "AssetConditionSection",
+                        "overrideType": 1,
+                        "useParent": false,
+                        "displayOrder": 2,
+                        "productNodeSection": 1,
+                        "createdOn": "2024-03-19T10:10:29.8151315+00:00",
+                        "createdBy": "DOMIMU"
+                    },
+                    {
+                        "bundleTypeGroupIds": [],
+                        "bundleTypeGroupCodes": [],
+                        "id": 35362,
+                        "componentSection": "BundleTypeGroupSection",
+                        "overrideType": 1,
+                        "useParent": false,
+                        "displayOrder": 17,
+                        "productNodeSection": 4,
+                        "createdOn": "2024-03-19T10:10:29.8151315+00:00",
+                        "createdBy": "DOMIMU"
+                    },
+                    {
+                        "businessTypeIds": [
+                            1
+                        ],
+                        "businessTypeCodes": [
+                            "Business-Type-1"
+                        ],
+                        "id": 35363,
+                        "componentSection": "BusinessTypeSection",
+                        "overrideType": 0,
+                        "useParent": false,
+                        "displayOrder": 6,
+                        "productNodeSection": 5,
+                        "createdOn": "2024-03-19T10:10:29.8151315+00:00",
+                        "createdBy": "DOMIMU"
+                    },
+                    {
+                        "commissionRailId": 13,
+                        "isProductConditionsOnly": true,
+                        "id": 35366,
+                        "componentSection": "CommissionSection",
+                        "overrideType": 0,
+                        "useParent": false,
+                        "displayOrder": 18,
+                        "productNodeSection": 33,
+                        "createdOn": "2024-03-19T10:10:29.8151315+00:00",
+                        "createdBy": "DOMIMU"
+                    },
+                    {
+                        "interestRateRailId": 81,
+                        "useMocCalculationBasis": false,
+                        "useDealershipCalculationBasis": false,
+                        "useMbfCalculationBasis": false,
+                        "id": 35367,
+                        "componentSection": "DefaultLinkedRailSection",
+                        "overrideType": 0,
+                        "useParent": false,
+                        "displayOrder": 19,
+                        "productNodeSection": 32,
+                        "createdOn": "2024-03-19T10:10:29.8151315+00:00",
+                        "createdBy": "DOMIMU"
+                    },
+                    {
+                        "packageTypeIds": [
+                            1
+                        ],
+                        "packageTypeCodes": [
+                            "PackageType1"
+                        ],
+                        "id": 35377,
+                        "componentSection": "PackageTypeSection",
+                        "overrideType": 0,
+                        "useParent": false,
+                        "displayOrder": 5,
+                        "productNodeSection": 9,
+                        "createdOn": "2024-03-19T10:10:29.8151315+00:00",
+                        "createdBy": "DOMIMU"
+                    },
+                    {
+                        "isApplicable": true,
+                        "endValueType": 0,
+                        "endValueCalculationBasis": 3,
+                        "guaranteedBy": 1,
+                        "rvConfigChartType": 2,
+                        "rvLookupRailId": 96,
+                        "isMileageRange": false,
+                        "isMileageApplicable": false,
+                        "id": 35381,
+                        "componentSection": "EndValueSection",
+                        "overrideType": 1,
+                        "useParent": false,
+                        "displayOrder": 13,
+                        "productNodeSection": 45,
+                        "createdOn": "2024-03-19T10:10:29.8151315+00:00",
+                        "createdBy": "DOMIMU"
+                    },
+                    {
+                        "retentionTypeIds": [
+                            1
+                        ],
+                        "retentionTypeCodes": [
+                            "RetentionType1"
+                        ],
+                        "id": 35383,
+                        "componentSection": "RetentionTypeSection",
+                        "overrideType": 0,
+                        "useParent": false,
+                        "displayOrder": 7,
+                        "productNodeSection": 12,
+                        "createdOn": "2024-03-19T10:10:29.8151315+00:00",
+                        "createdBy": "DOMIMU"
+                    }
+                ],
+                "levelCode": "C"
+            }
+        ],
+        "bundleTypeGroups": [
+            {
+                "id": 26,
+                "externalCode": "Motor Insurance (MI)",
+                "name": "Motor Insurance (MI)",
+                "bundleTypeCodes": [
+                    "motorInsurancePrivate"
+                ]
+            },
+            {
+                "id": 10,
+                "externalCode": "Payment Protection Insurance (PPI)",
+                "name": "Payment Protection Insurance (PPI)",
+                "bundleTypeCodes": [
+                    "paymentProtectionInsurance"
+                ]
+            },
+            {
+                "id": 18,
+                "externalCode": "Motor Insurance (Mandatory)",
+                "name": "Motor Insurance (Mandatory)",
+                "bundleTypeCodes": [
+                    "motorInsurance"
+                ]
+            },
+            {
+                "id": 29,
+                "externalCode": "Relief Vehicle ",
+                "name": "Relief Vehicle ",
+                "bundleTypeCodes": [
+                    "reliefVehicle"
+                ]
+            }
+        ],
+        "bundleTypes": [
+            {
+                "id": 3,
+                "code": "paymentProtectionInsurance",
+                "externalCode": "paymentProtectionInsurance",
+                "name": "Payment Protection Insurance (PPI)",
+                "localName": "Seguro de Proteção de Crédito (PPI)",
+                "description": "Payment Protection Insurance (PPI)",
+                "displayOrder": 2,
+                "status": 2,
+                "paymentOption": 1,
+                "waiveOptions": 1,
+                "processingFrequency": 4,
+                "isOptionalToCustomer": true,
+                "isOptionalToCustomerDefault": true,
+                "groupPeriodAmounts": false,
+                "isDiscount": false,
+                "isService": false,
+                "taxType": 3,
+                "canAmountBeChanged": false,
+                "quoteDisplayOption": 1,
+                "displayOption": 1,
+                "additionalAttributes": [
+                    {
+                        "id": 391,
+                        "code": "coveragePackage",
+                        "displayName": "Coverage Package",
+                        "isRequired": false,
+                        "invalidatesPeriodOverrides": true,
+                        "displayOrder": 2,
+                        "attributeType": 3,
+                        "displayType": 1,
+                        "choice": {
+                            "defaultChoice": "Basis",
+                            "choices": [
+                                {
+                                    "id": 414,
+                                    "displayName": "Package",
+                                    "value": "Basis",
+                                    "isEnabled": true
+                                },
+                                {
+                                    "id": 415,
+                                    "displayName": "Package 3",
+                                    "value": "Complete",
+                                    "isEnabled": true
+                                },
+                                {
+                                    "id": 416,
+                                    "displayName": "Package 2",
+                                    "value": "Intermediate",
+                                    "isEnabled": true
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "id": 392,
+                        "code": "customerAge",
+                        "displayName": "Age",
+                        "isRequired": false,
+                        "invalidatesPeriodOverrides": true,
+                        "displayOrder": 0,
+                        "attributeType": 1,
+                        "displayType": 1,
+                        "text": {}
+                    },
+                    {
+                        "id": 393,
+                        "code": "yearOfDrivingLicense",
+                        "displayName": "Year of Driving License",
+                        "isRequired": false,
+                        "invalidatesPeriodOverrides": true,
+                        "displayOrder": 1,
+                        "attributeType": 1,
+                        "displayType": 1,
+                        "text": {}
+                    }
+                ],
+                "canCurrencyBeChanged": false,
+                "categories": []
+            },
+            {
+                "id": 5,
+                "code": "motorInsurance",
+                "externalCode": "motorInsurance",
+                "name": "Motor Insurance IPOS",
+                "localName": "Seguro Auto",
+                "description": "Motor Insurance",
+                "displayOrder": 1,
+                "status": 2,
+                "paymentOption": 1,
+                "waiveOptions": 1,
+                "processingFrequency": 4,
+                "isOptionalToCustomer": false,
+                "isOptionalToCustomerDefault": false,
+                "groupPeriodAmounts": false,
+                "isDiscount": false,
+                "isService": false,
+                "taxType": 3,
+                "canAmountBeChanged": false,
+                "quoteDisplayOption": 1,
+                "displayOption": 1,
+                "additionalAttributes": [
+                    {
+                        "id": 440,
+                        "code": "coveragePackage",
+                        "displayName": "Coverage Package",
+                        "isRequired": false,
+                        "invalidatesPeriodOverrides": true,
+                        "displayOrder": 2,
+                        "attributeType": 3,
+                        "displayType": 1,
+                        "choice": {
+                            "defaultChoice": "Tarifa Plana 1",
+                            "choices": [
+                                {
+                                    "id": 453,
+                                    "displayName": "Package 1",
+                                    "value": "Tarifa Plana 1",
+                                    "isEnabled": true
+                                },
+                                {
+                                    "id": 454,
+                                    "displayName": "Package 2",
+                                    "value": "Tarifa Plana 2",
+                                    "isEnabled": true
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "id": 441,
+                        "code": "vehicleModelVersion",
+                        "displayName": "Vehicle Model Version",
+                        "isRequired": false,
+                        "invalidatesPeriodOverrides": false,
+                        "displayOrder": 0,
+                        "attributeType": 3,
+                        "displayType": 1,
+                        "choice": {
+                            "defaultChoice": "",
+                            "choices": []
+                        }
+                    },
+                    {
+                        "id": 442,
+                        "code": "customerAge",
+                        "displayName": "Age",
+                        "isRequired": false,
+                        "invalidatesPeriodOverrides": true,
+                        "displayOrder": 0,
+                        "attributeType": 1,
+                        "displayType": 1,
+                        "text": {}
+                    },
+                    {
+                        "id": 443,
+                        "code": "yearOfDrivingLicense",
+                        "displayName": "Year of Driving License",
+                        "isRequired": false,
+                        "invalidatesPeriodOverrides": true,
+                        "displayOrder": 1,
+                        "attributeType": 1,
+                        "displayType": 1,
+                        "text": {}
+                    }
+                ],
+                "canCurrencyBeChanged": false,
+                "categories": [
+                    {
+                        "id": 2,
+                        "code": "INS",
+                        "name": "Insurance"
+                    }
+                ]
+            },
+            {
+                "id": 11,
+                "code": "reliefVehicle",
+                "externalCode": "reliefVehicle",
+                "name": "Replacement Vehicle",
+                "localName": "Viatura de Substituição",
+                "description": "Replacement Vehicle PT",
+                "displayOrder": 1,
+                "status": 2,
+                "paymentOption": 1,
+                "waiveOptions": 6,
+                "processingFrequency": 4,
+                "isOptionalToCustomer": false,
+                "isOptionalToCustomerDefault": false,
+                "groupPeriodAmounts": false,
+                "isDiscount": false,
+                "isService": false,
+                "taxType": 2,
+                "canAmountBeChanged": false,
+                "quoteDisplayOption": 1,
+                "displayOption": 1,
+                "additionalAttributes": [
+                    {
+                        "id": 430,
+                        "code": "immobility",
+                        "displayName": "Immobility",
+                        "isRequired": false,
+                        "invalidatesPeriodOverrides": true,
+                        "displayOrder": 1,
+                        "attributeType": 6,
+                        "displayType": 1,
+                        "wholeNumber": {
+                            "defaultNumber": 0,
+                            "minNumber": 0
+                        }
+                    },
+                    {
+                        "id": 431,
+                        "code": "replacementDays",
+                        "displayName": "Replacement Days",
+                        "isRequired": true,
+                        "invalidatesPeriodOverrides": false,
+                        "displayOrder": 1,
+                        "attributeType": 6,
+                        "displayType": 2,
+                        "wholeNumber": {
+                            "defaultNumber": 0,
+                            "minNumber": 0
+                        }
+                    }
+                ],
+                "currencyCode": "USD",
+                "canCurrencyBeChanged": false,
+                "categories": []
+            },
+            {
+                "id": 18,
+                "code": "motorInsurance",
+                "externalCode": "motorInsurance",
+                "name": "Motor Insurance (Mandatory) ",
+                "localName": "Seguro Auto (Mandatory) ",
+                "description": "Motor Insurance Copy",
+                "displayOrder": 1,
+                "status": 2,
+                "paymentOption": 1,
+                "waiveOptions": 1,
+                "processingFrequency": 4,
+                "isOptionalToCustomer": false,
+                "isOptionalToCustomerDefault": false,
+                "groupPeriodAmounts": false,
+                "isDiscount": false,
+                "isService": false,
+                "taxType": 3,
+                "canAmountBeChanged": false,
+                "quoteDisplayOption": 1,
+                "displayOption": 1,
+                "additionalAttributes": [
+                    {
+                        "id": 315,
+                        "code": "coveragePackage",
+                        "displayName": "Coverage Package",
+                        "isRequired": false,
+                        "invalidatesPeriodOverrides": true,
+                        "displayOrder": 2,
+                        "attributeType": 3,
+                        "displayType": 1,
+                        "choice": {
+                            "defaultChoice": "S",
+                            "choices": [
+                                {
+                                    "id": 340,
+                                    "displayName": "Package 3",
+                                    "value": "L",
+                                    "isEnabled": true
+                                },
+                                {
+                                    "id": 341,
+                                    "displayName": "Package 2",
+                                    "value": "M",
+                                    "isEnabled": true
+                                },
+                                {
+                                    "id": 342,
+                                    "displayName": "Package 1",
+                                    "value": "S",
+                                    "isEnabled": true
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "id": 316,
+                        "code": "customerAge",
+                        "displayName": "Age",
+                        "isRequired": false,
+                        "invalidatesPeriodOverrides": true,
+                        "displayOrder": 0,
+                        "attributeType": 1,
+                        "displayType": 1,
+                        "text": {}
+                    },
+                    {
+                        "id": 317,
+                        "code": "yearOfDrivingLicense",
+                        "displayName": "Year of Driving License",
+                        "isRequired": false,
+                        "invalidatesPeriodOverrides": true,
+                        "displayOrder": 1,
+                        "attributeType": 1,
+                        "displayType": 1,
+                        "text": {}
+                    }
+                ],
+                "canCurrencyBeChanged": false,
+                "categories": []
+            },
+            {
+                "id": 27,
+                "code": "motorInsurancePrivate",
+                "externalCode": "motorInsurancePrivate",
+                "name": "Motor Insurance Private",
+                "localName": "Seguro Auto private",
+                "description": "Motor Insurance Private (Created for testing purposes)",
+                "displayOrder": 1,
+                "status": 2,
+                "paymentOption": 1,
+                "waiveOptions": 1,
+                "processingFrequency": 4,
+                "isOptionalToCustomer": true,
+                "isOptionalToCustomerDefault": true,
+                "groupPeriodAmounts": false,
+                "isDiscount": false,
+                "isService": false,
+                "taxType": 3,
+                "canAmountBeChanged": false,
+                "quoteDisplayOption": 1,
+                "displayOption": 1,
+                "additionalAttributes": [
+                    {
+                        "id": 414,
+                        "code": "coveragePackage",
+                        "displayName": "Coverage Package",
+                        "isRequired": false,
+                        "invalidatesPeriodOverrides": true,
+                        "displayOrder": 2,
+                        "attributeType": 3,
+                        "displayType": 1,
+                        "choice": {
+                            "defaultChoice": "Tarifa Plana 1",
+                            "choices": [
+                                {
+                                    "id": 425,
+                                    "displayName": "Package 1",
+                                    "value": "Tarifa Plana 1",
+                                    "isEnabled": true
+                                },
+                                {
+                                    "id": 426,
+                                    "displayName": "Package 2",
+                                    "value": "Tarifa Plana 2",
+                                    "isEnabled": true
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "id": 415,
+                        "code": "customerAge",
+                        "displayName": "Age",
+                        "isRequired": false,
+                        "invalidatesPeriodOverrides": true,
+                        "displayOrder": 0,
+                        "attributeType": 1,
+                        "displayType": 1,
+                        "text": {}
+                    },
+                    {
+                        "id": 416,
+                        "code": "yearOfDrivingLicense",
+                        "displayName": "Date Of Driveres License",
+                        "isRequired": false,
+                        "invalidatesPeriodOverrides": true,
+                        "displayOrder": 1,
+                        "attributeType": 1,
+                        "displayType": 1,
+                        "text": {}
+                    }
+                ],
+                "canCurrencyBeChanged": false,
+                "categories": []
+            }
+        ],
+        "assetTypes": [
+            {
+                "id": 2,
+                "externalCode": "PC",
+                "description": "PC"
+            },
+            {
+                "id": 23,
+                "externalCode": "VAN",
+                "description": "Vans"
+            }
+        ],
+        "assetConditions": [
+            {
+                "id": 1,
+                "externalCode": "00001",
+                "description": "New BuildToOrder"
+            },
+            {
+                "id": 2,
+                "externalCode": "00002",
+                "description": "New stock (unregistered)"
+            },
+            {
+                "id": 3,
+                "externalCode": "00003",
+                "description": "Stock (registered)"
+            },
+            {
+                "id": 5,
+                "externalCode": "00005",
+                "description": "Used"
+            }
+        ],
+        "packageTypes": [
+            {
+                "id": 1,
+                "externalCode": "PackageType1"
+            }
+        ],
+        "businessTypes": [
+            {
+                "id": 1,
+                "externalCode": "Business-Type-1",
+                "description": "Retail"
+            }
+        ],
+        "retentionTypes": [
+            {
+                "id": 1,
+                "externalCode": "RetentionType1",
+                "description": "Normal"
+            }
+        ]
+    },
+    "hasErrors": false
+}

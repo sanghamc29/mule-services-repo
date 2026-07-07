@@ -1,0 +1,8 @@
+{
+	"data": {
+		"isMaxXirrValid": true,
+		"euribor": 0.02,
+		"spread": 0.02
+	},
+	"hasErrors": false
+}

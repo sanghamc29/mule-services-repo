@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:oauth="http://www.mulesoft.org/schema/mule/oauth" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:salesforce-composite="http://www.mulesoft.org/schema/mule/salesforce-composite" xmlns:anypoint-mq="http://www.mulesoft.org/schema/mule/anypoint-mq" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd
+http://www.mulesoft.org/schema/mule/anypoint-mq http://www.mulesoft.org/schema/mule/anypoint-mq/current/mule-anypoint-mq.xsd
+http://www.mulesoft.org/schema/mule/salesforce-composite http://www.mulesoft.org/schema/mule/salesforce-composite/current/mule-salesforce-composite.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/oauth http://www.mulesoft.org/schema/mule/oauth/current/mule-oauth.xsd">
+    <configuration-properties doc:name="Configuration properties" doc:id="0656042c-f751-474a-90fb-aaec39c07141" file="default-properties.yaml" />
+    <apikit:config name="api-config" api="${api.spec}" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <http:request-config name="HTTP_Request-configuration" doc:name="HTTP Request configuration" doc:id="1470b387-9d11-4202-88c5-2c9482e432d6" basePath="${abacus-sys.basePath}" responseTimeout="${abacus-sys.responseTimeout}">
+        <http:request-connection host="#[vars.countryCode ++ p('abacus-sys.host')]" port="${abacus-sys.port}" protocol="${abacus-sys.protocol}">
+            <reconnection>
+                <reconnect frequency="${reconn.intrvl}" count="${reconn.attempt}" />
+            </reconnection>
+			<http:authentication >
+				<oauth:client-credentials-grant-type clientId="#[p('abacus.clientId')]" clientSecret="${secure::abacus.clientSecret}" tokenUrl="#[p('abacus.tokenUrl')]" />
+			</http:authentication>
+        </http:request-connection>
+		<http:default-headers >
+			<http:default-header key="Accept-Language" value="#[vars.languageCode]" />
+		</http:default-headers>
+    </http:request-config>
+    <secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="47e17559-fd1c-4a7c-a0a2-6ba743e49a44" file="secure-properties.yaml" key="${encryption.key}" >
+		<secure-properties:encrypt algorithm="Blowfish" />
+	</secure-properties:config>
+    <http:listener-config name="HTTP_Listener-config" doc:name="HTTP Listener config" doc:id="8288702f-f4fe-40bb-ac7f-4ab7365378d0">
+        <http:listener-connection port="${http.port}" host="${api.http.listener.host}" readTimeout="${api.http.listener.readTimeout}"/>
+    </http:listener-config>
+    <api-gateway:autodiscovery apiId="${api.instanceId}" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="6b11c9ee-19de-4d53-a55d-e23d156fe832" flowRef="api-main" />
+	<anypoint-mq:config name="Anypoint_MQ_Config" doc:name="Anypoint MQ Config" doc:id="ed79b08b-f89e-47a9-a024-8aea2d78783a" >
+		<anypoint-mq:connection url="${mq.url}" clientId="${mq.clientId}" clientSecret="${secure::mq.clientSecret}"/>
+	</anypoint-mq:config>
+	<global-property doc:name="Global Property" doc:id="60d667b9-17f9-44eb-bec1-e0f1d3939289" name="encryption.key" value="QziR0rSJo2gRe7Ar" />
+	<salesforce-composite:composite-config name="Salesforce_Composite_Config" doc:name="Salesforce Composite Config" doc:id="29c61d4f-b173-48ed-8b5c-9e3f97787f85" >
+		<salesforce-composite:oauth-jwt-connection consumerKey="${secure::sf.consumerKey}" keyStore="${sf.keystore}" storePassword="${secure::sf.storePass}" principal="${sf.principal}" tokenEndpoint="${sf.tokenEndpoint}" audienceUrl="${sf.aud}" responseTimeout="${sf.responseTimeoutInSec}" connectionTimeout="${sf.connTimeoutInSec}">
+			<reconnection >
+				<reconnect-forever />
+			</reconnection>
+		</salesforce-composite:oauth-jwt-connection>
+	</salesforce-composite:composite-config>
+	<anypoint-mq:circuit-breaker name="Circuit_breaker" tripTimeout="${mq.tripTimeout}" doc:name="Circuit breaker" doc:id="872c90a3-28f1-465a-aa71-ae317329fa3a" onErrorTypes="${mq.errorTypes}" errorsThreshold="${mq.threshold}"/>
+	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="f9dcc279-fe1d-4e6b-9284-bd2901880830" >
+		<salesforce:jwt-connection consumerKey="${secure::sf.consumerKey}" keyStore="${sf.keystore}" storePassword="${secure::sf.storePass}" principal="${sf.principal}" tokenEndpoint="${sf.tokenEndpoint}" audienceUrl="${sf.aud}">
+            <reconnection>
+                <reconnect-forever />
+            </reconnection>
+        </salesforce:jwt-connection>
+	</salesforce:sfdc-config>
+</mule>

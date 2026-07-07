@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:salesforce-composite="http://www.mulesoft.org/schema/mule/salesforce-composite" xmlns:anypoint-mq="http://www.mulesoft.org/schema/mule/anypoint-mq"
+	xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/anypoint-mq http://www.mulesoft.org/schema/mule/anypoint-mq/current/mule-anypoint-mq.xsd
+http://www.mulesoft.org/schema/mule/salesforce-composite http://www.mulesoft.org/schema/mule/salesforce-composite/current/mule-salesforce-composite.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
+	<sub-flow name="post-finance-quote" doc:id="d9e78d8b-a71e-431d-83c8-346ac1a62cc5" >
+        
+		<ee:transform doc:name="Request" doc:id="3e3d406d-96d2-45ef-a261-0fe00d648cd7">
+			<ee:message>
+				<ee:set-payload resource="dataweaves/p-finance-quote-request.dwl" />
+			</ee:message>
+		</ee:transform>
+        
+		<logger level="DEBUG" doc:name="Log Request" doc:id="20affbad-9ff9-448b-9492-c287ba133ad9" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.corrId ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode ++ &#10;&quot;Calculate Finance Quote Start: &quot; ++ now()]" category="${debugCtgry}" />
+		<flow-ref doc:name="Calculate Finance Quote" doc:id="30e44dbc-92f3-438e-bc3a-1e3225f1e5f2" name="calculate-finance-quote"/>
+		<validation:is-true doc:name="Validate Failure as null" doc:id="4371f5fb-4bfd-4c32-ba93-c049767402b8" expression="#[vars.isFailure == null]" message="#[vars.errorObject.description]" />
+		
+		<logger level="DEBUG" doc:name="Log Response" doc:id="39e45b03-dabb-49a3-8381-9e7efb35f7f4" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.corrId ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode ++ &#10;&quot;Calculate Finance Quote End: &quot; ++ now()]" category="${debugCtgry}"/>
+		<flow-ref doc:name="Publish Finance Quote Response to MQ" doc:id="f298828a-91ea-430b-994e-3154af734398" name="publish-finance-quote-response-to-mq"/>
+		<ee:transform doc:name="Response" doc:id="73d4e789-07b7-4b31-8c9a-0e75436d7e90" >
+			<ee:message >
+				<ee:set-payload resource="dataweaves/p-finance-quote-response.dwl" />
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+	<sub-flow name="fetch-finance-quote" doc:id="daa9acb9-cbf6-4bec-a36c-56db1589e17c" >
+		<salesforce:query doc:id="b1bd8a8b-0a56-48f2-ab54-faa9b4d0d570" config-ref="Salesforce_Config" doc:name="File Content Query">
+			<salesforce:salesforce-query ><![CDATA[SELECT Id, ContentDocument.LatestPublishedVersion.Title,ContentDocument.LatestPublishedVersion.EU_FileContentType__c,ContentDocument.LatestPublishedVersion.VersionData FROM ContentDocumentLink where ContentDocument.LatestPublishedVersion.EU_FileContentType__c ='AbacusFQResponse' AND LinkedEntityId = ':Id']]></salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	"Id" : vars.applicationId
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<ee:transform doc:name="Abacus File Content Payload" doc:id="c6adb9a5-aff3-4eba-89d1-1fe224d2f9c0" >
+			<ee:message >
+				<ee:set-payload resource="dataweaves/p-convert-abacus-file-payload.dwl" />
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+	<sub-flow name="cache-fq-response-sf" doc:id="fd45f9d6-0362-46aa-b1ba-200a8d0f9297" >
+		<ee:transform doc:name="Retrieve Existing Content Version Documents" doc:id="598e79ce-2680-4fc6-b01a-c768880d1c94">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable resource="dataweaves/p-finance-quote-content-query.dwl" variableName="contentQuery" />
+			</ee:variables>
+		</ee:transform>
+		<salesforce-composite:execute-composite-request doc:name="Execute composite request - Query" doc:id="73eb9137-722c-4c72-8de5-4cd9d903f828" config-ref="Salesforce_Composite_Config" target="queryResponse">
+			<salesforce-composite:request-body ><![CDATA[#[vars.contentQuery]]]></salesforce-composite:request-body>
+		</salesforce-composite:execute-composite-request>
+		<ee:transform doc:name="Create/update Content Version" doc:id="bdc3ddd9-fb11-4a81-90cc-dcd8e3123455">
+					<ee:message>
+				<ee:set-payload resource="dataweaves/p-finance-quote-content-version.dwl" />
+					</ee:message>
+				</ee:transform>
+		<salesforce-composite:execute-composite-request doc:name="Execute composite request - Upsert" doc:id="980e01df-7eda-49ca-93a3-3995fcd92d84" config-ref="Salesforce_Composite_Config" />
+			<choice doc:name="Check for validation errors" doc:id="9f9630d3-4506-4c65-bf6e-b9768a44b8b0" >
+			<when expression="#[payload.compositeResponse[0].body.success]">
+				<logger level="INFO" doc:name="Logger" doc:id="cd666d8c-c3f6-4098-a94d-322c1b76b587" message="Flat File Uploaded successfully"/>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Set Error Code" doc:id="a318eb23-ba26-4109-843e-9a5098f101e8">
+					<ee:message>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="errorCode"><![CDATA[%dw 2.0
+output application/json
+---
+(payload.compositeResponse.body filter ($.errorCode[0] != "PROCESSING_HALTED" ))[0].errorCode[0]
+
+]]></ee:set-variable>
+						<ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/java
+---
+400]]></ee:set-variable>
+						<ee:set-variable variableName="errorMessage" ><![CDATA[%dw 2.0
+output application/json
+---
+(payload.compositeResponse.body filter ($.errorCode[0] != "PROCESSING_HALTED" ))[0].message[0]
+
+]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<raise-error doc:name="Raise error for Business Failures" doc:id="356ec535-0d9d-443e-83a6-80ba14f7a4ed" type="ORG_MB:SALESFORCE_BAD_REQUEST" description="Bad Request during Composite Request execution" />
+			</otherwise>
+		</choice>
+			</sub-flow>
+</mule>

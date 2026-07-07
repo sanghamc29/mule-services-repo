@@ -1,0 +1,102 @@
+{
+    "data": {
+        "basePrice": {
+            "amountInclusive": 123000.62,
+            "amountExclusive": 100000.5,
+            "amountTax": 23000.12,
+            "currency": ""
+        },
+        "manufacturerOptions": {
+            "amountInclusive": 0.0,
+            "amountExclusive": 0.0,
+            "amountTax": 0.0,
+            "currency": ""
+        },
+        "dealerOptions": {
+            "amountInclusive": 0.0,
+            "amountExclusive": 0.0,
+            "amountTax": 0.0,
+            "currency": ""
+        },
+        "totalPurchasePrice": {
+            "amountInclusive": 121770.62,
+            "amountExclusive": 99000.5,
+            "amountTax": 22770.12,
+            "currency": ""
+        },
+        "usedTotalPurchasePrice": {},
+        "purchasePriceWithoutBpm": {},
+        "vehicleCharges": {
+	        "ipt": {
+	            "amountInclusive": 122,
+	            "amountExclusive": 100,
+	            "amountTax": 22,
+	            "currency": "EUR"
+	        },
+            "registrationTaxable": {
+                "amountInclusive": 530.0,
+                "amountExclusive": 500.0,
+                "amountTax": 30.0,
+                "currency": "EUR"
+            },
+            "registrationExemption": {
+                "amountInclusive": 500.0,
+                "amountExclusive": 500.0,
+                "amountTax": 0.0,
+                "currency": "EUR"
+            }
+        },
+        "listPriceInclManufacturerOptionsAndIsvAndEco": {
+            "amountInclusive": 123000.62,
+            "amountExclusive": 100000.5,
+            "amountTax": 23000.12,
+            "currency": ""
+        },
+        "totalBodybuilderOptionsPrice": {
+            "amountInclusive": 615.0,
+            "amountExclusive": 500.0,
+            "amountTax": 115.0,
+            "currency": ""
+        },
+        "bodybuilderOptions": [
+            {
+                "code": "00001",
+                "externalCode": "1100",
+                "description": "Van",
+                "price": {
+                    "amountInclusive": 122.0,
+                    "amountExclusive": 100.0,
+                    "amountTax": 22.0,
+                    "currency": "EUR"
+                },
+                "uniqueId": "tester1"
+            },
+            {
+                "code": "00002",
+                "externalCode": "1200",
+                "description": "Mixed",
+                "price": {
+                    "amountInclusive": 122.0,
+                    "amountExclusive": 100.0,
+                    "amountTax": 22.0,
+                    "currency": "EUR"
+                },
+                "uniqueId": "tester2"
+            }
+        ],
+        "totalRegistrationTaxAmount": {
+        	"amountInclusive": 500.0
+        },
+        "dealershipDiscount": {
+            "amountExclusive": 30250.0,
+            "pct": 0.5
+        },
+        "totalPurchasePriceExcludingBodyBuilderOptions": {
+            "amountInclusive": 38109.38,
+            "amountExclusive": 31239.0,
+            "amountTax": 6870.38,
+            "currency": "EUR"
+        }
+    },
+    "hasErrors": false
+}

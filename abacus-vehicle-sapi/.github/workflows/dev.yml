@@ -1,0 +1,68 @@
+name: Test and Deploy
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - dev
+      - release-*
+    types:
+      - closed
+env: 
+  JAVA_VERSION: 17
+  MULE_ARTIFACTORY_USER: ${{ secrets.MULE_REPO_USER }}
+  MULE_ARTIFACTORY_PSSWD: ${{ secrets.MULE_REPO_PSSWD }}
+  MB_ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_REPO_USERNAME }}
+  MB_ARTIFACTORY_PSSWD: ${{ secrets.ARTIFACTORY_REPO_TOKEN }}
+  MULE_ENCRYPTION_KEY: ${{ secrets.MULE_SECURED_PROP_ENCRYPTION_KEY }}
+  ANYPOINT_EXCHANGE_MAVEN_APP_ID: ${{ secrets.ANYPOINT_EXCHANGE_MAVEN_APP_ID }}
+  ANYPOINT_EXCHANGE_MAVEN_APP_SECRET: ${{ secrets.ANYPOINT_EXCHANGE_MAVEN_APP_SECRET }}
+  ANYPOINT_CLIENT_ID: ${{ secrets.ANYPOINT_RUNTIME_DEPLOYER_ID }} 
+  ANYPOINT_CLIENT_SECRET: ${{ secrets.ANYPOINT_RUNTIME_DEPLOYER_SECRET }}
+  ANYPOINT_ORG_ID: ${{ secrets.ANYPOINT_FS_ORG_ID }}
+  DEPLOYMENT_TARGET: ${{ secrets.ANYPOINT_AMERICAS_NON_PROD_TARGET_ID }}
+  API_MANAGER_CLIENT_ID: ${{ secrets.ANYPOINT_API_MANAGER_DEV_CLIENT_ID }}
+  API_MANAGER_CLIENT_SECRET: ${{ secrets.ANYPOINT_API_MANAGER_DEV_CLIENT_SECRET }}
+  DATADOG_API_KEY: ${{ secrets.DATADOG_NONPROD_API_KEY }}
+  MULE_PIPELINE_APP_PROPS_ACCESS_PRIVATE_KEY: ${{ secrets.MULE_PIPELINE_APP_PROPS_ACCESS_PRIVATE_KEY }}
+  
+jobs:
+  testAndDeploy:
+    runs-on: [self-hosted, aks-gha-runners]
+    environment: DEV
+    if: ${{ !contains(github.event.head_commit.message, '[maven-release-plugin]') && github.event.pull_request.merged == true }}
+    steps:
+        
+      - uses: actions/checkout@v3
+      
+      - name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Add Known Hosts
+        run: |
+          mkdir ~/.ssh/
+          ssh-keyscan -H git.i.mercedes-benz.com  >> ~/.ssh/known_hosts
+      - uses: actions/checkout@v3
+        with:
+          repository: mbfs-OneOps/anypoint-continuous-deployment
+          #ref: feature-dynamic-region-test
+          path: ./custom-action
+          ssh-known-hosts: git.i.mercedes-benz.com
+          ssh-key: ${{ secrets.MULE_CD_PRIVATE_KEY }}
+      
+      - id: deploy-to-dev
+        name: Deploy to Dev
+        uses: ./custom-action/composites/deploy-to-cloudhub2
+        with:
+          appName: ${{ github.event.repository.name }}
+          region: ${{ github.event.pull_request.labels[0].name }} 

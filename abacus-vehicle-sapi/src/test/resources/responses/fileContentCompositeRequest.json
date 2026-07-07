@@ -1,0 +1,18 @@
+{
+  "compositeResponse": [
+    {
+      "body": {
+        "id": "06877000000WXroAAG",
+        "success": true,
+        "errors": [
+        ],
+        "created": false
+      },
+      "httpHeaders": {
+        "Location": "/services/data/v60.0/sobjects/ContentVersion/06877000000WXroAAG"
+      },
+      "httpStatusCode": 200,
+      "referenceId": "refContentversionUpsert"
+    }
+  ]
+}

@@ -1,0 +1,124 @@
+{
+  "financialCode": "7aa49bdfe8f849e1b8d93bdc14c97a36",
+  "isExternalQuote": true,
+  "quoteId": "13XDP0000008PKv2AM",
+  "expectedContractStartDate": "2025-08-08",
+  "roleCode": "EU_SF_IT_Dealer_Sales_Person",
+  "salesChannel": "otr",
+  "dealerRegionCode": "IT_AL",
+  "vatSegmentId": 1,
+  "gsCode": "GS0004282",
+  "marketCode": "it",
+  "currencyCode": "EUR",
+  "fundedItems": [
+    {
+      "campaignId": 34,
+      "classifications": [
+        {
+          "id": 2,
+          "type": 7
+        },
+        {
+          "id": 3,
+          "type": 1
+        }
+      ],
+      "commissionLevelCode": "",
+      "quantity": 1,
+      "zipCode": "",
+      "financeParameters": {
+        "period": 36,
+        "downPayment": {
+			"amountInclusive": 100,
+            "amountExclusive": 90,
+            "pct": 0.1,
+            "pegOnAmount": true
+        },
+        "governmentGrants": {
+          "amountExclusive": 100
+        },
+        "paymentDay": 1,
+        "useVariableInterestRate": false,
+        "dealershipDiscount": {
+          "amountExclusive": 12
+        }
+      },
+      "bundles": [
+        
+      ],
+      "vehicle": {
+        "modelCode": "1770841_IT1-806-DL8",
+        "expectedRegistrationDate": "2025-08-08",
+        "conditionCode": "00001",
+        "provinceOfRegistration": "IT_AG",
+        "vin": "null",
+        "transportingType": "goods",
+        "licensePlate": "",
+        "mileage": 0,
+        "price": {
+          "amountExclusive": 30000
+        },
+        "priceInfo": {
+          "dealerPurchasePrice": {
+            "amountExclusive": "38085.74"
+          },
+          "usedTotalPurchasePrice": {
+            "amountExclusive": "31215"
+          },
+          "usedBasePrice": {
+            "amountExclusive": 20000
+          }
+        },
+        "options": [
+          {
+            "price": {
+              "amountExclusive": 12
+            },
+            "type": 1
+          },
+          {
+            "optionCode": "DL8",
+            "price": {
+              "amountExclusive": 1916
+            },
+            "type": 1
+          },
+          {
+            "price": {
+              "amountExclusive": 60000
+            },
+            "type": 2
+          }
+        ],
+        "vehicleCharges": {
+          "standardDeliveryCosts": [
+            {
+              
+            }
+          ],
+          "ecv": {
+            
+          },
+          "isv": {
+            
+          },
+          "registrationTaxableAmount": {
+            "amountExclusive": 12
+          },
+          "registrationExemptAmount": {
+            "amountExclusive": 40
+          }
+        },
+        "endValue": {
+          "value": {
+            
+          }
+        },
+        "bodyBuilderOptions": [
+          
+        ]
+      }
+    }
+  ],
+  "useFinalSubmission": false
+}

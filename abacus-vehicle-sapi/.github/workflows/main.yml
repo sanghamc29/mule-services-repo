@@ -1,0 +1,39 @@
+name: Verify Commits to Feature and Master
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - 'feature-**'
+  pull_request:
+    branches: 
+      - main
+      - 'feature-**'
+      
+env:
+  JAVA_VERSION: 17
+  MULE_ARTIFACTORY_USER: ${{ secrets.MULE_REPO_USER }}
+  MULE_ARTIFACTORY_PSSWD: ${{ secrets.MULE_REPO_PSSWD }}
+  MB_ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_REPO_USERNAME }}
+  MB_ARTIFACTORY_PSSWD: ${{ secrets.ARTIFACTORY_REPO_TOKEN }}
+  MULE_ENCRYPTION_KEY: ${{ secrets.MULE_SECURED_PROP_ENCRYPTION_KEY }}
+  ANYPOINT_EXCHANGE_MAVEN_APP_ID: ${{ secrets.ANYPOINT_EXCHANGE_MAVEN_APP_ID }}
+  ANYPOINT_EXCHANGE_MAVEN_APP_SECRET: ${{ secrets.ANYPOINT_EXCHANGE_MAVEN_APP_SECRET }}
+
+jobs:
+  verify:
+    runs-on: [self-hosted, aks-gha-runners]
+
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'maven'
+
+      - name: Run Unit Tests
+        run: mvn clean test -s settings.xml -Dencryption.key=${{ env.MULE_ENCRYPTION_KEY }}

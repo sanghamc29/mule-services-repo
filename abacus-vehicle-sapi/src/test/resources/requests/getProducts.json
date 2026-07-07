@@ -1,0 +1,24 @@
+{
+  "modelCode": "1770511_000-804_054",
+  "conditionCode": "00005",
+  "classifications": [
+      {
+        "id": 1,
+        "type": 7
+      }
+  ],
+  "dealerOutletCode": "GS0006208",
+  "hierarchy": "P",
+  "isBodyBuilder": true,
+  "sections": [
+    "AssetConditionSection",
+    "BusinessTypeSection",
+    "CommissionSection",
+    "EndValueSection",
+    "PaymentDaySection",
+    "BundleTypeGroupSection",
+    "TermsSection",
+    "InterestRateTypeSection"
+  ],
+  "isInternalUser" : true
+}

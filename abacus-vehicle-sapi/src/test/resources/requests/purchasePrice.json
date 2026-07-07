@@ -1,0 +1,77 @@
+{
+        "vatSegmentId": 1,
+        "expectedRegistrationDate": "2021-07-28T00:00:00Z",
+        "currencyCode": "",
+        "conditionCode": "5",
+        "provinceOfRegistration": "1",
+        "usageCode": "1",
+        "mileage": 0,
+        "firstRegistrationDate": "2021-07-28T00:00:00Z",
+        "modelCode": "9076371_000-XZ0",
+        "transportingType": "goods",
+        "price": {
+    		"amountExclusive": 100000.5
+  		},
+  		"priceInfo": {
+          "dealerPurchasePrice": {
+            "amountExclusive": "38085.74"
+          },
+          "usedTotalPurchasePrice": {
+            "amountExclusive": "31215"
+          },
+          "usedBasePrice": {
+            "amountExclusive": 20000
+          }
+          },
+       "bodyBuilderOptions": [
+            {
+                "code": "00001",
+                "price": {
+                    "amountExclusive": 100
+                },
+                "uniqueId": "tester1"
+            },
+            {
+                "code": "00001",
+                "price": {
+                    "amountExclusive": 100
+                },
+                "uniqueId": "tester2"
+            }
+        ],
+        "options": [{   
+                "price": {
+                    "amountExclusive": 0
+                },
+                "type": 1
+            }, {
+                
+                "price": {
+                    "amountExclusive": 0
+                },
+                "type": 2
+            }
+        ],
+        "vehicleCharges": {
+            "standardDeliveryCosts": [{
+                    "amountExclusive": 0
+                }
+            ],
+	        "registrationTaxableAmount": {
+	            "amountExclusive": 500.0
+	        },
+	        "registrationExemptAmount": {
+	            "amountExclusive": 500.0
+	        }
+        },
+    "dealershipDiscount": {
+        "amountExclusive": 1000,
+        "pct": 0.5
+    },
+    "classifications": [
+    {
+      "id": 1,
+      "classificationType": 7
+    }]
+  
+}

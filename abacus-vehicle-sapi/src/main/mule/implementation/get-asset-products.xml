@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+	<sub-flow name="get-all-products-modelcode-subflow" doc:id="fa68b451-2bb4-4f8e-ab79-9bb320461b13" >
+		<ee:transform doc:name="Prepare abacus recursive search request" doc:id="9b68bc21-bf1c-4d0b-bd1f-dc875af516e5" >
+			<ee:message >
+				<ee:set-payload resource="dataweaves/p-get-all-products-request.dwl"></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="countryCode" ><![CDATA[%dw 2.0
+output application/java
+---
+attributes.headers.'x-country-code' default ""]]></ee:set-variable>
+				<ee:set-variable variableName="modelCode" ><![CDATA[%dw 2.0
+output application/java
+---
+payload.'modelCode']]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger level="DEBUG" doc:name="Display Log - Request" doc:id="c6636436-3220-4d8e-a263-e7234c16b085" category="${debugCtgry}" message="#[payload]"/>
+		<until-successful maxRetries="${until.retries}" doc:name="Until Successful" doc:id="a0f90b96-be13-4f1e-a6ba-99da4c5bc25f" millisBetweenRetries="${until.milliseconds}">
+			<try doc:name="Try" doc:id="fca804f8-ff52-41b9-a125-3670a1a91ff6">
+				<http:request method="${abacus-sys.recursiveSearch.method}" doc:name="Abacus Recursive Search API" doc:id="e3d85bcd-a8cd-4221-ac28-1d22ae2ad4a2" config-ref="HTTP_Request-configuration" path="${abacus-sys.recursiveSearch.path}" sendCorrelationId="ALWAYS" responseTimeout="${abacus-sys.recursiveSearch.timeout}">
+			<http:headers><![CDATA[#[output application/java
+---
+{
+	
+	"Show-Product-Node-Error" : p('isProductErrorRequired')
+}]]]></http:headers>
+		</http:request>
+				<error-handler ref="abacus-error-handler" />
+		</try>
+		</until-successful>
+		<validation:is-true doc:name="Validate Failure as null" doc:id="75d1a7d0-fdc1-4dd0-95c4-bca45148ed05" expression="#[vars.isFailure == null]" message="#[vars.errorObject.description]" />
+		<logger level="DEBUG" doc:name="Display Log - Response" doc:id="dcd44539-6048-4274-8c1e-38ed47310ce0" message="#[payload]" category="${debugCtgry}" />
+		<ee:transform doc:name="Prepare products recursive search response" doc:id="442d0546-e306-45f0-9c6c-62a792cd787d">
+			<ee:message>
+				<ee:set-payload resource="dataweaves/p-get-all-products-response.dwl"></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+</mule>

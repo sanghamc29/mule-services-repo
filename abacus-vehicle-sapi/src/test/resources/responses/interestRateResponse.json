@@ -1,0 +1,10 @@
+
+
+{
+  "financeSummary": [
+  	 {
+  		"euribor": 0.02,
+  		"spread": 0.02
+  	 }
+  		]
+}
