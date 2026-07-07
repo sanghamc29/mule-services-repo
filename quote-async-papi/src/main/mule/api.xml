@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:tracing="http://www.mulesoft.org/schema/mule/tracing" xmlns:anypoint-mq="http://www.mulesoft.org/schema/mule/anypoint-mq" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:java="http://www.mulesoft.org/schema/mule/java" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/java http://www.mulesoft.org/schema/mule/java/current/mule-java.xsd
+http://www.mulesoft.org/schema/mule/anypoint-mq http://www.mulesoft.org/schema/mule/anypoint-mq/current/mule-anypoint-mq.xsd
+http://www.mulesoft.org/schema/mule/tracing http://www.mulesoft.org/schema/mule/tracing/current/mule-tracing.xsd">
+<flow name="quote-async-papi-subscribe" doc:id="4a6996a2-64e3-4787-8b5a-a490417d79f3">
+		<anypoint-mq:subscriber doc:name="Upload Finance Quote" doc:id="efecc3f9-c6bc-456a-9889-c013e541dfdf" config-ref="Anypoint_MQ_Config" destination="${mq.queue}" acknowledgementMode="MANUAL" acknowledgementTimeout="${mq.ackTimeout}" circuitBreaker="Circuit_breaker" >
+			<redelivery-policy maxRedeliveryCount="${mq.redeliveryCount}" />
+			<anypoint-mq:subscriber-type >
+				<anypoint-mq:prefetch maxLocalMessages="${mq.prefetch}" />
+			</anypoint-mq:subscriber-type>
+		</anypoint-mq:subscriber>
+		<tracing:with-correlation-id doc:name="With CorrelationID" doc:id="084f673c-08fc-4a96-a16d-e6995209e531" correlationId="#[attributes.properties.correlationId]" >
+			<flow-ref doc:name="publish-application-mq-subflow" doc:id="88fff1fd-5139-4ee7-9551-b9d3cd90966e" name="publish-application-mq-subflow" />
+		</tracing:with-correlation-id>
+		<error-handler ref="mq-error-handler" />
+		
+	</flow>
+	<flow name="miles-quote-amendment-subscribe" doc:id="b5aaab6f-f635-4770-9fd8-08047e7a8539" >
+		<anypoint-mq:subscriber doc:name="Quote Sync Event" doc:id="4fb26345-3253-4ec0-a360-8e6a4045c5d1" config-ref="Anypoint_MQ_Config" destination="${mq.milesQuoteAmendment.queue}" acknowledgementMode="MANUAL" acknowledgementTimeout="${mq.ackTimeout}" circuitBreaker="Circuit_breaker" >
+			<redelivery-policy maxRedeliveryCount="${mq.redeliveryCount}" />
+			<anypoint-mq:subscriber-type >
+				<anypoint-mq:prefetch maxLocalMessages="${mq.prefetch}" />
+			</anypoint-mq:subscriber-type>
+		</anypoint-mq:subscriber>
+		<ee:transform doc:name="set correlationId" doc:id="0bad4416-3fec-4ed8-8bf7-d81406887950" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="correlationId" ><![CDATA[%dw 2.0
+output application/java
+---
+attributes.properties.correlationId default correlationId]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<tracing:with-correlation-id doc:name="With CorrelationID" doc:id="66d3fe45-56c7-4c48-a7fe-0454dd5834c0" correlationId="#[vars.correlationId]" >
+			<flow-ref doc:name="publish-application-miles-mq-subflow" doc:id="fac3294b-1f8b-4fb2-b033-3b7ab35aa6c9" name="publish-application-miles-mq-subflow" />
+		</tracing:with-correlation-id>
+		<error-handler ref="mq-error-handler" />
+	</flow>
+</mule>

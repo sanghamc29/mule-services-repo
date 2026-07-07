@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="   http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd   http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd   http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="quote-async-papi-subscribe-test.xml">
+		<munit:parameterizations file="test-parameters-subscriber.yaml"/>
+	</munit:config>
+	<munit:test doc:id="7453f67d-cd71-4523-a49b-63c9a2e7377f" name="quote-papi-subscribe-test">
+    <munit:behavior>
+      <munit-tools:mock-when doc:id="f895b2be-78b9-44b3-977a-92dd9b573ed9" doc:name="Mock Subscriber" processor="anypoint-mq:subscriber">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute attributeName="doc:name" whereValue="Upload Finance Quote"/>
+				</munit-tools:with-attributes>
+      </munit-tools:mock-when>
+      <munit-tools:mock-when doc:id="8d17cfba-0c75-4a83-9fe6-dce92e9e67b9" doc:name="Mock Abacus Vehicle SAPI FQ Call" processor="${processor}">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute attributeName="${mockAttributeName}" whereValue="${mockAbacusCall}"/>
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:payload mediaType="application/json" value="#[output application/json --- (readUrl('classpath://${mockFqOutput}','application/json'))]"/>
+				</munit-tools:then-return>
+      </munit-tools:mock-when>
+      <munit-tools:mock-when doc:id="69828956-437d-4556-8d74-9b6758116aa8" doc:name="Mock Abacus Vehicle SAPI Recursive Response Call" processor="${processor}">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute attributeName="${mockAttributeName}" whereValue="${mockAbacusCall}"/>
+					<munit-tools:with-attribute attributeName="path" whereValue="#[vars.httpOperation.path]"/>
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:payload mediaType="application/json" value="#[output application/json --- (readUrl('classpath://${mockRecursiveOutput}','application/json'))]"/>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:id="9f4174d7-4944-4e0f-8cfa-8b103ec054d2" doc:name="Mock Sf Management SAPI call" processor="http:request">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute attributeName="doc:name" whereValue="Create Application"/>
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:payload mediaType="application/json" value="#[output application/json --- (readUrl('classpath://${mockSfOutput}','application/json'))]"/>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Miles Quote Call" doc:id="30bcd3c3-039a-4a77-8621-e467ba25307c" processor="${processor}">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="${mockMilesCall}" attributeName="${mockAttributeName}" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- (readUrl('classpath://${mockMilesQuoteOutput}','application/json'))]" mediaType="application/json" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Archiving Call" doc:id="3634f569-37e3-4077-9f66-9f3c980f52fa" processor="${processor}">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="${mockArchiveCall}" attributeName="${mockAttributeName}" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- (readUrl('classpath://${mockArchiveOutput}','application/json'))]" mediaType="application/json" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:id="fb1c530a-58bc-44a1-b4ad-0152b4d27780" doc:name="Mock Ack" processor="anypoint-mq:ack">
+        <munit-tools:with-attributes>
+          <munit-tools:with-attribute attributeName="doc:name" whereValue="Ack"/>
+        </munit-tools:with-attributes>
+      </munit-tools:mock-when>
+    </munit:behavior>
+    <munit:execution>
+      <munit:set-event doc:id="75d98ea7-3173-4c50-a98a-b80f6b758979" doc:name="Set Event">
+				<munit:payload value="#[output application/json --- (readUrl('classpath://${inPayload}','application/json'))]" encoding="UTF-8" mediaType="application/json" />
+				<munit:attributes value="#[output application/json --- readUrl('classpath://attributes/createApplicationForm.json','application/json')]" encoding="UTF-8" mediaType="application/json" />
+      </munit:set-event>
+      <flow-ref doc:id="78514e28-51d5-4403-ad0d-6153c30036d8" doc:name="Flow Reference" name="${flowName_queue}"/>
+    </munit:execution>
+    <munit:validation>
+			<munit-tools:verify-call doc:id="aa449cae-c0b5-470b-ab4c-4534df4aed77" doc:name="Verify End Logger is called" processor="logger" atLeast="1">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute attributeName="doc:name" whereValue="Log Response"/>
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+    </munit:validation>
+  </munit:test>
+	<munit:test doc:id="69e24a91-22dc-45be-b430-d88e6f3a4aba" expectedErrorType="TRACING:RETRY_EXHAUSTED" name="quote-papi-mq-failure-test">
+		<munit:behavior>
+			<munit-tools:mock-when doc:id="926c366c-7fba-4e29-9ed4-83c5b34de7a8" doc:name="Mock Subscriber" processor="anypoint-mq:subscriber">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute attributeName="doc:name" whereValue="Upload Finance Quote"/>
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:id="2125e3ad-1c90-4908-8f25-111a5bc54942" doc:name="Mock Abacus Vehicle SAPI FQ Call" processor="${processor}">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute attributeName="${mockAttributeName}" whereValue="${mockAbacusCall}"/>
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:payload mediaType="application/json" value="#[output application/json --- (readUrl('classpath://${mockFqOutput}','application/json'))]"/>
+					<munit-tools:error typeId="HTTP:CONNECTIVITY"/>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Miles Quote Call" doc:id="8298007b-c093-4fd2-b029-2c113b0b00ff" processor="${processor}">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="${mockMilesCall}" attributeName="${mockAttributeName}" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- (readUrl('classpath://${mockMilesQuoteOutput}','application/json'))]" mediaType="application/json" />
+					<munit-tools:error typeId="HTTP:CONNECTIVITY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:id="c72bb026-8424-44b0-a0b9-a6892a5085e1" doc:name="Mock NACK" processor="anypoint-mq:nack">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute attributeName="doc:name" whereValue="Nack to send to original queue"/>
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:attributes mediaType="application/json" value="#[output application/json --- readUrl('classpath://attributes//createApplicationForm.json','application/json')]"/>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<munit:set-event doc:id="721b5b3a-85c0-4a0a-89ae-f429622d39c9" doc:name="Set Event">
+				<munit:payload value="#[output application/json --- (readUrl('classpath://${inPayload}','application/json'))]" encoding="UTF-8" mediaType="application/json" />
+				<munit:attributes value="#[output application/json --- readUrl('classpath://attributes/createApplicationForm.json','application/json')]" encoding="UTF-8" mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:id="52b5763a-5128-4f02-b46c-36754b92286e" doc:name="Flow Reference" name="${flowName_queue}"/>
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:verify-call doc:id="8686b810-18ec-4bbf-8b43-e14915b77cff" doc:name="Verify End Logger is called" processor="logger">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute attributeName="doc:name" whereValue="Log Retriable Error"/>
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test doc:id="0756e1d8-2be8-45e8-8cfc-a5f0482c1bae" name="quote-papi-mq-redelivery-failure-test">
+		<munit:behavior>
+			<munit-tools:mock-when doc:id="a4b5eda5-54b8-4d27-9dbd-49c90246f3e6" doc:name="Mock Subscriber" processor="anypoint-mq:subscriber">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute attributeName="doc:name" whereValue="Upload Finance Quote"/>
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:id="a7ad6be9-8a9c-4002-b33c-45518195e0b2" doc:name="Mock Abacus Vehicle SAPI FQ Call" processor="${processor}">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute attributeName="${mockAttributeName}" whereValue="${mockAbacusCall}"/>
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:payload mediaType="application/json" value="#[output application/json --- (readUrl('classpath://${mockFqOutput}','application/json'))]"/>
+					<munit-tools:error typeId="REDELIVERY_EXHAUSTED"/>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Miles Quote Call" doc:id="591469bc-fedd-4369-bab3-04e3ab1ea9cb" processor="${processor}">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="${mockMilesCall}" attributeName="${mockAttributeName}" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- (readUrl('classpath://${mockMilesQuoteOutput}','application/json'))]" mediaType="application/json" />
+					<munit-tools:error typeId="REDELIVERY_EXHAUSTED" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:id="a5345bda-0b2b-40ec-a87c-0f6b5be9e739" doc:name="Mock DLQ" processor="anypoint-mq:publish">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute attributeName="doc:name" whereValue="Publish To DLQ"/>
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:attributes mediaType="application/json" value="#[output application/json --- readUrl('classpath://attributes//createApplicationForm.json','application/json')]"/>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:id="eeea3f7b-b686-40ee-9de3-d78b459136e5" doc:name="Mock ACK" processor="anypoint-mq:ack">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute attributeName="doc:name" whereValue="Ack the Original Message"/>
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:attributes mediaType="application/json" value="#[output application/json --- readUrl('classpath://attributes//createApplicationForm.json','application/json')]"/>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<munit:set-event doc:id="62dbc692-0ed9-4bcb-95fc-3ceccafedcad" doc:name="Set Event">
+				<munit:payload value="#[output application/json --- (readUrl('classpath://${inPayload}','application/json'))]" encoding="UTF-8" mediaType="application/json" />
+				<munit:attributes value="#[output application/json --- readUrl('classpath://attributes/createApplicationForm.json','application/json')]" encoding="UTF-8" mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:id="807ee92f-8625-45a1-9db9-7099043fde68" doc:name="Flow Reference" name="${flowName_queue}"/>
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:verify-call doc:id="af0ec098-7c7e-4dc5-aad1-7d0720dbdc6e" doc:name="Verify End Logger is called" processor="logger">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute attributeName="doc:name" whereValue="Log Non Retriable Errors"/>
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+
+</mule>

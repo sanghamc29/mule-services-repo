@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+	<sub-flow name="abacus-vehicle-sapi-call-subflow" doc:id="063d26de-1872-4c6d-b242-52b2d39db964" >
+		<logger level="DEBUG" doc:name="Log Before Request" doc:id="9e69f5c4-5acb-4cdd-9d1f-82df5b2bace4" message="#[payload]" category="${debugCategory.abacus}" />
+		<until-successful maxRetries="${until.retries}" doc:name="Until Successful" doc:id="4e4a4b2d-9eb1-4972-8aa2-f90463dd6fe9" millisBetweenRetries="${until.milliseconds}" >
+			<try doc:name="Try" doc:id="f27a2f22-ff16-4bd9-b98e-9ab4c2586f61" >
+				<http:request method="#[vars.httpOperation.method]" doc:name="Abacus System API Http Request" doc:id="e610294c-b116-4086-a19c-3720bd2758cf" config-ref="Abacus_Vehicle_Sapi_HTTP_Request" path="#[vars.httpOperation.path]" responseTimeout="#[vars.httpOperation.timeout]" sendCorrelationId="ALWAYS">
+					<http:headers ><![CDATA[#[output application/json
+---
+vars.httpOperation.headers default {}]]]></http:headers>
+					<http:uri-params ><![CDATA[#[output application/json
+---
+vars.httpOperation.uriParams default {}]]]></http:uri-params>
+					<http:query-params ><![CDATA[#[output application/json
+---
+vars.httpOperation.queryParams default {}]]]></http:query-params>
+				</http:request>
+				<error-handler ref="retry-error-handler" />
+			</try>
+		</until-successful>
+		<logger level="DEBUG" doc:name="Log After Request" doc:id="176493de-94c1-4f11-999f-58251a6c4821" message="#[payload]" category="${debugCategory.abacus}" />
+		<validation:is-true doc:name="Validate Failure as null" doc:id="21d0a31c-83eb-4486-a4e4-d57ffd34d9f6" expression="#[vars.isFailure == null]" message="#[vars.errorObject.description]" />
+	</sub-flow>
+	<sub-flow name="salesforce-applications-mgmt-sapi-call-subflow" doc:id="2dd0bc04-8c94-4243-8e76-ff8896cf6dba" >
+		<logger level="DEBUG" doc:name="Log Before Request" doc:id="e4d340d2-59d6-4f72-92cf-cbb4960f81c9" message="#[payload]" category="${debugCategory.management}" />
+		<until-successful maxRetries="${reconn.attempt}" doc:name="Until Successful" doc:id="947dc5b9-37f4-42ba-a8ef-b02c5df13069" millisBetweenRetries="${reconn.intrvl}" >
+			<try doc:name="Try" doc:id="59df0108-0075-42c9-bcce-746a08f41eae" >
+				<http:request method="#[vars.httpOperation.method]" doc:name="Create Application" doc:id="b92792b1-4a19-467e-9654-b1e39ec03fdb" config-ref="Salesforce_Applications_Mgmt_Sapi_HTTP_Request" path="#[vars.httpOperation.path]" responseTimeout="#[vars.httpOperation.timeout]" sendCorrelationId="NEVER">
+					<http:body ><![CDATA[#[vars.applnPayload]]]></http:body>
+					<http:headers ><![CDATA[#[output application/json
+---
+vars.httpOperation.headers default {}]]]></http:headers>
+					<http:uri-params ><![CDATA[#[output application/json
+---
+vars.httpOperation.uriParams default {}]]]></http:uri-params>
+					<http:query-params ><![CDATA[#[output application/json
+---
+vars.httpOperation.queryParams default {}]]]></http:query-params>
+				</http:request>
+				<error-handler ref="retry-error-handler" />
+			</try>
+		</until-successful>
+		<logger level="DEBUG" doc:name="Log After Request" doc:id="8094049b-cc23-4667-8e4f-fb288652a4b3" message="#[payload]" category="${debugCategory.management}" />
+		<validation:is-true doc:name="Validate Failure as null" doc:id="674093c7-a3c9-4765-9819-d306f04dab13" expression="#[vars.isFailure == null]" message="#[vars.errorObject.description]" />
+	</sub-flow>
+	<sub-flow name="miles-sapi-call-subflow" doc:id="5e54c1d1-5f5b-4e4e-887e-ab60f75f02ec" >
+		<logger level="DEBUG" doc:name="Log Before Request" doc:id="09e7f19d-2671-482f-b0fa-6c589e059255" message="#[payload]" category="${debugCategory.miles}" />
+		<until-successful maxRetries="${until.retries}" doc:name="Until Successful" doc:id="25ca5fec-826f-433b-b411-8af4c1a283c8" millisBetweenRetries="${until.milliseconds}" >
+			<try doc:name="Try" doc:id="bfc8a026-2ceb-4a14-bb53-45799b3f3495" >
+				<http:request method="#[vars.httpOperation.method]" doc:name="Miles System API Http Request" doc:id="abc78a3e-dcd1-44c5-8276-219992a06ba8" config-ref="Miles_Sapi_HTTP_Request" path="#[vars.httpOperation.path]" responseTimeout="#[vars.httpOperation.timeout]" sendCorrelationId="NEVER">
+					<http:headers ><![CDATA[#[output application/json
+---
+vars.httpOperation.headers default {}]]]></http:headers>
+					<http:uri-params ><![CDATA[#[output application/json
+---
+vars.httpOperation.uriParams default {}]]]></http:uri-params>
+					<http:query-params ><![CDATA[#[output application/json
+---
+vars.httpOperation.queryParams default {}]]]></http:query-params>
+				</http:request>
+			</try>
+		</until-successful>
+		<logger level="DEBUG" doc:name="Log After Request" doc:id="315311b2-d0c8-4e5a-82e9-6e6913d6027a" message="#[payload]" category="${debugCategory.miles}" />
+		<validation:is-true doc:name="Validate Failure as null" doc:id="ba5b7443-34fa-4e2a-87ae-55d4473b06cc" expression="#[vars.isFailure == null]" message="#[vars.errorObject.description]" />
+	</sub-flow>
+	<sub-flow name="archiving-sapi-call-subflow" doc:id="fb81a9cc-943f-4d67-88fd-9606d2df41b7" >
+		<logger level="DEBUG" doc:name="Log Before Request" doc:id="8f6777df-d951-440e-a46f-95662398763f" message="#[payload]" category="${debugCategory.archiving}" />
+		<until-successful maxRetries="${until.retries}" doc:name="Until Successful" doc:id="d641d5ec-3273-467a-aa4a-e77ef4aa502f" millisBetweenRetries="${until.milliseconds}" >
+			<try doc:name="Try" doc:id="0226ecd3-3b67-4132-9881-e1281d024a04" >
+				<http:request method="#[vars.httpOperation.method]" doc:name="Archiving System API Http Request" doc:id="1d3e573f-c2c4-4e81-8abe-866004e40306" config-ref="Archiving_Sapi_HTTP_Request" path="#[vars.httpOperation.path]" responseTimeout="#[vars.httpOperation.timeout]" sendCorrelationId="NEVER">
+					<http:headers ><![CDATA[#[output application/json
+---
+vars.httpOperation.headers default {}]]]></http:headers>
+					<http:uri-params ><![CDATA[#[output application/json
+---
+vars.httpOperation.uriParams default {}]]]></http:uri-params>
+					<http:query-params ><![CDATA[#[output application/json
+---
+vars.httpOperation.queryParams default {}]]]></http:query-params>
+				</http:request>
+			</try>
+		</until-successful>
+		<logger level="DEBUG" doc:name="Log After Request" doc:id="85a14b25-cb76-420f-b861-7121919c0df0" message="#[payload]" category="${debugCategory.archiving}" />
+		<validation:is-true doc:name="Validate Failure as null" doc:id="1bd3a085-7736-4eb8-b3a6-404af7f456eb" expression="#[vars.isFailure == null]" message="#[vars.errorObject.description]" />
+	</sub-flow>
+</mule>

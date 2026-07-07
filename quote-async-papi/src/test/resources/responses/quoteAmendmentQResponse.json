@@ -1,0 +1,23 @@
+{
+  "eventUniqueId": "10005953",
+  "eventType": "Credit Application Submitted",
+  "countryCode": "PT",
+  "entities": [
+    {
+      "type": "quote",
+      "id": "10030524",
+      "subId": "10038605",
+      "apiEndpoint": "/api/miles-eapi/v1/events",
+      "status": null,
+      "changeReason": null
+    }
+  ],
+  "eventMetadata": {
+    "timeStamp": "2024-12-23T14:06:30.956Z",
+    "eventTypeGroup": "Credit Score Submitted",
+    "eventTypeGroupId": "6641",
+    "eventTypeId": "6642",
+    "statusId": null,
+    "changeReasonId": null
+  }
+}

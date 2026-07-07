@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:anypoint-mq="http://www.mulesoft.org/schema/mule/anypoint-mq" xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway"
+	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd
+http://www.mulesoft.org/schema/mule/anypoint-mq http://www.mulesoft.org/schema/mule/anypoint-mq/current/mule-anypoint-mq.xsd">
+	<configuration-properties doc:name="Configuration properties" doc:id="0656042c-f751-474a-90fb-aaec39c07141" file="default-properties.yaml" />
+	<http:request-config name="Salesforce_Applications_Mgmt_Sapi_HTTP_Request" doc:name="HTTP Request configuration" doc:id="155b0987-cff9-461f-ba33-b483f23ac1b2" basePath="#[vars.httpOperation.basePath]">
+		<http:request-connection protocol="HTTPS" host="#[vars.httpOperation.host]" port="#[vars.httpOperation.port]" />
+	</http:request-config>
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="3d27fd12-3f95-4280-b3b3-844379f33fa1" file="secure-properties.yaml" key="${encryption.key}" >
+		<secure-properties:encrypt algorithm="Blowfish" />
+	</secure-properties:config>
+	<anypoint-mq:config name="Anypoint_MQ_Config" doc:name="Anypoint MQ Config" doc:id="42e697bf-387b-4034-9dff-a5c035a26a07" >
+		<anypoint-mq:connection url="${mq.url}" clientId="${mq.clientId}" clientSecret="${secure::mq.clientSecret}" />
+	</anypoint-mq:config>
+    <http:request-config name="Abacus_Vehicle_Sapi_HTTP_Request" doc:name="HTTP Request configuration" doc:id="8de9ba22-1c49-4c2c-a227-d16fba488eaf" basePath="#[vars.httpOperation.basePath]" responseTimeout="#[vars.httpOperation.timeout]">
+    <http:request-connection host="#[vars.httpOperation.host]" port="#[vars.httpOperation.port]" protocol="HTTPS"/>
+    </http:request-config>
+    <http:request-config name="Miles_Sapi_HTTP_Request" doc:name="HTTP Request configuration" doc:id="7810190a-8749-4eba-84af-c5b1b8e35e19" basePath="#[vars.httpOperation.basePath]" responseTimeout="#[vars.httpOperation.timeout]">
+    <http:request-connection host="#[vars.httpOperation.host]" port="#[vars.httpOperation.port]" protocol="HTTPS"/>
+    </http:request-config>
+    <http:request-config name="Archiving_Sapi_HTTP_Request" doc:name="HTTP Request configuration" doc:id="1d88deb0-086e-41ae-bdb3-7af18891b070" basePath="#[vars.httpOperation.basePath]" responseTimeout="#[vars.httpOperation.timeout]">
+    <http:request-connection host="#[vars.httpOperation.host]" port="#[vars.httpOperation.port]" protocol="HTTPS"/>
+    </http:request-config>
+	<anypoint-mq:circuit-breaker name="Circuit_breaker" tripTimeout="${mq.tripTimeout}" doc:name="Circuit breaker" doc:id="d39a4c88-5de9-4409-bc6a-edd752da101e" onErrorTypes="${mq.errorTypes}" errorsThreshold="${mq.threshold}"/>
+</mule>

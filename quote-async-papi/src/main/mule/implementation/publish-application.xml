@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:anypoint-mq="http://www.mulesoft.org/schema/mule/anypoint-mq" xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.mulesoft.org/schema/mule/anypoint-mq http://www.mulesoft.org/schema/mule/anypoint-mq/current/mule-anypoint-mq.xsd">
+	
+	<flow name="publish-application-mq-subflow" doc:id="caa11567-639c-4134-82ef-4c21b5b2e5df" >
+		<ee:transform doc:name="Capture Properties" doc:id="f50ef95d-225c-49a8-9dd6-8235f87f5d4e" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="httpOperation" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"host": Mule::p('http.requester.abacusSAPI.host'),
+	"port": Mule::p('http.requester.abacusSAPI.port'),
+	"basePath": Mule::p('http.requester.abacusSAPI.basePath'),
+	"method": Mule::p('http.requester.abacusSAPI.financeQuoteSummary.method'),
+	"path": Mule::p('http.requester.abacusSAPI.financeQuoteSummary.path'),
+	"protocol": Mule::p('http.requester.abacusSAPI.protocol'),
+	"timeout": Mule::p('http.requester.abacusSAPI.financeQuoteSummary.timeout'),
+	"headers" :{
+		"x-country-code" : lower(attributes.properties.countryCode) default "",
+		"x-correlation-id" : correlationId,
+		"x-client-id" : Mule::p('http.requester.clientId'),
+		"x-client-secret" : Mule::p('secure::http.requester.clientSecret'),
+		"Accept-Language": vars.localeCode
+	},
+	"uriParams":{
+		applicationId: payload.applicationId,
+		financialCode: payload.financialCode	
+	}
+}]]></ee:set-variable>
+				<ee:set-variable variableName="applnPayload" ><![CDATA[%dw 2.0
+output application/java
+---
+payload]]></ee:set-variable>
+				<ee:set-variable variableName="countryCode" ><![CDATA[%dw 2.0
+output application/java
+---
+attributes.properties.countryCode]]></ee:set-variable>
+				<ee:set-variable variableName="ackToken" ><![CDATA[%dw 2.0
+output application/java
+---
+attributes.ackToken]]></ee:set-variable>
+				<ee:set-variable variableName="applicationId" ><![CDATA[%dw 2.0
+output application/java
+---
+payload.applicationId]]></ee:set-variable>
+				<ee:set-variable variableName="dlqName" ><![CDATA[%dw 2.0
+import p from Mule
+output application/java
+---
+p('mq.applicationdlq')]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="abacus-vehicle-sapi-call-subflow" doc:id="7bf5205f-6298-426c-924b-852d8324593c" name="abacus-vehicle-sapi-call-subflow" target="fqSummaryResponse"/>
+		<ee:transform doc:name="Prepare Request Mapping and Dynamic HTTP operation params" doc:id="1367863a-80d2-4e70-8057-b8b0de77a6e0">
+			<ee:message>
+				<ee:set-payload resource="dataweaves/p-recursive-search-request.dwl" />
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="httpOperation"><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"host": Mule::p('http.requester.abacusSAPI.host'),
+	"port": Mule::p('http.requester.abacusSAPI.port'),
+	"basePath": Mule::p('http.requester.abacusSAPI.basePath'),
+	"method": Mule::p('http.requester.abacusSAPI.recursiveSearch.method'),
+	"path": Mule::p('http.requester.abacusSAPI.recursiveSearch.path'),
+	"protocol": Mule::p('http.requester.abacusSAPI.protocol'),
+	"timeout": Mule::p('http.requester.abacusSAPI.recursiveSearch.timeout'),
+	"headers" :{
+		"x-country-code" : lower(vars.countryCode),
+		"x-correlation-id" : correlationId,
+		"x-client-id" : Mule::p('http.requester.clientId'),
+		"x-client-secret" : Mule::p('secure::http.requester.clientSecret'),
+		"Accept-Language": vars.localeCode
+	}
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="abacus-vehicle-sapi-call-subflow" doc:id="522e0462-865a-4505-b65c-920b8f369f3f" name="abacus-vehicle-sapi-call-subflow" target="recursiveResponse"/>
+		<ee:transform doc:name="Prepare Request Mapping and Dynamic HTTP operation params" doc:id="adcbcf13-a03f-404f-a742-414173049b3a" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="httpOperation" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"host": Mule::p('http.requester.salesforceAppMgmtSAPI.host'),
+	"port": Mule::p('http.requester.salesforceAppMgmtSAPI.port'),
+	"basePath": Mule::p('http.requester.salesforceAppMgmtSAPI.basePath'),
+	"method": Mule::p('http.requester.salesforceAppMgmtSAPI.applicationDetails.method'),
+	"path": Mule::p('http.requester.salesforceAppMgmtSAPI.applicationDetails.path'),
+	"protocol": Mule::p('http.requester.salesforceAppMgmtSAPI.protocol'),
+	"timeout": Mule::p('http.requester.salesforceAppMgmtSAPI.applicationDetails.timeout'),
+	"headers" :{
+		"x-country-code" : lower(vars.countryCode),
+		"x-correlation-id" : correlationId,
+		"x-client-id" : Mule::p('http.requester.clientId'),
+		"x-client-secret" : Mule::p('secure::http.requester.clientSecret'),
+		"Accept-Language": vars.localeCode
+	},
+	"uriParams":{
+		applicationId: vars.applnPayload.applicationId	
+	}
+}]]></ee:set-variable>
+				<ee:set-variable resource="dataweaves/p-update-application-request.dwl" variableName="applnPayload" />
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="salesforce-applications-mgmt-sapi-call-subflow" doc:id="77c4019b-3aac-4547-b76c-9153be81f8fb" name="salesforce-applications-mgmt-sapi-call-subflow"/>
+		<anypoint-mq:ack doc:name="Ack" doc:id="efa02cc9-470e-4b3e-ac74-4eaaadc0a65d" config-ref="Anypoint_MQ_Config" ackToken="#[vars.ackToken]"/>
+		<logger level="INFO" doc:name="Log Response" doc:id="761f9c91-6858-4ede-8f49-4624ef880a52" message="#[output application/java&#10;---&#10;&quot;Application is created Succesfully for&quot;  ++ &quot;\'Transaction\': &quot; ++ correlationId ++ &quot; \'countryCode\': &quot; ++ vars.countryCode ++ &quot; \'ApplicationId\': &quot; ++ vars.applicationId]"/>
+		<error-handler ref="mq-error-handler" />
+	</flow>
+	
+	</mule>

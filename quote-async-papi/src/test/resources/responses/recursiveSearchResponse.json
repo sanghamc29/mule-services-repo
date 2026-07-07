@@ -1,0 +1,329 @@
+[
+  {
+    "productTypeCode": "GPD14880",
+    "status": 2,
+    "assetModelCode": "1770511_000-805_055",
+    "productTypeId": 53,
+    "basicInfo": {
+      "name": "Finance Lease",
+      "description": "DON'T CHANGE! Actual Finance Lease with Options product type.",
+      "effectiveDate": "2022-03-31T00:00:00+01:00",
+      "expiryDate": "2025-12-01T23:59:59+00:00",
+      "businessRulesId": 1,
+      "status": 2,
+      "fundingTypeId": 1,
+      "dateComparison": 1,
+      "finalSubmissionDate": "2026-12-12T23:59:59+00:00",
+      "externalCode": "GPD14880",
+      "translations": [
+        {
+          "locale": "pt-PT",
+          "description": "Leasing"
+        }
+      ],
+      "createdOn": "2024-01-18T14:18:16.8684806+00:00",
+      "createdBy": "DOMIMU",
+      "updatedOn": "2024-01-18T14:18:22.7965109+00:00",
+      "updatedBy": "DOMIMU"
+    },
+    "products": [
+      {
+        "productCode": "SFLEA",
+        "status": 2,
+        "assetModelCode": "1770511_000-805_055",
+        "productId": 121,
+        "productTypeName": "Finance Lease",
+        "basicInfo": {
+          "name": "SF - Finance Lease Standard LEA",
+          "description": "DON'T CHANGE! Actual Finance Lease product.",
+          "effectiveDate": "2023-12-17T00:00:00+00:00",
+          "expiryDate": "2029-01-01T23:59:59+00:00",
+          "businessRulesId": 1,
+          "status": 2,
+          "fundingTypeId": 1,
+          "dateComparison": 1,
+          "finalSubmissionDate": "2029-01-01T23:59:59+00:00",
+          "externalCode": "SFLEA",
+          "subExternalCode": "LEASER",
+          "translations": [
+            
+          ],
+          "createdOn": "2024-11-11T15:29:02.5916098+00:00",
+          "createdBy": "System",
+          "updatedOn": "2024-11-11T15:29:09.6432644+00:00",
+          "updatedBy": "System"
+        },
+        "campaigns": [
+          {
+            "campaignCode": "SFBundleTest",
+            "status": 2,
+            "assetModelCode": "1770511_000-805_055",
+            "campaignId": 159,
+            "productName": "SF - Finance Lease Standard LEA",
+            "basicInfo": {
+              "name": "SF- Bundle test campaign",
+              "description": null,
+              "effectiveDate": "2024-08-12T00:00:00+01:00",
+              "expiryDate": "2026-01-01T23:59:59+00:00",
+              "businessRulesId": 1,
+              "status": 2,
+              "fundingTypeId": 1,
+              "dateComparison": 1,
+              "finalSubmissionDate": "2026-01-01T23:59:59+00:00",
+              "externalCode": "SFBundleTest",
+              "subExternalCode": null,
+              "translations": [
+                
+              ],
+              "createdOn": "2024-11-21T11:47:14.8963933+00:00",
+              "createdBy": "System",
+              "updatedOn": "2024-11-21T11:47:22.4598562+00:00",
+              "updatedBy": "System"
+            },
+            "sections": [
+              {
+                "customerTypeIds": [
+                  {
+                    "selectedItem": 1,
+                    "isDefault": false
+                  },
+                  {
+                    "selectedItem": 2,
+                    "isDefault": true
+                  }
+                ],
+                "id": 29917,
+                "componentSection": "CustomerTypeSection",
+                "overrideType": 0,
+                "useParent": false,
+                "displayOrder": 1,
+                "productNodeSection": 41,
+                "createdOn": "2024-01-18T14:18:16.8684806+00:00",
+                "createdBy": "DOMIMU"
+              },
+              {
+                "id": 49661,
+                "componentSection": "AssetConditionSection",
+                "overrideType": 0,
+                "useParent": false,
+                "displayOrder": 2,
+                "productNodeSection": 1,
+                "createdOn": "2024-11-11T15:29:02.5916098+00:00",
+                "createdBy": "System",
+                "assetConditions": [
+                  {
+                    "id": 1,
+                    "externalCode": "00001",
+                    "description": "New BuildToOrder"
+                  },
+                  {
+                    "id": 2,
+                    "externalCode": "00002",
+                    "description": "New stock (unregistered)"
+                  },
+                  {
+                    "id": 3,
+                    "externalCode": "00003",
+                    "description": "Stock (registered)"
+                  },
+                  {
+                    "id": 5,
+                    "externalCode": "00005",
+                    "description": "Used"
+                  }
+                ]
+              },
+              {
+                "assetGroupRailIds": [
+                  2
+                ],
+                "id": 49662,
+                "componentSection": "AssetGroupSection",
+                "overrideType": 0,
+                "useParent": false,
+                "displayOrder": 10,
+                "productNodeSection": 2,
+                "createdOn": "2024-11-11T15:29:02.5916098+00:00",
+                "createdBy": "System"
+              },
+              {
+                "dealerShipGroupRailIds": [
+                  56
+                ],
+                "id": 49668,
+                "componentSection": "DealershipGroupSection",
+                "overrideType": 0,
+                "useParent": false,
+                "displayOrder": 11,
+                "productNodeSection": 6,
+                "createdOn": "2024-11-11T15:29:02.5916098+00:00",
+                "createdBy": "System"
+              },
+              {
+                "selectedInterestRateTypes": [
+                  {
+                    "selectedItem": 1,
+                    "isDefault": true
+                  },
+                  {
+                    "selectedItem": 2,
+                    "isDefault": false
+                  }
+                ],
+                "id": 49675,
+                "componentSection": "InterestRateTypeSection",
+                "overrideType": 0,
+                "useParent": false,
+                "displayOrder": 21,
+                "productNodeSection": 47,
+                "createdOn": "2024-11-11T15:29:02.5916098+00:00",
+                "createdBy": "System"
+              },
+              {
+                "isRange": false,
+                "selectedDays": [
+                  1
+                ],
+                "dayRange": {
+                  "minimum": 0,
+                  "maximum": 0
+                },
+                "id": 49677,
+                "componentSection": "PaymentDaySection",
+                "overrideType": 0,
+                "useParent": false,
+                "displayOrder": 6,
+                "productNodeSection": 10,
+                "createdOn": "2024-11-11T15:29:02.5916098+00:00",
+                "createdBy": "System"
+              },
+              {
+                "isRange": true,
+                "termRange": {
+                  "minimum": 2,
+                  "maximum": 96
+                },
+                "defaultValue": 36,
+                "id": 49682,
+                "componentSection": "TermsSection",
+                "overrideType": 0,
+                "useParent": false,
+                "displayOrder": 7,
+                "productNodeSection": 13,
+                "createdOn": "2024-11-11T15:29:02.5916098+00:00",
+                "createdBy": "System"
+              },
+              {
+                "id": 50155,
+                "componentSection": "BusinessTypeSection",
+                "overrideType": 0,
+                "useParent": false,
+                "displayOrder": 6,
+                "productNodeSection": 5,
+                "createdOn": "2024-11-21T11:47:14.8963933+00:00",
+                "createdBy": "System",
+                "businessTypes": [
+                  
+                ]
+              },
+              {
+                "isProductConditionsOnly": false,
+                "commissionCalculationBasis": 1,
+                "id": 50159,
+                "componentSection": "CommissionSection",
+                "overrideType": 0,
+                "useParent": false,
+                "displayOrder": 18,
+                "productNodeSection": 33,
+                "createdOn": "2024-11-21T11:47:14.8963933+00:00",
+                "createdBy": "System",
+                "commissionRailId": 156,
+                "commissionLevels": [
+                  {
+                    "commissionLevelId": 1,
+                    "externalCode": "pt_0001",
+                    "method": "Factor 0",
+                    "isCampaign": false,
+                    "isDefault": false
+                  },
+                  {
+                    "commissionLevelId": 2,
+                    "externalCode": "pt_0002",
+                    "method": "Factor A",
+                    "isCampaign": false,
+                    "isDefault": false
+                  },
+                  {
+                    "commissionLevelId": 3,
+                    "externalCode": "pt_0003",
+                    "method": "Factor B",
+                    "isCampaign": false,
+                    "isDefault": false
+                  },
+                  {
+                    "commissionLevelId": 4,
+                    "externalCode": "pt_0004",
+                    "method": "Factor C",
+                    "isCampaign": false,
+                    "isDefault": false
+                  },
+                  {
+                    "commissionLevelId": 5,
+                    "externalCode": "pt_0005",
+                    "method": "Factor D",
+                    "isCampaign": false,
+                    "isDefault": false
+                  },
+                  {
+                    "commissionLevelId": 6,
+                    "externalCode": "pt_0006",
+                    "method": "Factor E",
+                    "isCampaign": false,
+                    "isDefault": false
+                  },
+                  {
+                    "commissionLevelId": 7,
+                    "externalCode": "pt_0007",
+                    "method": "Factor F",
+                    "isCampaign": false,
+                    "isDefault": false
+                  },
+                  {
+                    "commissionLevelId": 9,
+                    "externalCode": "pt_0008",
+                    "method": "Campaign",
+                    "isCampaign": true,
+                    "isDefault": false
+                  }
+                ]
+              },
+              {
+                "isApplicable": true,
+                "endValueType": 0,
+                "endValueCalculationBasis": 1,
+                "guaranteedBy": 0,
+                "rvConfigChartType": 2,
+                "rvLookupRailId": 155,
+                "isMileageRange": true,
+                "mileageRange": {
+                  "minimum": 0,
+                  "maximum": 100000
+                },
+                "isMileageApplicable": true,
+                "defaultMileageValue": 10000,
+                "id": 50173,
+                "componentSection": "EndValueSection",
+                "overrideType": 1,
+                "useParent": false,
+                "displayOrder": 13,
+                "productNodeSection": 45,
+                "createdOn": "2024-11-21T11:47:14.8963933+00:00",
+                "createdBy": "System"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

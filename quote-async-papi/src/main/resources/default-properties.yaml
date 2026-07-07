@@ -1,0 +1,99 @@
+custom-error-code-prefix: "ORG_MB"
+debugCategory: 
+  abacus: "com.mercedes-benz.com.abacus-vehicle-sapi"
+  management: "com.mercedes-benz.com.salesforce-application-mgmt-sapi"
+  miles: "com.mercedes-benz.com.miles-sapi"
+  archiving: "com.mercedes-benz.com.archiving-sapi"
+application:
+ name: "${project.artifactId}"
+ 
+api:
+ name: "${project.artifactId}"
+ instanceId: "1" #this should be configured as a runtime property via Runtime Manager
+ version: "${api.build.version}"
+ http:
+  listener:
+   path: "/api/${api.name}/${api.version}/*"
+   host: "0.0.0.0"
+
+#property http.port is replaced by CloudHub 2.0 during the deployment
+http:
+  port: "8081"
+  requester:
+    clientId: "c4657fc448f54ae3a70eb7cb4d9df119"
+    abacusSAPI:
+      host: "abacus-vehicle-sapi-dev-nnkf7u.internal-lonthm.deu-c1.cloudhub.io"
+      port: "443"
+      protocol: "HTTPS"  
+      basePath: "/api/abacus-vehicle-sapi/v1"
+      recursiveSearch:
+        path: "/products/search"
+        method: "POST"
+        timeout: "15000"
+      financeQuoteSummary:
+        path: "/quotes/{applicationId}/finance/{financialCode}"
+        method: "GET"
+        timeout: "15000"
+    salesforceAppMgmtSAPI:
+      host: "salesforce-applications-mgmt-sapi-dev-nnkf7u.lonthm.deu-c1.cloudhub.io"
+      port: "443"
+      protocol: "HTTPS"  
+      basePath: "/api/salesforce-applications-mgmt-sapi/v1"
+      applicationDetails:
+        path: "/applications/{applicationId}/finance"
+        method: "POST"
+        timeout: "30000"
+      applications:
+        path: "/applications"
+        method: "POST"
+        timeout: "30000"
+    milesSAPI:
+      host: "miles-sapi-dev-nnkf7u.lonthm.deu-c1.cloudhub.io" 
+      port: "443" 
+      protocol: "HTTPS"  
+      basePath: "/api/miles-sapi/v1"
+      creditCreditQuoteApplication:
+        path: "/credit/{applicationId}/quotes/{quoteId}"
+        method: "GET"
+        timeout: "30000"
+    archivingSAPI:
+      host: "archiving-sapi-dev-nnkf7u.lonthm.deu-c1.cloudhub.io"
+      port: "443"
+      protocol: "HTTPS"  
+      basePath: "/api/archiving-sapi/v1"
+      documentList:
+        path: "/documentsList"
+        method: "POST"
+        timeout: "30000"
+     
+
+log:
+  payloadFlag: "false"
+  
+reconn:
+ attempt: "2"
+ intrvl: "2000"
+ 
+mq:
+ url: "https://mq-eu-west-1.anypoint.mulesoft.com/api/v1/organizations/c83a2291-ce49-4c83-a453-39a63be34c6c/environments/e52d7089-ab1c-412f-9a8e-f189d1f94417"
+ clientId: "b7f360d11e87417c88ef847340ff20b2"
+ ackTimeout: "15000"
+ queue: "Q.OTR.SFDC.APPLICATION.DEV.V1"
+ applicationdlq: "DLQ.OTR.SFDC.APPLICATION.DEV.V1"
+ prefetch: "30"
+ redeliveryCount: "3"
+ tripTimeout: "5000"
+ threshold: "5"
+ errorTypes: "MULE:CRITICAL,MULE:CONNECTIVITY,MULE:TIMEOUT,HTTP:INTERNAL_SERVER_ERROR,HTTP:TOO_MANY_REQUESTS,HTTP:GATEWAY_TIMEOUT,HTTP:TIMEOUT,HTTP:SERVICE_UNAVAILABLE"
+ milesQuoteAmendment:
+  queue: "Q.MILES.MBFS.QUOTE-SYNC.SFDC.MBFS.DEV.V1"
+  dlq: "DLQ.MILES.MBFS.QUOTE-SYNC.SFDC.MBFS.DEV.V1"
+ 
+#Until Succesful Properties
+until:
+  retries: "3"
+  milliseconds: "5000"
+  
+campaign:
+  sections: 
+    "AssetConditionSection,BusinessTypeSection,CommissionSection,EndValueSection,PaymentDaySection,BundleTypeGroupSection,TermsSection,InterestRateTypeSection"

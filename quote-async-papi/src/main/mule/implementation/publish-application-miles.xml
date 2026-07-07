@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:anypoint-mq="http://www.mulesoft.org/schema/mule/anypoint-mq" xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.mulesoft.org/schema/mule/anypoint-mq http://www.mulesoft.org/schema/mule/anypoint-mq/current/mule-anypoint-mq.xsd">
+	
+	<flow name="publish-application-miles-mq-subflow" doc:id="caa11567-639c-4134-82ef-4c21b5b2e5df" >
+		<ee:transform doc:name="Capture Properties" doc:id="f50ef95d-225c-49a8-9dd6-8235f87f5d4e" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="httpOperation" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"host": Mule::p('http.requester.milesSAPI.host'),
+	"port": Mule::p('http.requester.milesSAPI.port'),
+	"basePath": Mule::p('http.requester.milesSAPI.basePath'),
+	"method": Mule::p('http.requester.milesSAPI.creditCreditQuoteApplication.method'),
+	"path": Mule::p('http.requester.milesSAPI.creditCreditQuoteApplication.path'),
+	"protocol": Mule::p('http.requester.milesSAPI.protocol'),
+	"timeout": Mule::p('http.requester.milesSAPI.creditCreditQuoteApplication.timeout'),
+	"headers" :{
+		"x-country-code" : lower(attributes.properties.countryCode) default payload.countryCode,
+		"x-correlation-id" : vars.correlationId,
+		"x-client-id" : Mule::p('http.requester.clientId'),
+		"x-client-secret" : Mule::p('secure::http.requester.clientSecret'),
+		"Content-Type": "application/json",
+		"Accept-Language": vars.localeCode
+	},
+	"uriParams":{
+		applicationId: payload.entities[0].id,
+		quoteId: payload.entities[0].subId	
+	}
+}]]></ee:set-variable>
+				<ee:set-variable variableName="applnPayload" ><![CDATA[%dw 2.0
+output application/java
+---
+payload]]></ee:set-variable>
+				<ee:set-variable variableName="countryCode" ><![CDATA[%dw 2.0
+output application/java
+---
+payload.countryCode]]></ee:set-variable>
+				<ee:set-variable variableName="ackToken" ><![CDATA[%dw 2.0
+output application/java
+---
+attributes.ackToken]]></ee:set-variable>
+				<ee:set-variable variableName="quoteId" ><![CDATA[%dw 2.0
+output application/java
+---
+payload.entities[0].subId]]></ee:set-variable>
+				<ee:set-variable variableName="applicationId" ><![CDATA[%dw 2.0
+output application/java
+---
+payload.entities[0].id]]></ee:set-variable>
+				<ee:set-variable variableName="dlqName" ><![CDATA[%dw 2.0
+output application/java
+---
+Mule::p('mq.milesQuoteAmendment.dlq')]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="miles-sapi-call-subflow" doc:id="7bf5205f-6298-426c-924b-852d8324593c" name="miles-sapi-call-subflow" target="milesCreditQuoteApplicationDetails"/>
+		<logger level="INFO" doc:name="log miles sapi response" doc:id="11a1f646-7670-420f-b927-648df20a926e" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.correlationId ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode ++ &#10;&quot; \'QUOTEID\': &quot; ++ vars.quoteId default '' ++&#10;&quot; \'Method\': &quot; ++ vars.httpOperation.method default '' ++&#10;&quot; \'Resource\': &quot; ++ vars.httpOperation.path default '' ++&#10;&quot; Miles Sapi End: &quot; ++ now() ++&#10;(if(p('log.payloadFlag') == 'true') (&quot;\'Payload\': &quot; ++ write(payload,&quot;application/json&quot;)) else &quot;&quot;)]" category="com.mercedes-benz.com.quote-async-papi"/>
+		<ee:transform doc:name="Prepare Request Mapping and Dynamic HTTP operation params" doc:id="1367863a-80d2-4e70-8057-b8b0de77a6e0">
+			<ee:message>
+				<ee:set-payload resource="dataweaves/p-document-list-search-request.dwl" />
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="httpOperation"><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"host": Mule::p('http.requester.archivingSAPI.host'),
+	"port": Mule::p('http.requester.archivingSAPI.port'),
+	"basePath": Mule::p('http.requester.archivingSAPI.basePath'),
+	"method": Mule::p('http.requester.archivingSAPI.documentList.method'),
+	"path": Mule::p('http.requester.archivingSAPI.documentList.path'),
+	"protocol": Mule::p('http.requester.archivingSAPI.protocol'),
+	"timeout": Mule::p('http.requester.archivingSAPI.documentList.timeout'),
+	"headers" :{
+		"x-country-code" : lower(vars.countryCode),
+		"x-correlation-id" : vars.correlationId,
+		"x-client-id" : Mule::p('http.requester.clientId'),
+		"x-client-secret" : Mule::p('secure::http.requester.clientSecret'),
+		"Accept-Language": vars.localeCode
+	}
+}
+
+
+ ]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="archiving-sapi-call-subflow" doc:id="522e0462-865a-4505-b65c-920b8f369f3f" name="archiving-sapi-call-subflow" target="recursiveResponse"/>
+		<logger level="INFO" doc:name="log archieve sapi response" doc:id="749c239e-bab8-48f4-b7f8-0e927423853d" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.correlationId ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode ++ &#10;&quot; \'QUOTEID\': &quot; ++ vars.quoteId default '' ++&#10;&quot; \'ApplicationId\': &quot; ++ (vars.applicationId default &quot;&quot;) ++&#10;&quot; \'Method\': &quot; ++ vars.httpOperation.method default '' ++&#10;&quot; \'Resource\': &quot; ++ vars.httpOperation.path default '' ++&#10;&quot; Archieve Sapi End: &quot; ++ now() ++&#10;(if(p('log.payloadFlag') == 'true') (&quot;\'Payload\': &quot; ++ write(payload,&quot;application/json&quot;)) else &quot;&quot;)]" />
+		<ee:transform doc:name="Prepare Request Mapping and Dynamic HTTP operation params" doc:id="adcbcf13-a03f-404f-a742-414173049b3a" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="httpOperation" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"host": Mule::p('http.requester.salesforceAppMgmtSAPI.host'),
+	"port": Mule::p('http.requester.salesforceAppMgmtSAPI.port'),
+	"basePath": Mule::p('http.requester.salesforceAppMgmtSAPI.basePath'),
+	"method": Mule::p('http.requester.salesforceAppMgmtSAPI.applications.method'),
+	"path": Mule::p('http.requester.salesforceAppMgmtSAPI.applications.path'),
+	"protocol": Mule::p('http.requester.salesforceAppMgmtSAPI.protocol'),
+	"timeout": Mule::p('http.requester.salesforceAppMgmtSAPI.applications.timeout'),
+	"headers" :{
+		"x-country-code" : lower(vars.countryCode),
+		"x-correlation-id" : vars.correlationId,
+		"x-client-id" : Mule::p('http.requester.clientId'),
+		"x-client-secret" : Mule::p('secure::http.requester.clientSecret'),
+		"Accept-Language": vars.localeCode
+	}
+}]]></ee:set-variable>
+				<ee:set-variable resource="dataweaves/p-create-application-request.dwl" variableName="applnPayload" />
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="salesforce-applications-mgmt-sapi-call-subflow" doc:id="77c4019b-3aac-4547-b76c-9153be81f8fb" name="salesforce-applications-mgmt-sapi-call-subflow"/>
+		<logger level="INFO" doc:name="log sf sapi response" doc:id="4a889ed6-8dbc-4322-8b58-c8889e478959" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.correlationId ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode ++ &#10;&quot; \'QUOTEID\': &quot; ++ vars.quoteId default '' ++ &#10;&quot; \'ApplicationId\': &quot; ++ (vars.applicationId default &quot;&quot;) ++&#10;&quot; \'Method\': &quot; ++ vars.httpOperation.method default '' ++&#10;&quot; \'Resource\': &quot; ++ vars.httpOperation.path default '' ++&#10;&quot; Salesforce applications mgmt Sapi End: &quot; ++ now() ++&#10;(if(p('log.payloadFlag') == 'true') (&quot;\'Payload\': &quot; ++ write(payload,&quot;application/json&quot;)) else &quot;&quot;)]" />
+		<anypoint-mq:ack doc:name="Ack" doc:id="efa02cc9-470e-4b3e-ac74-4eaaadc0a65d" config-ref="Anypoint_MQ_Config" ackToken="#[vars.ackToken]"/>
+		<logger level="INFO" doc:name="Log Response" doc:id="761f9c91-6858-4ede-8f49-4624ef880a52" message="#[output application/java&#10;---&#10;&quot;Application is created Succesfully for&quot;  ++ &quot;\'Transaction\': &quot; ++ vars.correlationId default&quot;&quot; ++ &quot; \'countryCode\': &quot; ++ (vars.countryCode default&quot;&quot;)++ &quot; \'ApplicationId\': &quot; ++ (vars.applicationId default &quot;&quot;) ++ &quot; \'QUOTEID\': &quot; ++ vars.quoteId default '']"/>
+		<error-handler ref="mq-error-handler" />
+	</flow>
+	
+	</mule>

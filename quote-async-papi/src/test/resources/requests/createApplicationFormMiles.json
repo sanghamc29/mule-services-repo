@@ -1,0 +1,48 @@
+{
+    "offerId": "307",
+    "sourceChannel": "OTR",
+    "applicationId": "13X76000000L3wPEAS",
+    "businessPartnerType": "BusinessPartnerPerson",
+    "financialCode": "e472ba6c33374842b3f1914484a9919a",
+    "returnUrl": "https://www.google.com/",
+    "customer": {
+    "individualPerson": {
+      "firstName": "Adam",
+      "middleName": "Paul",
+      "lastName": "Smith",
+      "birthDate": "1988-08-08",
+      "country": "PT",
+      "placeOfBirth": "LISBON",
+      "countryOfBirth": "PT",
+      "addresses": [
+        {
+          "addressType": "Primary",
+          "address": "test",
+          "postalCode": "9000",
+          "city": "LISBON",
+          "state": "GE",
+          "country": "PT"
+        }
+      ],
+      "phoneNumbers": [
+        {
+          "number": "374873647",
+          "phoneType": "Main (Work)"
+        }
+      ],
+      "individualType": "Customer"
+    },
+    "electronicReferences": [
+      {
+        "referenceAddress": "test@portgal.pr",
+        "referenceType": "E-mail (Main)"
+      }
+    ],
+    "customerType": "Person"
+  },
+    "dealer": {
+        "userId": "ADROHRB",
+        "outletId": "GS0004431"
+        
+    }
+}

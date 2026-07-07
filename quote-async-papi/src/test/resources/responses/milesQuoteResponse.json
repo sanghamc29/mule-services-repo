@@ -1,0 +1,63 @@
+{
+  "brandCode": "12345",
+  "offerId": "111",
+  "applicationId": "12345678",
+  "sourceChannel": "OTR",
+  "returnUrl": "http://test.com",
+  "businessPartnerType": "BusinessPartnerPerson",
+  "contractNumber": "12345",
+  "financialCode": "89177dec59244990b48ed192ba6c9a9a",
+  "customer": {
+    "individualPerson": {
+      "firstName": "Adam",
+      "middleName": "Paul",
+      "lastName": "Smith",
+      "birthDate": "1988-08-08",
+      "country": "PT",
+      "placeOfBirth": "LISBON",
+      "countryOfBirth": "PT",
+      "addresses": [
+        {
+          "addressType": "Primary",
+          "address": "test",
+          "postalCode": "9000",
+          "city": "LISBON",
+          "state": "GE",
+          "country": "PT"
+        }
+      ],
+      "phoneNumbers": [
+        {
+          "localPhoneNumber": "374873647",
+          "countryCode": "351",
+          "zonalCode": "351",
+          "phoneType": "Main (Work)"
+        }
+      ],
+      "individualType": "Customer"
+    },
+    "customerNumber": "41199698",
+    "electronicReferences": [
+      {
+        "referenceAddress": "test@portgal.pr",
+        "referenceType": "E-mail (Main)"
+      }
+    ],
+    "customerType": "Person"
+  },
+  "dealer": {
+    "userId": "12345",
+    "dealerId": "GC0010999",
+    "dealerName": "John D",
+    "dealerExternalId": "0017600000ggQ5qAAE",
+    "outletId": "GS00011111",
+    "outletName": "Merano",
+    "outletExternalId": "0017600000ggQ5rAAE",
+    "dealershipExternalId": "0017600000ggA5qAAE"
+  },
+  "status": "active",
+  "startedAt": null,
+  "updatedAt": null,
+  "type": "creditCheck",
+  "state": "approved"
+}

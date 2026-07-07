@@ -1,0 +1,20 @@
+{
+  "headers": {
+    "lockId": "AQEBqMrwIkDAEZu86glYaYqbEct/08bQDrGLaqxO+XwTcM2sq0kH6qrL6ob/ZEA4sPsCK0RSP9D88JB4GXPItPqjCVVvFHVVb7D/kOM2NUZXjkG5/vSDZYnQkp59g4L1u/YHTq996lmOFyZL4T1xWEVhkNa893Ofso/Q1hF8jstsipAenQ1RYqWFncVmOggf+8lAlNBF3ckSpIKCsRhUJB28/+brJUI1lXuDA6pgVXB7Spd7ZelT9SCOCdVGI7cHa4xGukNfhFxkgIVrZuMXLH1U3PbtWw7aUgVNWMchpZ6Y7ySDIOAKj2gXl84wJx/up991",
+    "created": "Mon, 16 Dec 2024 15:01:40 GMT",
+    "messageId": "52d39296-331d-4d2d-b1ac-7a7fb600b5e4",
+    "ttl": "15000",
+    "deliveryCount": "9"
+  },
+  "destination": "Q.OTR.SFDC.APPLICATION.DEV.V1",
+  "messageId": "52d39296-331d-4d2d-b1ac-7a7fb600b5e4",
+  "ackToken": "eyJkZXN0aW5hdGlvbiI6IlEuT1RSLlNGREMuQVBQTElDQVRJT04uREVWLlYxLlRFU1QiLCJtZXNzYWdlSWQiOiI1MmQzOTI5Ni0zMzFkLTRkMmQtYjFhYy03YTdmYjYwMGI1ZTQiLCJsb2NrSWQiOiJBUUVCcU1yd0lrREFFWnU4NmdsWWFZcWJFY3QvMDhiUURyR0xhcXhPK1h3VGNNMnNxMGtINnFyTDZvYi9aRUE0c1BzQ0swUlNQOUQ4OEpCNEdYUEl0UHFqQ1ZWdkZIVlZiN0Qva09NMk5VWlhqa0c1L3ZTRFpZblFrcDU5ZzRMMXUvWUhUcTk5NmxtT0Z5Wkw0VDF4V0VWaGtOYTg5M09mc28vUTFoRjhqc3RzaXBBZW5RMVJZcVdGbmNWbU9nZ2YrOGxBbE5CRjNja1NwSUtDc1JoVUpCMjgvK2JySlVJMWxYdURBNnBnVlhCN1NwZDdaZWxUOVNDT0NkVkdJN2NIYTR4R3VrTmZoRnhrZ0lWclp1TVhMSDFVM1BidFd3N2FVZ1ZOV01jaHBaNlk3eVNESU9BS2oyZ1hsODR3SngvdXA5OTEifQ==",
+  "deliveryCount": 9,
+  "contentType": "application/json; charset=UTF-8",
+  "properties": {
+    "countryCode": "pt",
+    "correlationId": "8dc405b8-c042-4622-a7a1-1064f960a070",
+    "contentType": "application/json; charset=UTF-8",
+    "MULE_ENCODING": "UTF-8"
+  }
+}

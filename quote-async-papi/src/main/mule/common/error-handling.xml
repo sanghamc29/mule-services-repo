@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:anypoint-mq="http://www.mulesoft.org/schema/mule/anypoint-mq"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/anypoint-mq http://www.mulesoft.org/schema/mule/anypoint-mq/current/mule-anypoint-mq.xsd">
+	<error-handler name="retry-error-handler" doc:id="09d3b6ec-ea97-4e51-a3ed-a193c152f316" >
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="ebe84ab4-a642-4ac1-971d-04ee08469c27" when="#[!(['SERVICE_UNAVAILABLE','TIMEOUT','CONNECTIVITY'] contains error.errorType.identifier)]">
+			<set-variable value="#[true]" doc:name="Set isFailure variable" doc:id="e16d6238-5dd0-4488-829b-dcd0b1e924c6" variableName="isFailure" />
+			<ee:transform doc:name="Capture error object" doc:id="59162b25-ddc2-418b-855c-3fab31648f4b" >
+				<ee:message />
+				<ee:variables >
+					<ee:set-variable variableName="errorObject" ><![CDATA[output application/json
+---
+error]]></ee:set-variable>
+					<ee:set-variable variableName="errorMessage" ><![CDATA[%dw 2.0
+output application/java
+---
+error.errorMessage.payload.error]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+		</on-error-continue>
+	</error-handler>
+	<error-handler name="mq-error-handler" doc:id="fb6e878a-f46a-4ed6-8248-808c9c341d51" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="Continue-On-Retriable-Errors" doc:id="bb302363-6da0-466d-96a0-64a68dab93bd" type=" HTTP:CONNECTIVITY,HTTP:SERVICE_UNAVAILABLE, HTTP:TIMEOUT, HTTP:NOT_FOUND, HTTP:TOO_MANY_REQUESTS" >
+			<logger level="ERROR" doc:name="Log Retriable Error" doc:id="42603279-fd0a-4742-823b-a7f94012178a" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ correlationId ++ &quot;\'CountryCode\': &quot; ++ (vars.countryCode default &quot;&quot;)++ &quot;\'Error\': &quot; ++ error.description]"/>
+			<anypoint-mq:nack doc:name="Nack to send to original queue" doc:id="481c488d-1297-4d60-9d5d-0da6db597212" config-ref="Anypoint_MQ_Config" ackToken="#[vars.ackToken]" />
+		</on-error-propagate>
+		<on-error-continue enableNotifications="true" logException="true" doc:name="Other Errors" doc:id="c078ed5d-af05-4c57-b389-b194e026817f" type="ANY" >
+			<logger level="ERROR" doc:name="Log Non Retriable Errors" doc:id="d771cc4e-4bba-4b81-a0fa-d7de79554c21" message="#[&quot;\'Transaction\': &quot; ++ correlationId ++ &quot;\'ApplicationId\': &quot; ++ (vars.applicationId default &quot;&quot;)&#10;     ++ &quot;\'Error\':&quot;] #[vars.errorMessage default error.description]"/>
+			<set-variable value="#[vars.ackToken default attributes.ackToken]" doc:name="Set ACK Variable" doc:id="8f5cde42-bbef-40c2-b330-118abff3b4a2" variableName="acknowledgeToken" />
+			<anypoint-mq:publish doc:name="Publish To DLQ" doc:id="38a50f77-405e-4faf-8892-65dabf9f14c3" config-ref="Anypoint_MQ_Config" destination="#[vars.dlqName]" >
+				<anypoint-mq:body ><![CDATA[#[%dw 2.0
+output application/json
+---
+{
+	"originalPayload": vars.applnPayload default payload,
+	"errorMessage": error.detailedDescription as String
+}]]]></anypoint-mq:body>
+				<anypoint-mq:properties ><![CDATA[#[{
+	"correlationId" : attributes.properties.correlationId default correlationId,
+	"countryCode": attributes.properties.countryCode default vars.countryCode
+}]]]></anypoint-mq:properties>
+			</anypoint-mq:publish>
+			<anypoint-mq:ack doc:name="Ack the Original Message" doc:id="b23f0241-08e8-4661-90b0-ebb0b0b71491" config-ref="Anypoint_MQ_Config" ackToken="#[vars.acknowledgeToken]" />
+		</on-error-continue>
+	</error-handler>
+	
+	
+	
+	</mule>
