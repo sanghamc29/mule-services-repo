@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<sub-flow name="sf-accounts-sapi-call-subflow" doc:id="1a0cbc6b-1675-435b-9c14-3ee5ddf67ceb" >
+		<logger level="INFO" doc:name="Log Before Request" doc:id="f614d82b-ea00-4307-a422-d79b41dc3a1c" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.correlationId ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode ++ &#10;&quot; \'Application Form ID\': &quot; ++ vars.applicationFormId default '' ++&#10;&quot; \'Method\': &quot; ++ vars.httpOperation.method default '' ++&#10;&quot; \'Resource\': &quot; ++ vars.httpOperation.path default '' ++&#10;&quot; Salesforce Accounts Sapi Start: &quot; ++ now()]" category="com.mercedes-benz.com.exposure-async-papi"/>
+		<http:request method="#[vars.httpOperation.method]" doc:name="Request" doc:id="d8c5a473-e12e-4cb1-ab0d-2ffae0c86865" config-ref="HTTP_Sf_Accounts_Sapi_Request_configuration" path="#[vars.httpOperation.path]" responseTimeout="#[vars.httpOperation.timeout]">
+			<http:headers><![CDATA[#[output application/java
+---
+vars.httpOperation.headers default {}]]]></http:headers>
+			<http:uri-params><![CDATA[#[output application/java
+---
+vars.httpOperation.uriParams default {}]]]></http:uri-params>
+			<http:query-params><![CDATA[#[output application/java
+---
+vars.httpOperation.queryParams default {}]]]></http:query-params>
+		</http:request>
+		<logger level="INFO" doc:name="Log After Request" doc:id="099047e1-fbea-4ae8-b6b1-6aadefb683cb" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.correlationId ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode ++ &#10;&quot; \'Application Form ID\': &quot; ++ vars.applicationFormId default '' ++&#10;&quot; \'Method\': &quot; ++ vars.httpOperation.method default '' ++&#10;&quot; \'Resource\': &quot; ++ vars.httpOperation.path default '' ++&#10;&quot; Salesforce Accounts Sapi End: &quot; ++ now()]" category="com.mercedes-benz.com.exposure-async-papi"/>
+	</sub-flow>
+	<sub-flow name="local-market-sapi-call-subflow" doc:id="8706bb90-0f22-45ac-bd88-da33f4dba945" >
+		<logger level="INFO" doc:name="Log Before Request" doc:id="4750a336-bbdb-4720-85b6-3a4376ba7629" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.correlationId ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode ++ &#10;&quot; \'Application Form ID\': &quot; ++ vars.applicationFormId default '' ++&#10;&quot; \'Method\': &quot; ++ vars.httpOperation.method default '' ++&#10;&quot; \'Resource\': &quot; ++ vars.httpOperation.path default '' ++&#10;&quot; Local Market Sapi Start: &quot; ++ now()]" category="com.mercedes-benz.com.exposure-async-papi"/>
+		<http:request method="#[vars.httpOperation.method]" doc:name="Request" doc:id="0a99ee09-8b5d-4216-a3d0-6e99a8a90547" config-ref="HTTP_Local_Market_Sapi_Request_configuration" path="#[vars.httpOperation.path]" responseTimeout="#[vars.httpOperation.timeout]">
+			<http:headers><![CDATA[#[output application/java
+---
+vars.httpOperation.headers default {}]]]></http:headers>
+			<http:uri-params><![CDATA[#[output application/java
+---
+vars.httpOperation.uriParams default {}]]]></http:uri-params>
+			<http:query-params><![CDATA[#[output application/java
+---
+vars.httpOperation.queryParams default {}]]]></http:query-params>
+		</http:request>
+		<logger level="INFO" doc:name="Log After Request" doc:id="56359aca-e3c7-424a-9cfa-12a7fd7cef1f" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.correlationId ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode ++ &#10;&quot; \'Application Form ID\': &quot; ++ vars.applicationFormId default '' ++&#10;&quot; \'Method\': &quot; ++ vars.httpOperation.method default '' ++&#10;&quot; \'Resource\': &quot; ++ vars.httpOperation.path default '' ++&#10;&quot; Local Market Sapi End: &quot; ++ now() ++&#10;(if(p('log.payloadFlag') == 'true') (&quot;\'Payload\': &quot; ++ write(payload,&quot;application/json&quot;)) else &quot;&quot;)]" category="com.mercedes-benz.com.exposure-async-papi"/>
+	</sub-flow>
+	<sub-flow name="miles-sapi-call-subflow" doc:id="fe6817fb-212f-41c5-b1e3-7bbb23949c06" >
+		<logger level="INFO" doc:name="Log Before Request" doc:id="47a78a88-f57c-428b-8644-bb33718d2fb5" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.correlationId ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode ++ &#10;&quot; \'Application Form ID\': &quot; ++ vars.applicationFormId default '' ++&#10;&quot; \'Method\': &quot; ++ vars.httpOperation.method default '' ++&#10;&quot; \'Resource\': &quot; ++ vars.httpOperation.path default '' ++&#10;&quot; Miles Sapi Start: &quot; ++ now()]" category="com.mercedes-benz.com.exposure-async-papi" />
+		<http:request method="#[vars.httpOperation.method]" doc:name="Request" doc:id="732e0815-fe2d-4159-9535-ed0eb4e421d1" config-ref="HTTP_Miles_Sapi_Request_configuration" path="#[vars.httpOperation.path]" responseTimeout="#[vars.httpOperation.timeout]" >
+			<http:headers ><![CDATA[#[output application/java
+---
+vars.httpOperation.headers default {}]]]></http:headers>
+			<http:uri-params ><![CDATA[#[output application/java
+---
+vars.httpOperation.uriParams default {}]]]></http:uri-params>
+			<http:query-params ><![CDATA[#[output application/java
+---
+vars.httpOperation.queryParams default {}]]]></http:query-params>
+		</http:request>
+		<logger level="INFO" doc:name="Log After Request" doc:id="2738609a-cf5c-47b7-bec3-f7db509270f5" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.correlationId ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode ++ &#10;&quot; \'Application Form ID\': &quot; ++ vars.applicationFormId default '' ++&#10;&quot; \'Method\': &quot; ++ vars.httpOperation.method default '' ++&#10;&quot; \'Resource\': &quot; ++ vars.httpOperation.path default '' ++&#10;&quot; Miles Sapi End: &quot; ++ now()]" category="com.mercedes-benz.com.exposure-async-papi" />
+	</sub-flow>
+	<sub-flow name="sf-commons-sapi-call-subflow" doc:id="19e38a22-30d3-4af8-85a3-b21c21833cf0" >
+		<logger level="INFO" doc:name="Log Before Request" doc:id="17076e4d-14d1-4476-8062-ee26112881c0" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.correlationId ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode ++ &#10;&quot; \'Application Form ID\': &quot; ++ vars.applicationFormId default '' ++&#10;&quot; \'Method\': &quot; ++ vars.httpOperation.method default '' ++&#10;&quot; \'Resource\': &quot; ++ vars.httpOperation.path default '' ++&#10;&quot; Salesforce Common Sapi Start: &quot; ++ now()]" category="com.mercedes-benz.com.exposure-async-papi" />
+		<http:request method="#[vars.httpOperation.method]" doc:name="Request" doc:id="8a2d63e5-40d3-4544-9ad9-2c72f40f06ee" config-ref="http-salesforce-common-sapi-config" path="#[vars.httpOperation.path]">
+			<http:headers ><![CDATA[#[output application/java
+---
+vars.httpOperation.headers default {}]]]></http:headers>
+			<http:uri-params ><![CDATA[#[output application/java
+---
+vars.httpOperation.uriParams default {}]]]></http:uri-params>
+			<http:query-params ><![CDATA[#[output application/java
+---
+vars.httpOperation.queryParams default {}]]]></http:query-params>
+		</http:request>
+		<logger level="INFO" doc:name="Log After Request" doc:id="337ab97f-98c4-4876-a82d-0bcb9130e327" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.correlationId ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode ++ &#10;&quot; \'Application Form ID\': &quot; ++ vars.applicationFormId default '' ++&#10;&quot; \'Method\': &quot; ++ vars.httpOperation.method default '' ++&#10;&quot; \'Resource\': &quot; ++ vars.httpOperation.path default '' ++&#10;&quot; Salesforce Common Sapi End: &quot; ++ now()]" category="com.mercedes-benz.com.exposure-async-papi" />
+	</sub-flow>
+</mule>

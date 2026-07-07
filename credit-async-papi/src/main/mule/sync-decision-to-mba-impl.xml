@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:tracing="http://www.mulesoft.org/schema/mule/tracing"
+	xmlns:anypoint-mq="http://www.mulesoft.org/schema/mule/anypoint-mq" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/anypoint-mq http://www.mulesoft.org/schema/mule/anypoint-mq/current/mule-anypoint-mq.xsd
+http://www.mulesoft.org/schema/mule/tracing http://www.mulesoft.org/schema/mule/tracing/current/mule-tracing.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+	<sub-flow name="sync-updates-or-comments-in-credit-app-to-mb-advantage-subflow" doc:id="e2e35ddc-ca98-44cb-b75c-53e09c266e15" >
+		<set-variable value="#[message]" doc:name="Set originalMessage" doc:id="b59af5e0-e385-44f3-944c-b43c10b71beb" variableName="originalMessage" />
+		<set-variable value="#[attributes.ackToken]" doc:name="Save ackToken" doc:id="c2be6312-c00f-425c-9472-a574aab85f8f" variableName="ackId"/>
+		<try doc:name="Try" doc:id="12a2236c-0d4c-4cc1-b2f5-ba803fd28d0f">
+			<logger level="INFO" doc:name="Log ApplicationId Message for synchronization" doc:id="4465d6a0-def6-46b1-8f45-4c7d7ddf9929" message="#[import try from dw::Runtime&#10;output application/java --- &quot;\'Synchronize updates in credit application received from SF Experience API\': &quot; ++ &quot; \'applicationId\': &quot; ++ (vars.appID) ++ &quot; \'correlationId\': &quot; ++ (attributes.properties.correlationId default correlationId) ++ if(p('log.payloadFlag') == 'true'  and  try(() -&gt; isEmpty(payload)).success) (&quot;\'Payload\': &quot; ++ write(payload,&quot;application/json&quot;)) else &quot;&quot;]" />
+			<flow-ref doc:name="Flow reference to get application from salesforce" doc:id="b70c6f6c-8f1e-42fb-800a-a29d38f284b9" name="get-cedit-app-details-flow" />
+					<ee:transform doc:name="add agentComments" doc:id="e60a0b6f-65ae-4c0f-bb9b-a34026428a1b">
+						<ee:message>
+							<ee:set-payload><![CDATA[%dw 2.0
+output application/json skipNullOn="everywhere"
+---
+if(vars.syncUpdatesCreditApp.note? ) (payload ++ "agentComments": vars.syncUpdatesCreditApp.note) else payload]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+			<http:request method="PATCH" doc:name="Call MB Advantage SAPI" doc:id="bac7d430-ee4f-4295-b051-db8962a8fd74" config-ref="http-mba-sapi-config" path="/applications/{applicationId}/decision">
+				<http:uri-params><![CDATA[#[output application/java
+---
+{
+	"applicationId" : payload.applicationID
+}]]]></http:uri-params>
+			</http:request>
+			<anypoint-mq:ack doc:name="Acknowledge MQ" doc:id="94741b3f-ff5e-4d67-8b71-c3ce0523788e" config-ref="anypoint-mq-config" ackToken="#[vars.ackId]" />
+			<error-handler>
+						<on-error-propagate enableNotifications="false" logException="false" doc:name="On Error Propagate" doc:id="5552aeeb-4680-4ab9-837a-ba1e8b92b170" type="HTTP:CONNECTIVITY, HTTP:INTERNAL_SERVER_ERROR, HTTP:RETRY_EXHAUSTED, HTTP:SERVICE_UNAVAILABLE, HTTP:TIMEOUT, HTTP:UNAUTHORIZED">
+							<logger level="ERROR" doc:name="Log Message" doc:id="b7141a69-78d2-4d73-90d6-c176ab878dd9" message='#["Error: " ++ (error.detailedDescription as String) ++ " occured while processing Sync updates in Credit App from MB Advantage SAPI."]' />
+							<anypoint-mq:nack doc:name="NOT Acknowledge MQ" doc:id="c5921439-9239-4f1b-82ba-b963c3656612" config-ref="anypoint-mq-config" ackToken="#[vars.ackId]" />
+						</on-error-propagate>
+						<on-error-continue enableNotifications="false" logException="false" doc:name="On Error Continue" doc:id="447a91cc-2d1e-400d-b352-95287043d478" type="ANY">
+							<logger level="ERROR" doc:name="Log Message" doc:id="dca5fc52-d238-49da-a584-15a8f866dd52" message='#["Error: " ++ (error.detailedDescription as String) ++ " occured while processing Sync updates in Credit App from MB Advantage SAPI. Moving message to DLQ"]' />
+							<anypoint-mq:publish doc:name="Publish Sync updates in Credit App to DLQ" doc:id="93b0f4ed-54bb-4277-bfae-1f5222861592" config-ref="anypoint-mq-config" destination="${mq.syncUpdateCreditApp.dlq}">
+								<anypoint-mq:body><![CDATA[#[%dw 2.0
+output application/json
+---
+{
+	"originalPayload": vars.syncUpdatesCreditApp,
+	"errorMessage": error.detailedDescription as String
+}]]]></anypoint-mq:body>
+							<anypoint-mq:properties><![CDATA[#[output application/java
+---
+{
+	"correlationId" : vars.originalMessage.attributes.properties.correlationId default "no correlationId"	
+}]]]></anypoint-mq:properties>
+							</anypoint-mq:publish>
+							<anypoint-mq:ack doc:name="Acknowledge MQ" doc:id="dd53d9d8-cc4a-443d-9f18-5418893eda54" config-ref="anypoint-mq-config" ackToken="#[vars.ackId]" />
+						</on-error-continue>
+					</error-handler>
+				</try>
+	</sub-flow>
+</mule>

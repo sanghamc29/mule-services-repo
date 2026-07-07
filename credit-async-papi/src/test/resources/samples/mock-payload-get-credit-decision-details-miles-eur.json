@@ -1,0 +1,27 @@
+{
+    "externalId": "10030524",
+    "applicationID": "AF-00005265",
+    "applicationEvaluations": [
+        {
+            "decision": "Decline",
+            "comments": "test",
+            "decisionDate": "2024-12-23",
+            "decisionReason": "Term",
+            "validity": "2025-02-21"
+        }
+    ],
+    "applicationProductOffer": {
+        "amountFinanced": 17705.85
+    },
+    "applicationParties": [
+        {
+            "riskLevel": "LOW"
+        }
+    ],
+    "creditReports": [
+        {
+            "probabilityOfDefault": 4.96,
+            "creditScore": 293
+        }
+    ]
+}

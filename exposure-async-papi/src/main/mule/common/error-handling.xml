@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:anypoint-mq="http://www.mulesoft.org/schema/mule/anypoint-mq" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/anypoint-mq http://www.mulesoft.org/schema/mule/anypoint-mq/current/mule-anypoint-mq.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+    <error-handler name="mq-global-error-handler" doc:id="70d11fd7-9f8f-48ac-b129-a481375e29c5" >
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="78fa0648-8fd5-459a-a06e-278767379fd1" type="HTTP:BAD_REQUEST, HTTP:NOT_FOUND">
+			<logger level="ERROR" doc:name="Log Business/Non Retiable Error" doc:id="a36e71ca-e02b-406f-aa32-8885f1ab4ee7" message="Non Retriable Error message: #[error.errorMessage.payload] ---------------- applicationId: #[vars.applicationFormId] is getting pushed to IPE" />
+			<flow-ref doc:name="custom-sf-error-object-ipe" doc:id="c1c6fc4d-b81c-460a-9256-2a272b9cd15b" name="custom-sf-error-object-ipe" />
+			<anypoint-mq:ack doc:name="Ack" doc:id="2cc7f0e0-9e26-46e6-99b6-38a48e7c5a03" config-ref="anypoint-mq-config" ackToken="#[vars.ackToken]" />
+			<logger level="INFO" doc:name="Log Ack" doc:id="a1cbcd30-4d9e-49f7-8f21-75adbb427587" message='#["Message Ack in Queue after processing of the message failed with Business Error. CorrelationId: " ++ vars.correlationId]' />
+		</on-error-continue>
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="17a75444-cd59-4a78-b44e-20f453cca20e" when='#[(error.errorMessage.payload.failures..errorType.identifier dw::core::Arrays::some (["BAD_REQUEST","NOT_FOUND"] contains $)) and error.errorMessage.payload.failures..errorType.identifier != null ]'>
+			<logger level="ERROR" doc:name="Log Business / Non Retiable  Error" doc:id="8b3d80fb-f138-457a-95c3-8254e0447575" message="Non Retriable Error message: #[error.errorMessage.payload] ---------------- applicationId: #[vars.applicationFormId] is getting pushed to IPE" />
+			<flow-ref doc:name="custom-sf-error-object-ipe" doc:id="2660cf92-cd19-4920-b776-d93f5c46e9ed" name="custom-sf-error-object-ipe" />
+			<anypoint-mq:ack doc:name="Ack" doc:id="62ff59d5-b910-4d06-9469-17d2c6cc182d" config-ref="anypoint-mq-config" ackToken="#[vars.ackToken]" />
+			<logger level="INFO" doc:name="Log Ack" doc:id="61450273-3782-4bbf-be81-c2261257c6e1" message='#["Message Ack in Queue after processing of the message failed with Business Error. CorrelationId: " ++ vars.correlationId]' />
+		</on-error-continue>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="b5ffba84-198a-46f4-8ef4-c1757ef2e420" type="ANY">
+			<logger level="ERROR" doc:name="Log Technical/Retriable Error" doc:id="14e989c2-7ae6-4b58-9b41-d47c3f8360aa" message="Retriable Error message: #[error.errorMessage.payload] ---------------- applicationId: #[vars.applicationFormId] is getting retried" />
+			<logger level="ERROR" doc:name="Log Nack" doc:id="fa3f3a7c-4a7e-4e4a-902f-3dab03b609d9" message='#[output application/java&#10;---&#10;"Correlation ID: " ++ vars.correlationId ++ " Application ID is getting retried via queue due to error: " ++ vars.applicationFormId]' />
+			<anypoint-mq:nack doc:name="Nack" doc:id="e60aba19-2e97-4140-85e9-46ca06edbc89" config-ref="anypoint-mq-config" ackToken="#[vars.ackToken]" />
+            <choice doc:name="Retry Exhausted for c5?" doc:id="f4306980-a166-46b8-929a-7d65b66a1bf9" >
+                <when expression="#[(vars.originalPayload.data.payload.EU_EventType__c == Mule::p('mq.fraudCheckInbound.event')) and (vars.deliveryCount ~= Mule::p(&quot;mq.fraudCheckInbound.maxRedilveryCount&quot;))]">
+                    <logger level="ERROR" doc:name="Log Error Info" doc:id="578337c9-1715-4cb2-9725-2cbd6c9b9d67" message="C5 Retry Exhausted and Message moved to DLQ for applicationId: #[vars.applicationFormId] " />
+                    <set-variable value="#[true]" doc:name="Set redeliveryExhausted" doc:id="fc34d902-cda9-48ef-993e-1acfa96a23f4" variableName="redeliveryExhausted" />
+                    <flow-ref doc:name="custom-sf-error-object-ipe" doc:id="8fa6939f-175d-49f6-bce3-462a11f5cf79" name="custom-sf-error-object-ipe" />
+                    <flow-ref doc:name="Ref to c5-fraud-check-sf-applicants-flag-update" doc:id="dc6957a7-343d-4fce-8f79-7493ec9bee0e" name="c5-fraud-check-sf-applicants-flag-update" />
+                </when>
+				<when expression="#[upper(vars.requestEventType) == p('mq.lomapiAgencyFeedback.event')]">
+					<flow-ref doc:name="SF object IPE" doc:id="07499b26-41f7-45c6-8f1a-f3c2575a7280" name="custom-sf-error-object-ipe" />
+				</when>
+            </choice>
+		</on-error-propagate>
+		
+	</error-handler>
+	<sub-flow name="custom-sf-error-object-ipe" doc:id="188d4f75-3dd1-4efd-92a1-1452e4058cfc" >
+		<try doc:name="Try" doc:id="46adba6e-c8bb-4b2a-92c2-0f53d22b25c3" >
+			<ee:transform doc:name="payload to update SF IPE status" doc:id="82904c29-9cc1-4fa3-9a8e-81886279ff76" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var fraudCheckFailed = vars.fraudCheckFailed default false
+var compositeErrors = if(!isEmpty(error.errorMessage.payload.failures)) (((error.errorMessage.payload.failures mapObject ((value, key, index) -> value.errorMessage.payload default {})).*error default [] reduce ((item, accumulator="") -> accumulator ++ item.errorMessage ++ " : " ++ item.errorDescription ++ ", "))[0 to -3]) else ""
+---
+{
+	"uniqueId": if (vars.requestEventType == p('mq.lomapiAgencyData.documentsUpload.event')) vars.originalPayload.entities.uniqueId[0] else vars.originalPayload.data.payload.EU_IntegrationLogId__c,
+	"errorStatus": "Failed",
+	"errorCode":  if(fraudCheckFailed) vars.fraudCheckData.errorCode joinBy ","
+				  else error.errorMessage.payload.error.errorCode default error.errorType.identifier,
+	"errorMessage": if(fraudCheckFailed) vars.fraudCheckData.errorMessage joinBy ","
+					else if(!isEmpty(compositeErrors)) compositeErrors 
+					else ((error.errorMessage.payload.error.errorMessage default "INTERNAL_SERVER_ERROR")
+					++ " : " ++ (error.errorMessage.payload.error.errorDescription default "")),
+	"errorDateTime": if (vars.requestEventType == p('mq.lomapiAgencyData.documentsUpload.event')) vars.originalPayload.entities.createdDate[0] else vars.originalPayload.data.payload.CreatedDate
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<http:request method="POST" doc:name="update SF IPE status with error" doc:id="c2aef23f-56c2-45f4-b477-204587c455b0" config-ref="http-salesforce-common-sapi-config" path="${common-sf.sapi.businessExceptions.path}" >
+				<http:headers ><![CDATA[#[output application/java 
+--- 
+{
+	"x-country-code": vars.originalPayload.data.payload.EU_Market__c default "",
+	"x-correlation-id": vars.correlationId default ""	
+}]]]></http:headers>
+			</http:request>
+			<logger level="INFO" doc:name="Log Error Saved" doc:id="3fb88d12-e76f-400d-82eb-b0bc7f47957d" message="Business error saved into SF " />
+			<error-handler >
+				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="c97d80ff-2a10-47ab-a799-9dccc7f84dd2" >
+					<logger level="ERROR" doc:name="Log Error while saving Business Error" doc:id="d492dfe9-c626-4e1e-b33e-a5a59f835446" message='#[output application/java&#10;---&#10;"Pushinig messsage to DLQ after failing to save business error into Salesforce. Correlation ID: " ++ vars.correlationId ++ " Unique Id: " ++ vars.originalPayload.data.payload.EU_IntegrationLogId__c]'/>
+
+					<anypoint-mq:publish doc:name="Publish DLQ" doc:id="a587adf5-8520-4a7e-ad35-243ebb5c317b" config-ref="anypoint-mq-config" destination="#[if(vars.originalPayload.data.payload.EU_EventType__c == &quot;LoMaAPI C4&quot;) Mule::p('mq.lomapiInbound.dlq') else if(vars.originalPayload.data.payload.EU_EventType__c == Mule::p('mq.fraudCheckInbound.event')) Mule::p('mq.fraudCheckInbound.dlq') else if (vars.originalPayload.data.payload.EU_EventType__c == &quot;C6&quot;) Mule::p('mq.lomapiAgencyData.dlq') else if (vars.originalPayload.eventType == &quot;Agency Documents Upload&quot;) Mule::p('mq.documentsUpload.dlq') else if (vars.originalPayload.data.payload.EU_EventType__c == Mule::p('mq.lomapiAgencyFeedback.event'))  Mule::p('mq.lomapiAgencyFeedback.dlq')  else Mule::p('mq.exposureInbound.dlq')]">
+
+						<anypoint-mq:body><![CDATA[#[vars.originalPayload]]]></anypoint-mq:body>
+						<anypoint-mq:properties><![CDATA[#[output application/java
+---
+{
+	"correlationId" : vars.correlationId default "no correlationId"	
+}]]]></anypoint-mq:properties>
+					</anypoint-mq:publish>
+				</on-error-continue>
+			</error-handler>
+		</try>
+	</sub-flow>
+	
+	</mule>

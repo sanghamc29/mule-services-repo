@@ -1,0 +1,200 @@
+custom-error-code-prefix: "ORG_MB"
+application:
+ name: "${project.artifactId}"
+api:
+ name: "${project.artifactId}"
+ instanceId: "19539624" #this should be configured as a runtime property via Runtime Manager
+ version: "${api.build.version}"
+ http:
+  listener:
+   path: "/api/${api.name}/${api.version}/*"
+   host: "0.0.0.0"
+
+#property http.port is replaced by CloudHub 2.0 during the deployment
+http:
+  port: "8081"
+
+log:
+  payloadFlag: "false"
+
+sf-accounts-sapi:
+  protocol: "HTTPS"
+  host: "salesforce-accounts-sapi-dev-nnkf7u.lonthm.deu-c1.cloudhub.io"
+  port: "443"
+  response:
+    timeout: "30000"
+  client-id: "1ad597f688a6412499cdea319bfbf1bf"
+  applicantDetails:
+    method: "GET"
+    path: "api/salesforce-accounts-sapi/v1/applicantDetails/{applicantId}"
+  applicantsDetails:
+    method: "GET"
+    path: "api/salesforce-accounts-sapi/v1/applicantDetails"  
+  affordabilityCalculations:
+    method: "POST"
+    path: "api/salesforce-accounts-sapi/v1/affordabilityCalculations"
+    recordTypeId: "01276000000H3TaAAK"
+  customerExposure:
+    method: "POST"
+    path: "api/salesforce-accounts-sapi/v1/affordabilityCalculations"
+    recordTypeId: "01276000000H3TaAAK"
+
+  creditAgencyReport:
+    documentsuploadStatus:
+      method: "PATCH"
+      path: "api/salesforce-accounts-sapi/v1/applicantDetails/creditAgencyReport/uploadStatus/{applicantId}"  
+
+  applicantFlag:
+    method: "PATCH"
+    path: "api/salesforce-accounts-sapi/v1/applicantDetails/fraudCheck/status"
+
+local-market-sapi:
+  protocol: "HTTPS"
+  host: "local-market-sapi-dev-nnkf7u.lonthm.deu-c1.cloudhub.io"
+  port: "443"
+  response:
+    timeout: "300000"
+  client-id: "1ad597f688a6412499cdea319bfbf1bf"
+  companyAffordability:
+    method: "GET"
+    path: "api/local-market-sapi/v1/customers/affordabilityCalculations/company"
+  personAffordability:
+    method: "POST"
+    path: "api/local-market-sapi/v1/customers/affordabilityCalculations/person"
+  agencyData: 
+    method: "POST"
+    path: "/api/local-market-sapi/v1/customers/agencyData"
+  agencyfeedback:
+    method: "POST"
+    path: "/api/local-market-sapi/v1/customers/agencyFeedback"
+  fraudCheck:
+    method: "POST"
+    path: "api/local-market-sapi/v1/customers/fraudDataCheck/person"
+    
+miles-sapi:
+  protocol: "HTTPS"
+  host: "miles-sapi-dev-nnkf7u.lonthm.deu-c1.cloudhub.io"
+  port: "443"
+  response:
+    timeout: "300000"
+  client-id: "1ad597f688a6412499cdea319bfbf1bf"
+  customerExposure:
+    method: "GET"
+    path: "api/miles-sapi/v1/customers/{customerId}/exposure"
+    
+common-sf:
+  sapi:
+    host: "salesforce-common-sapi-dev-nnkf7u.lonthm.deu-c1.cloudhub.io"
+    port: "443"
+    protocol: "HTTPS"
+    basePath: "/api/salesforce-common-sapi/v1"
+    client-id: "7ac35767d77e41008eb32292aaddfa4a"
+    response:
+      timeout: "60000"
+    businessExceptions:
+      path: "/businessExceptions/errors"
+    updateDocument:
+      method: "PUT"
+      path: "documents"
+      document:
+        name: "Experian Scipafi Document"
+        extension: "pdf"
+    getDocument:
+      method: "GET"
+      path: "documents"
+      queryParam:
+        documentName: "Experian Scipafi Document"
+    lomapiAgencyDocuments:  
+      method: "GET"
+      path: "/documents"
+  keystore: "${app.home}/ms-to-sf.jks"
+  certAlias: "ms-to-sf"
+  principal: "mule.integration@oneops-mbm.com.ohqa"
+  aud: "https://test.salesforce.com"
+  tokenEndpoint: "https://test.salesforce.com/services/oauth2/token"
+  
+
+mq:
+  url: "https://mq-eu-west-1.anypoint.mulesoft.com/api/v1/organizations/c83a2291-ce49-4c83-a453-39a63be34c6c/environments/e52d7089-ab1c-412f-9a8e-f189d1f94417"
+  clientId: "b7f360d11e87417c88ef847340ff20b2"
+  circuitBreaker:
+    errorsThreshold: "3"
+    tripTimeout: "5"
+  lomapiInbound:
+    queue: "Q.SFDC.MBFS.CUSTOMER.LOMAPI.DEV.V1"
+    dlq: "DLQ.SFDC.MBFS.CUSTOMER.LOMAPI.DEV.V1"
+    reconnection:
+      attempts: "2"
+      frequency: "2000"
+    ack:
+      timeout: "180"
+  exposureInbound:
+    queue: "Q.SFDC.MBFS.CUSTOMER.MILES.DEV.V1"
+    dlq: "DLQ.SFDC.MBFS.CUSTOMER.MILES.DEV.V1"
+    reconnection:
+      attempts: "2"
+      frequency: "2000"
+    ack:
+      timeout: "180" 
+  lomapiAgencyData:
+    event: "C6"
+    queue: "Q.SFDC.MBFS.CUSTOMER.LOMAPI.CREDIT-AGENCY-DATA.DEV.V1"
+    dlq:   "DLQ.SFDC.MBFS.CUSTOMER.LOMAPI.CREDIT-AGENCY-DATA.DEV.V1"
+    reconnection:
+      attempts: "2"
+      frequency: "2000"
+    ack:
+      timeout: "180" 
+    documentsUpload:  
+      event: "Agency Documents Upload"
+      queue: "Q.SFDC.MBFS.CUSTOMER.LOMAPI.CREDIT-AGENCY-DOCUMENT-UPLOAD.DEV.V1"
+      dlq:   "DLQ.SFDC.MBFS.CUSTOMER.LOMAPI.CREDIT-AGENCY-DOCUMENT-UPLOAD.DEV.V1"
+      ack:
+       timeout: "180" 
+  fraudCheckInbound:
+    event: "C5"
+    queue: "Q.SFDC.MBFS.CREDIT-APPLICATION-FRAUD-CHECK.DEV.V1"
+    dlq: "DLQ.SFDC.MBFS.CREDIT-APPLICATION-FRAUD-CHECK.DEV.V1"
+    maxRedilveryCount : "5"
+    ack:
+      timeout: "180"
+  lomapiAgencyFeedback: 
+    event: "C7"
+    queue: "Q.SFDC.MBFS.CUSTOMER.LOMAPI.AGENCY-FEEDBACK-DATA.DEV.V1"
+    dlq:   "DLQ.SFDC.MBFS.CUSTOMER.LOMAPI.AGENCY-FEEDBACK-DATA.DEV.V1"
+    reconnection:
+      attempts: "2"
+      frequency: "2000"
+    ack:
+      timeout: "180" 
+      
+
+#Until Succesful Properties
+until:
+  retries: "3"
+  milliseconds: "5000"
+
+  
+documentTypes:
+  html:
+   batchSize: "20"
+  pdf:
+   batchSize:  "2"
+c6: 
+ documentName:
+  identifier: "C6"
+ documentUploadStatus:
+  success: "Completed"
+  failed: "Failed"
+  partialSuccess: "Partially Completed"
+  dciNotFound: "documentCheckListItemId not found"
+
+fraudCheck:
+  individual: "Individual"
+  default:
+    fraudCheckStatus: "-2"
+    finalFraudCheckRate: "-2"
+    semaphoreFlagStatus: "-2"
+    scipafiFraudCode: "9"
+  errorCode: "ERROR CODE:9"
+

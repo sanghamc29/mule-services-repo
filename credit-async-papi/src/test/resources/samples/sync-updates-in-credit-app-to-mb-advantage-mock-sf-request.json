@@ -1,0 +1,116 @@
+{
+  "coApplicantIndicator": true,
+  "brokerFlag": true,
+  "dealerComments": "DEALER TEST COMMENTS",
+  "brokerName": "Test Broker",
+  "salesPersonFirstName": "SIT",
+  "applicationType": "Individual",
+  "dealerUserFirstName": "Henry",
+  "dealerNumberNA": "71884",
+  "sourceNumber": "70100",
+  "preApprovalCode": "123",
+  "country": "US",
+  "mbadvantageSourceID": "3671",
+  "mbadvantageCreationDateTime": "2024-01-13T00:00:45.000+0000",
+  "createdDate": "2024-01-04T16:49:09.000+0000",
+  "salesPersonLastName": "Joe",
+  "dealerUserLastName": "Nick",
+  "dealerUpdateNumber": 0,
+  "applicationID": "444",
+  "tradeInVehicleIndicator": true,
+  "proposalNumber": "5002527503",
+  "status": "New",
+  "dealUpdateEligibility": "N",
+  "contractStatus": "R",
+  "applicationParties": [
+    
+  ],
+  "applicationProductOffer": {
+    "msrp": 72000,
+    "residualAmount": 0,
+    "totalCapitalizedCost": 71200,
+    "invoice": 66960,
+    "term": 60,
+    "capitalReduction": 7500,
+    "netTradeInAmount": 154000,
+    "estimatedPayment": 700,
+    "originalAmountFinanced": -44288,
+    "originalTotalDown": 121500,
+    "totalDown": 121500,
+    "amountFinanced": -44288,
+    "requestedAPR": 2.5,
+    "financedProductTotal": 6000,
+    "multipleSecurityDeposit": "0",
+    "securityDeposit": 0,
+    "mbProduct": 12,
+    "advanceRate": -61.51,
+    "loanToValue": -66.14,
+    "advanceRateWithoutFees": -61.53,
+    "loanToValueWithoutFees": -66.16,
+    "adjustedCapCost": -44288
+  },
+  "applicationProduct": {
+    "financeType": "RTL",
+    "programID": "6332"
+  },
+  "applicationVehicle": {
+    "vehicleType": "Application Vehicle",
+    "vehicleModel": "S500",
+    "vehicleYear": "2023",
+    "vehicleMake": "MERCEDES-BENZ",
+    "vehicleCondition": "New",
+    "vin": "55SWF4KB6FU040459",
+    "replacementVin": "0987612345",
+    "odometerMileage": 100000,
+    "vehicleDescription": "1000",
+    "cvpDeal": false
+  },
+  "tradeIn": {
+    "vehicleType": "Trade-In",
+    "vehicleModel": "5-Series",
+    "vehicleYear": "2022",
+    "vehicleMake": "BMW",
+    "tradeInPayOffAmount": 40000,
+    "cvpDeal": false
+  },
+  "owner": {
+    "name": "Mulesoft Integration User"
+  },
+  "applicationEvaluations": [
+    {
+      "decision": "Manual Review",
+      "active": false,
+      "decisionedTier": "4",
+      "lastModifiedDate": "2024-03-07T12:18:13.000+0000",
+      "sendToDealer": true
+    },
+    {
+      "decision": "Locked Bureau",
+      "active": true,
+      "decisionedTier": "1",
+      "lastModifiedDate": "2024-03-07T14:33:21.000+0000",
+      "sendToDealer": false
+    }
+  ],
+  "stipulations": [
+    {
+      "description": "test UPDATE from c360",
+      "status": "W",
+      "type": "DOC",
+      "assignedTermNumber": "ST-0000000015"
+    },
+    {
+      "description": "444 Stip",
+      "status": "N",
+      "type": "INF",
+      "assignedTermNumber": "ST-0000000021"
+    }
+  ],
+  "creditSummary": {
+    "decisionedTier": "A",
+    "customScore": "5"
+  },
+  "creditReports": [
+    
+  ]
+}

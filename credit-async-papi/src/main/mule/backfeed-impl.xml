@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:tracing="http://www.mulesoft.org/schema/mule/tracing" xmlns:anypoint-mq="http://www.mulesoft.org/schema/mule/anypoint-mq"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/anypoint-mq http://www.mulesoft.org/schema/mule/anypoint-mq/current/mule-anypoint-mq.xsd
+http://www.mulesoft.org/schema/mule/tracing http://www.mulesoft.org/schema/mule/tracing/current/mule-tracing.xsd">
+	<sub-flow name="get-application-details-and-post-to-mba-sapi" doc:id="5770382d-0a0c-4276-a6fa-9ec656e2eb26" >
+		<set-variable value="#[message]" doc:name="Set originalMessage" doc:id="c67b7c89-cec8-4a52-b7e5-32835033be4e" variableName="originalMessage" />
+		<try doc:name="Try" doc:id="ca67d1b2-3be6-45bf-bcdb-2ec0723023c2">
+			<logger level="INFO" doc:name="Log ApplicationId for Backfeed" doc:id="81428126-623b-4ca5-ba75-0225d5d931ab" message="#[import try from dw::Runtime&#10;output application/java --- &quot;\'Received the application details from Salesforce Experience API\': &quot; ++ &quot; \'applicationId\': &quot; ++ (vars.appID) ++ &quot; \'correlationId\': &quot; ++ (attributes.properties.correlationId default correlationId) ++ if(p('log.payloadFlag') == 'true'  and  try(() -&gt; isEmpty(payload)).success) (&quot;\'Payload\': &quot; ++ write(payload,&quot;application/json&quot;)) else &quot;&quot;]" />
+			<flow-ref doc:name="Flow reference to get application details from salesforce" doc:id="528b1371-23eb-4c22-a016-e75de6fd6df5" name="get-cedit-app-details-flow" />
+			<http:request method="POST" doc:name="Post application details to mba sapi" doc:id="ca51e902-5f59-4a82-89ce-79d756ff1d94" config-ref="http-mba-sapi-config" path="/applications" />
+				<http:request method="PUT" doc:name="update backfeed success response to sf sapi" doc:id="3ffaf4af-88b4-4916-818b-53a8428e170c" config-ref="http-salesforce-sapi-config" path="/applications/{applicationId}/applicationIntegrationStatus">
+					<http:body><![CDATA[#[%dw 2.0
+output application/json
+---
+{
+    "applicationIntegrationStatus": "Orchestration Started"
+}]]]></http:body>
+					<http:uri-params><![CDATA[#[output application/java
+---
+{
+	"applicationId" : vars.appID
+}]]]></http:uri-params>
+				</http:request>
+				<anypoint-mq:ack doc:name="Acknowledge MQ" doc:id="e9fe5a90-beb8-4685-b07a-96aba0c90128" config-ref="anypoint-mq-config" ackToken="#[vars.ackId]" />
+			<error-handler>
+				<on-error-propagate enableNotifications="false" logException="false" doc:name="On Error Propagate" doc:id="55a7ff7c-5de2-480b-8890-a3603c8e79e3" type="HTTP:CONNECTIVITY, HTTP:INTERNAL_SERVER_ERROR, HTTP:RETRY_EXHAUSTED, HTTP:SERVICE_UNAVAILABLE, HTTP:TIMEOUT, HTTP:UNAUTHORIZED">
+					<logger level="ERROR" doc:name="Log Message" doc:id="3d697bef-ec3d-41ad-8931-100eeaa3e7aa" message='#["Error: " ++ (error.detailedDescription as String) ++ " occured while publishing application details to mba sapi."]' />
+					<anypoint-mq:nack doc:name="NOT Acknowledge MQ" doc:id="fa555f8d-c903-42f6-a51f-f8a3e2bbbdda" config-ref="anypoint-mq-config" ackToken="#[vars.ackId]" />
+				</on-error-propagate>
+				<on-error-continue enableNotifications="false" logException="false" doc:name="On Error Continue" doc:id="9e83e5c6-2ba2-46c9-82a9-f8d0bb4d80fe" type="ANY">
+					<logger level="ERROR" doc:name="Log Message" doc:id="ee200618-e050-459f-bf83-d23201d0d212" message='#["Error: " ++ (error.detailedDescription as String) ++ " occured while publishing application details to mba sapi. Moving message to DLQ"]' />
+					<anypoint-mq:publish doc:name="Publish application details to DLQ" doc:id="d2e8afe3-6962-4fe9-abce-a7ebc5b22706" config-ref="anypoint-mq-config" destination="${mq.applicationOutbound.dlq}">
+						<anypoint-mq:body><![CDATA[#[%dw 2.0
+output application/json
+---
+{
+	"originalPayload": vars.appDetails,
+	"errorMessage": error.detailedDescription as String
+}]]]></anypoint-mq:body>
+							<anypoint-mq:properties><![CDATA[#[output application/java
+---
+{
+	"correlationId" : vars.originalMessage.attributes.properties.correlationId default "no correlationId"	
+}]]]></anypoint-mq:properties>
+					</anypoint-mq:publish>
+					<anypoint-mq:ack doc:name="Acknowledge MQ" doc:id="6c664f69-83ab-4fdd-b590-487911d80898" config-ref="anypoint-mq-config" ackToken="#[vars.ackId]" />
+				</on-error-continue>
+			</error-handler>
+		</try>
+	</sub-flow></mule>

@@ -1,0 +1,286 @@
+# Comprehensive Test Parameters for Exposure Async PAPI
+# Positive Test Cases
+positiveTests:
+  affordabilityCalculations:
+    flowName: "affordability-calculations-sub-flow"
+    testScenarios:
+      - name: "multipleApplicants"
+        description: "Test with multiple applicants - success scenario"
+        applicationFormId: "APP-AFFC-001"
+        correlationId: "test-corr-affc-001"
+        countryCode: "US"
+        currencyIsoCode: "USD"
+        inPayload: "requests/affordabilityCalculationsMultipleApplicants.json"
+        expectedStatus: "SUCCESS"
+        expectedRecordsProcessed: 2
+      - name: "singleApplicant"
+        description: "Test with single applicant - success scenario"
+        applicationFormId: "APP-AFFC-002"
+        correlationId: "test-corr-affc-002"
+        countryCode: "DE"
+        currencyIsoCode: "EUR"
+        inPayload: "requests/affordabilityCalculationsSingleApplicant.json"
+        expectedStatus: "SUCCESS"
+        expectedRecordsProcessed: 1
+
+  customerExposure:
+    flowName: "customer-exposure-sub-flow"
+    testScenarios:
+      - name: "validCustomers"
+        description: "Test with valid customers having customerId"
+        applicationFormId: "APP-CEXP-001"
+        correlationId: "test-corr-cexp-001"
+        countryCode: "US"
+        currencyIsoCode: "USD"
+        inPayload: "requests/customerExposureValidCustomers.json"
+        expectedFilteredCount: 2
+      - name: "mixedCustomers"
+        description: "Test with mixed valid/invalid customers"
+        applicationFormId: "APP-CEXP-002"
+        correlationId: "test-corr-cexp-002"
+        countryCode: "GB"
+        currencyIsoCode: "GBP"
+        inPayload: "requests/customerExposureMixedCustomers.json"
+        expectedFilteredCount: 1
+
+  fraudCheck:
+    flowName: "c5-fraud-check-orchestration-flow"
+    testScenarios:
+      - name: "allApplicantsSuccess"
+        description: "Test C5 fraud check with all applicants successful"
+        applicationFormId: "APP-FRAUD-001"
+        correlationId: "test-corr-fraud-001"
+        countryCode: "US"
+        applicantIds: "A1,A2,A3"
+        inPayload: "requests/fraudCheckMultipleApplicants.json"
+        expectedAllSuccess: true
+      - name: "singleApplicantSuccess"
+        description: "Test C5 fraud check with single applicant"
+        applicationFormId: "APP-FRAUD-002"
+        correlationId: "test-corr-fraud-002"
+        countryCode: "DE"
+        applicantIds: "A1"
+        inPayload: "requests/fraudCheckSingleApplicant.json"
+        expectedAllSuccess: true
+
+  processApplicantsDetails:
+    flowName: "process-applicantsDetails-subflow"
+    testScenarios:
+      - name: "multipleApplicantsSuccess"
+        description: "Test process applicants details with multiple applicants"
+        applicationFormId: "APP-PROC-001"
+        correlationId: "test-corr-proc-001"
+        countryCode: "US"
+        appilcantIds: "A1,A2"
+        inPayload: "requests/processApplicantsMultiple.json"
+        expectedProcessed: 2
+      - name: "singleApplicantSuccess"
+        description: "Test process applicants details with single applicant"
+        applicationFormId: "APP-PROC-002"
+        correlationId: "test-corr-proc-002"
+        countryCode: "FR"
+        appilcantIds: "A1"
+        inPayload: "requests/processApplicantsSingle.json"
+        expectedProcessed: 1
+
+  agencyFeedback:
+    flowName: "process-lomapi-agency-feedback-subflow"
+    testScenarios:
+      - name: "feedbackSuccess"
+        description: "Test agency feedback processing success"
+        applicationFormId: "APP-FEED-001"
+        correlationId: "test-corr-feed-001"
+        countryCode: "US"
+        applicantId: "A1"
+        requestEventType: "FEEDBACK_RECEIVED"
+        inPayload: "requests/agencyFeedbackSuccess.json"
+        expectedStatus: "SUCCESS"
+
+# Negative Test Cases
+negativeTests:
+  affordabilityCalculations:
+    flowName: "affordability-calculations-sub-flow"
+    testScenarios:
+      - name: "emptyApplicants"
+        description: "Test with no applicants"
+        applicationFormId: "APP-AFFC-NEG-001"
+        correlationId: "test-corr-affc-neg-001"
+        countryCode: "US"
+        currencyIsoCode: "USD"
+        inPayload: "requests/affordabilityCalculationsEmpty.json"
+        expectedRecordsProcessed: 0
+      - name: "sfSapiError"
+        description: "Test when SF SAPI returns error"
+        applicationFormId: "APP-AFFC-NEG-002"
+        correlationId: "test-corr-affc-neg-002"
+        countryCode: "DE"
+        currencyIsoCode: "EUR"
+        inPayload: "requests/affordabilityCalculationsValid.json"
+        mockError: "SF_SAPI_ERROR"
+        expectedError: true
+      - name: "lomapiError"
+        description: "Test when Local Market SAPI returns error"
+        applicationFormId: "APP-AFFC-NEG-003"
+        correlationId: "test-corr-affc-neg-003"
+        countryCode: "FR"
+        currencyIsoCode: "EUR"
+        inPayload: "requests/affordabilityCalculationsValid.json"
+        mockError: "LOMAPI_ERROR"
+        expectedError: true
+
+  customerExposure:
+    flowName: "customer-exposure-sub-flow"
+    testScenarios:
+      - name: "noValidCustomers"
+        description: "Test with no valid customers (all have null customerId)"
+        applicationFormId: "APP-CEXP-NEG-001"
+        correlationId: "test-corr-cexp-neg-001"
+        countryCode: "US"
+        currencyIsoCode: "USD"
+        inPayload: "requests/customerExposureInvalidCustomers.json"
+        expectedFilteredCount: 0
+      - name: "sfSapiFailure"
+        description: "Test when SF SAPI call fails"
+        applicationFormId: "APP-CEXP-NEG-002"
+        correlationId: "test-corr-cexp-neg-002"
+        countryCode: "GB"
+        currencyIsoCode: "GBP"
+        inPayload: "requests/customerExposureValidCustomers.json"
+        mockError: "SF_SAPI_ERROR"
+        expectedError: true
+      - name: "milesSapiFailure"
+        description: "Test when Miles SAPI call fails"
+        applicationFormId: "APP-CEXP-NEG-003"
+        correlationId: "test-corr-cexp-neg-003"
+        countryCode: "DE"
+        currencyIsoCode: "EUR"
+        inPayload: "requests/customerExposureValidCustomers.json"
+        mockError: "MILES_SAPI_ERROR"
+        expectedError: true
+
+  fraudCheck:
+    flowName: "c5-fraud-check-orchestration-flow"
+    testScenarios:
+      - name: "partialFailure"
+        description: "Test C5 fraud check with partial failures"
+        applicationFormId: "APP-FRAUD-NEG-001"
+        correlationId: "test-corr-fraud-neg-001"
+        countryCode: "US"
+        applicantIds: "A1,A2,A3"
+        inPayload: "requests/fraudCheckMultipleApplicants.json"
+        expectedPartialFailure: true
+        expectedErrorTriggered: true
+      - name: "noApplicants"
+        description: "Test C5 fraud check with empty applicant list"
+        applicationFormId: "APP-FRAUD-NEG-002"
+        correlationId: "test-corr-fraud-neg-002"
+        countryCode: "DE"
+        applicantIds: ""
+        inPayload: "requests/fraudCheckEmpty.json"
+        expectedAllSuccess: false
+      - name: "sfApplicantDetailsError"
+        description: "Test when SF applicant details call fails"
+        applicationFormId: "APP-FRAUD-NEG-003"
+        correlationId: "test-corr-fraud-neg-003"
+        countryCode: "FR"
+        applicantIds: "A1"
+        inPayload: "requests/fraudCheckSingleApplicant.json"
+        mockError: "SF_APPLICANT_ERROR"
+        expectedError: true
+
+  processApplicantsDetails:
+    flowName: "process-applicantsDetails-subflow"
+    testScenarios:
+      - name: "emptyApplicants"
+        description: "Test process applicants details with empty list"
+        applicationFormId: "APP-PROC-NEG-001"
+        correlationId: "test-corr-proc-neg-001"
+        countryCode: "US"
+        appilcantIds: ""
+        inPayload: "requests/processApplicantsEmpty.json"
+        expectedProcessed: 0
+      - name: "sfSapiError"
+        description: "Test when SF SAPI returns error"
+        applicationFormId: "APP-PROC-NEG-002"
+        correlationId: "test-corr-proc-neg-002"
+        countryCode: "FR"
+        appilcantIds: "A1"
+        inPayload: "requests/processApplicantsSingle.json"
+        mockError: "SF_SAPI_ERROR"
+        expectedError: true
+      - name: "lomapiError"
+        description: "Test when Local Market SAPI returns error"
+        applicationFormId: "APP-PROC-NEG-003"
+        correlationId: "test-corr-proc-neg-003"
+        countryCode: "GB"
+        appilcantIds: "A1,A2"
+        inPayload: "requests/processApplicantsMultiple.json"
+        mockError: "LOMAPI_ERROR"
+        expectedError: true
+
+  agencyFeedback:
+    flowName: "process-lomapi-agency-feedback-subflow"
+    testScenarios:
+      - name: "sfSapiError"
+        description: "Test agency feedback when SF SAPI fails"
+        applicationFormId: "APP-FEED-NEG-001"
+        correlationId: "test-corr-feed-neg-001"
+        countryCode: "US"
+        applicantId: "A1"
+        requestEventType: "FEEDBACK_RECEIVED"
+        inPayload: "requests/agencyFeedbackSuccess.json"
+        mockError: "SF_SAPI_ERROR"
+        expectedError: true
+      - name: "lomapiError"
+        description: "Test agency feedback when Local Market SAPI fails"
+        applicationFormId: "APP-FEED-NEG-002"
+        correlationId: "test-corr-feed-neg-002"
+        countryCode: "DE"
+        applicantId: "A1"
+        requestEventType: "FEEDBACK_RECEIVED"
+        inPayload: "requests/agencyFeedbackSuccess.json"
+        mockError: "LOMAPI_ERROR"
+        expectedError: true
+
+# Mock Configurations
+mockConfigurations:
+  sfSapiSuccess:
+    config: "HTTP_Sf_Accounts_Sapi_Request_configuration"
+    response: "responses/sfSapiSuccessResponse.json"
+    statusCode: 200
+  
+  lomapiSuccess:
+    config: "HTTP_Local_Market_Sapi_Request_configuration"
+    response: "responses/lomapiSuccessResponse.json"
+    statusCode: 200
+    
+  milesSapiSuccess:
+    config: "HTTP_Miles_Sapi_Request_configuration"
+    response: "responses/milesSapiSuccessResponse.json"
+    statusCode: 200
+    
+  sfCommonsSuccess:
+    config: "http-salesforce-common-sapi-config"
+    response: "responses/sfCommonsSuccessResponse.json"
+    statusCode: 200
+
+  # Error Mocks
+  sfSapiError:
+    config: "HTTP_Sf_Accounts_Sapi_Request_configuration"
+    errorType: "HTTP:BAD_REQUEST"
+    statusCode: 400
+    
+  lomapiError:
+    config: "HTTP_Local_Market_Sapi_Request_configuration"
+    errorType: "HTTP:INTERNAL_SERVER_ERROR"
+    statusCode: 500
+    
+  milesSapiError:
+    config: "HTTP_Miles_Sapi_Request_configuration"
+    errorType: "HTTP:TIMEOUT"
+    statusCode: 408
+    
+  sfCommonsError:
+    config: "http-salesforce-common-sapi-config"
+    errorType: "HTTP:UNAUTHORIZED"
+    statusCode: 401

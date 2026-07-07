@@ -1,0 +1,167 @@
+custom-error-code-prefix: "ORG_MB"
+application:
+ name: "${project.artifactId}"
+api:
+ name: "${project.artifactId}"
+ instanceId: "11"
+ version: "${api.build.version}"
+ http:
+  listener:
+   path: "/api/${api.name}/${api.version}/*"
+   host: "0.0.0.0"
+  
+sf:
+  sapi:
+    host: "salesforce-credit-sapi-dev-nnkf7u.lonthm.deu-c1.cloudhub.io"
+    #host: "127.0.0.1"
+    port: "443"
+    protocol: "HTTPS"
+    basePath: "/api/salesforce-credit-sapi/v3"
+    response:
+      timeout: "60000" 
+    aml-verify:
+      path: "/applications/{applicationId}/amlVerification"
+    creditDecision:
+      path: "/applications/{applicationId}/creditDecisions"
+  keystore: "${app.home}/ms-to-sf.jks"
+  certAlias: "ms-to-sf"
+  principal: "mulesoft@salesforce.com.integrationuser.ohqa"
+  aud: "https://test.salesforce.com"
+  tokenEndpoint: "https://test.salesforce.com/services/oauth2/token"       
+    
+    
+vip:
+  sapi:
+    host: "127.0.0.1"
+    port: "8081"
+    protocol: "HTTP"
+    basePath: "/api/vip-sapi/v1"
+    response:
+      timeout: "60000" 
+credit:
+  sapi:
+    host: "127.0.0.1"
+    #host: "credit-platform-sapi-dev-nnkf7u.lonthm.deu-c1.cloudhub.io"
+    port: "8083"
+    protocol: "HTTP"
+    #protocol: "HTTPS"
+    basePath: "/api/credit-platform-sapi/v1"
+    response:
+      timeout: "600000" 
+csl:
+  sapi:
+    host: "127.0.0.1"
+    port: "8081"
+    protocol: "HTTP"
+    basePath: "/api/csl-sapi/v1"   
+    response:
+      timeout: "60000"  
+vehicle-pricing:
+  sapi:
+    host: "127.0.0.1"
+    port: "8081"
+    protocol: "HTTP"
+    basePath: "/api/vehicle-pricing-sapi/v1"
+    response:
+      timeout: "60000" 
+alfa:
+  sapi:
+    host: "127.0.0.1"
+    port: "8081"
+    protocol: "HTTP"
+    basePath: "/api/alfa-sapi/v1"
+    response:
+      timeout: "60000" 
+mba:
+  sapi:
+    host: "127.0.0.1"
+    port: "8081"
+    protocol: "HTTP"
+    basePath: "/api/mb-advantage-sapi/v1"
+    response:
+      timeout: "60000" 
+      
+verify-aml:
+  sapi:
+    host: "verify-aml-sapi-dev-nnkf7u.lonthm.deu-c1.cloudhub.io"
+    port: "443"
+    protocol: "HTTPS"
+    basePath: "/api/verify-aml-sapi/v1"
+    response:
+      timeout: "60000" 
+    aml-check:
+      company:
+        path: "/aml-check/company"
+      person:
+        path: "/aml-check/person"
+
+miles-sapi:
+  protocol: "HTTPS"
+  host: "miles-sapi-dev-nnkf7u.lonthm.deu-c1.cloudhub.io"
+  basePath: "/api/miles-sapi/v1"
+  port: "443"
+  response:
+    timeout: "300000"
+  credit:
+    method: "PATCH"
+    path: "/credit/{applicationId}"
+  client:
+    id: "1ad597f688a6412499cdea319bfbf1bf"
+#property http.port is replaced by CloudHub 2.0 during the deployment
+http:
+  port: "8081"
+  
+client: 
+  id: "7ac35767d77e41008eb32292aaddfa4a"
+mq:
+  url: "https://mq-eu-west-1.anypoint.mulesoft.com/api/v1/organizations/c83a2291-ce49-4c83-a453-39a63be34c6c/environments/e52d7089-ab1c-412f-9a8e-f189d1f94417"
+  clientId: "b7f360d11e87417c88ef847340ff20b2"
+  events:
+    queue: "Q.ALFA.MBFS.CREDIT.SFDC.DEV.V1"
+    dlq: "DLQ.ALFA.MBFS.CREDIT.SFDC.DEV.V1"
+  syncUpdateCreditApp:
+    queue: "Q.SFDC.MBFS.CREDIT-UPDATES.MB-ADVANTAGE.DEV.V1"
+    dlq: "DLQ.SFDC.MBFS.CREDIT-UPDATES.MB-ADVANTAGE.DEV.V1"
+  reconnection:
+    attempts: "2"
+    frequency: "2000"
+  applicationOutbound:
+    queue: "Q.SFDC.MBFS.CREDIT-APPLICATION.MB-ADVANTAGE.DEV.V1"
+    dlq: "DLQ.SFDC.MBFS.CREDIT-APPLICATION.MB-ADVANTAGE.DEV.V1"
+  creditApplicationEnrichment:
+    queue: "Q.CREDIT-APP-PAPI.MBFS.CREDIT-APPLICATION-ENRICHMENT.SFDC.DEV.V1"
+    dlq: "DLQ.CREDIT-APP-PAPI.MBFS.CREDIT-APPLICATION-ENRICHMENT.SFDC.DEV.V1"
+  decisionOutbound:
+    queue: "Q.SFDC.MBFS.CREDIT-APPLICATION-DECISION.SFDC.DEV.V1"
+    dlq: "DLQ.SFDC.MBFS.CREDIT-APPLICATION-DECISION.SFDC.DEV.V1"
+  amlDecisionOutbound:
+    queue: "Q.SFDC.MBFS.CREDIT-APPLICATION-AML.VERIFY.DEV.V1"
+    dlq: "DLQ.SFDC.MBFS.CREDIT-APPLICATION-AML.VERIFY.DEV.V1"
+  creditDecisionOutbound:
+    queue: "Q.SFDC.MBFS.CREDIT-APPLICATION-DECISION.MILES.DEV.V1"
+    dlq: "DLQ.SFDC.MBFS.CREDIT-APPLICATION-DECISION.MILES.DEV.V1"
+
+log:
+  payloadFlag: "true"
+  
+common-sf:
+  sapi:
+    host: "salesforce-common-sapi-dev-nnkf7u.lonthm.deu-c1.cloudhub.io"
+    port: "443"
+    protocol: "HTTPS"
+    basePath: "/api/salesforce-common-sapi/v1"
+    response:
+      timeout: "60000"
+    businessExceptions:
+      path: "/businessExceptions/errors"
+  keystore: "${app.home}/ms-to-sf.jks"
+  certAlias: "ms-to-sf"
+  principal: "mule.integration@oneops-mbm.com.ohqa"
+  aud: "https://test.salesforce.com"
+  tokenEndpoint: "https://test.salesforce.com/services/oauth2/token"  
+ #tokenEndpoint: "https://test.salesforce.com/services/oauth2/token"
+
+EHRetry:
+ maxCount: "2"
+ intervalBetweenRetries: "10000"
+

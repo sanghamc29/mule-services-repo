@@ -1,0 +1,42 @@
+[
+    {
+        "applicationNumber": "AF-00013213",
+        "applicationId": "13X9Z000000ed7VUAQ",
+        "cancellationReason": "DealerCancel",
+        "applicantId": "13Y9Z000000Qe3RUAS",
+        "role": "MainApplicant",
+        "marketUniqueId": "04288210100",
+        "customerNumber": "AP-00017940",
+        "customerType": "Business",
+        "legalEntity": "MBFSI",
+        "addresses": [
+            {
+                "addressType": "MAIN_ADDRESS",
+                "city": "Piedimonte D'ischia",
+                "country": "AL",
+                "address": "Via dei Fiorentini 77",
+                "postalCode": "80070"
+            }
+        ],
+        "bankAccounts": [
+            {
+                "accountNumber": "IT44S0300203280825149129513"
+            }
+        ],
+        "phoneNumbers": [
+            {
+                "number": "081441 89120"
+            }
+        ],
+        "individualPerson": {
+            "taxId": "04288210100"
+        },
+        "companyInformation": {
+            "companyName": "Shubhashree",
+            "companyActivity": "37",
+            "subgroupOfEconomicActivity": "a3W9Z000000gb4jUAA",
+            "companyFoundingDate": "2025-07-01",
+            "companyRegistrationNumber": "1254-7645-7652"
+        }
+    }
+]

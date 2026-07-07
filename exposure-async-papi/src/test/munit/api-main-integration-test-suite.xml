@@ -1,0 +1,511 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" 
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" 
+      xmlns:munit="http://www.mulesoft.org/schema/mule/munit" 
+      xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" 
+      xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+      xmlns:anypoint-mq="http://www.mulesoft.org/schema/mule/anypoint-mq"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+      xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd 
+                          http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd 
+                          http://www.mulesoft.org/schema/mule/munit-tools http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+                          http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+                          http://www.mulesoft.org/schema/mule/anypoint-mq http://www.mulesoft.org/schema/mule/anypoint-mq/current/mule-anypoint-mq.xsd">
+    
+    <munit:config name="api-main-integration-test-suite.xml">
+        <munit:parameterizations file="test-parameters.yaml"/>
+    </munit:config>
+    
+    <!-- =============================================== -->
+    <!-- INTEGRATION TESTS FOR MAIN API FLOWS -->
+    <!-- =============================================== -->
+    
+    <munit:test name="api-main-affordability-calculations-integration-test" description="Integration test for API main affordability calculations flow with MQ subscriber and complete workflow">
+        <munit:behavior>
+            <!-- Mock MQ Subscriber -->
+            <munit-tools:mock-when processor="anypoint-mq:subscriber">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="anypoint-mq-config"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='#[readUrl("classpath://requests/c4CompanyEvent.json", "application/json")]'/>
+                    <munit-tools:attributes value='#[{
+                        properties: {correlationId: "test-integration-corr-001"},
+                        ackToken: "test-ack-token-001"
+                    }]'/>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+            <!-- Mock MQ Acknowledgment -->
+            <munit-tools:mock-when processor="anypoint-mq:ack">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="anypoint-mq-config"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='{"status":"acknowledged"}'/>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+            <!-- Mock affordability calculations sub-flow -->
+            <munit-tools:mock-when processor="flow-ref">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="name" whereValue="affordability-calculations-sub-flow"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='{"status":"SUCCESS","recordsProcessed":2,"message":"Affordability calculations completed successfully"}'/>
+                    <munit-tools:variables>
+                        <munit-tools:variable key="httpStatus" value="200"/>
+                    </munit-tools:variables>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+            <!-- Set event with C4 company event structure -->
+            <munit:set-event>
+                <munit:payload value='#[readUrl("classpath://requests/c4CompanyEvent.json", "application/json")]'/>
+                <munit:attributes value='#[{
+                    properties: {correlationId: "test-integration-corr-001"},
+                    ackToken: "test-ack-token-001"
+                }]'/>
+            </munit:set-event>
+        </munit:behavior>
+
+        <munit:execution>
+            <flow-ref name="api-main-affordability-calculations"/>
+        </munit:execution>
+
+        <munit:validation>
+            <munit-tools:assert-that expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+            <munit-tools:assert-that expression="#[payload.status]" is="#[MunitTools::equalTo('SUCCESS')]"/>
+            
+            <!-- Verify affordability calculations sub-flow was called -->
+            <munit-tools:verify-call processor="flow-ref">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="name" whereValue="affordability-calculations-sub-flow"/>
+                </munit-tools:with-attributes>
+            </munit-tools:verify-call>
+            
+            <!-- Verify MQ acknowledgment was called -->
+            <munit-tools:verify-call processor="anypoint-mq:ack">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="anypoint-mq-config"/>
+                </munit-tools:with-attributes>
+            </munit-tools:verify-call>
+            
+            <!-- Verify correlation ID was properly set -->
+            <munit-tools:assert-that expression="#[vars.correlationId]" is="#[MunitTools::equalTo('test-integration-corr-001')]"/>
+        </munit:validation>
+    </munit:test>
+
+    <munit:test name="api-main-fraud-check-integration-test" description="Integration test for API main fraud check flow with MQ subscriber and complete workflow">
+        <munit:behavior>
+            <!-- Mock MQ Subscriber for fraud check -->
+            <munit-tools:mock-when processor="anypoint-mq:subscriber">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="anypoint-mq-config"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='#[readUrl("classpath://requests/c5CompanyEvent.json", "application/json")]'/>
+                    <munit-tools:attributes value='#[{
+                        properties: {correlationId: "test-integration-fraud-001"},
+                        ackToken: "test-ack-token-fraud-001",
+                        deliveryCount: 1
+                    }]'/>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+            <!-- Mock MQ Acknowledgment -->
+            <munit-tools:mock-when processor="anypoint-mq:ack">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="anypoint-mq-config"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='{"status":"acknowledged"}'/>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+            <!-- Mock fraud check orchestration flow -->
+            <munit-tools:mock-when processor="flow-ref">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="name" whereValue="c5-fraud-check-orchestration-flow"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='{"status":"SUCCESS","applicantsProcessed":3,"fraudCheckCompleted":true}'/>
+                    <munit-tools:variables>
+                        <munit-tools:variable key="httpStatus" value="200"/>
+                    </munit-tools:variables>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+            <munit:set-event>
+                <munit:payload value='#[readUrl("classpath://requests/c5CompanyEvent.json", "application/json")]'/>
+                <munit:attributes value='#[{
+                    properties: {correlationId: "test-integration-fraud-001"},
+                    ackToken: "test-ack-token-fraud-001",
+                    deliveryCount: 1
+                }]'/>
+            </munit:set-event>
+        </munit:behavior>
+
+        <munit:execution>
+            <flow-ref name="api-main-fraud-check"/>
+        </munit:execution>
+
+        <munit:validation>
+            <munit-tools:assert-that expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+            <munit-tools:assert-that expression="#[payload.status]" is="#[MunitTools::equalTo('SUCCESS')]"/>
+            
+            <!-- Verify fraud check orchestration flow was called -->
+            <munit-tools:verify-call processor="flow-ref">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="name" whereValue="c5-fraud-check-orchestration-flow"/>
+                </munit-tools:with-attributes>
+            </munit-tools:verify-call>
+            
+            <!-- Verify MQ acknowledgment was called -->
+            <munit-tools:verify-call processor="anypoint-mq:ack">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="anypoint-mq-config"/>
+                </munit-tools:with-attributes>
+            </munit-tools:verify-call>
+            
+            <!-- Verify variables were properly set -->
+            <munit-tools:assert-that expression="#[vars.correlationId]" is="#[MunitTools::equalTo('test-integration-fraud-001')]"/>
+            <munit-tools:assert-that expression="#[vars.applicantIds]" is="#[MunitTools::notNullValue()]"/>
+        </munit:validation>
+    </munit:test>
+
+    <munit:test name="api-main-customer-exposure-integration-test" description="Integration test for API main customer exposure flow with MQ subscriber and complete workflow">
+        <munit:behavior>
+            <!-- Mock MQ Subscriber for customer exposure -->
+            <munit-tools:mock-when processor="anypoint-mq:subscriber">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="anypoint-mq-config"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='#[readUrl("classpath://requests/c4CompanyEvent.json", "application/json")]'/>
+                    <munit-tools:attributes value='#[{
+                        properties: {correlationId: "test-integration-exposure-001"},
+                        ackToken: "test-ack-token-exposure-001"
+                    }]'/>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+            <!-- Mock MQ Acknowledgment -->
+            <munit-tools:mock-when processor="anypoint-mq:ack">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="anypoint-mq-config"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='{"status":"acknowledged"}'/>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+            <!-- Mock customer exposure sub-flow -->
+            <munit-tools:mock-when processor="flow-ref">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="name" whereValue="customer-exposure-sub-flow"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='{"status":"SUCCESS","customersProcessed":2,"exposureCalculated":true}'/>
+                    <munit-tools:variables>
+                        <munit-tools:variable key="httpStatus" value="200"/>
+                    </munit-tools:variables>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+            <munit:set-event>
+                <munit:payload value='#[readUrl("classpath://requests/c4CompanyEvent.json", "application/json")]'/>
+                <munit:attributes value='#[{
+                    properties: {correlationId: "test-integration-exposure-001"},
+                    ackToken: "test-ack-token-exposure-001"
+                }]'/>
+            </munit:set-event>
+        </munit:behavior>
+
+        <munit:execution>
+            <flow-ref name="api-main-customer-exposure"/>
+        </munit:execution>
+
+        <munit:validation>
+            <munit-tools:assert-that expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+            <munit-tools:assert-that expression="#[payload.status]" is="#[MunitTools::equalTo('SUCCESS')]"/>
+            
+            <!-- Verify customer exposure sub-flow was called -->
+            <munit-tools:verify-call processor="flow-ref">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="name" whereValue="customer-exposure-sub-flow"/>
+                </munit-tools:with-attributes>
+            </munit-tools:verify-call>
+            
+            <!-- Verify MQ acknowledgment was called -->
+            <munit-tools:verify-call processor="anypoint-mq:ack">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="anypoint-mq-config"/>
+                </munit-tools:with-attributes>
+            </munit-tools:verify-call>
+        </munit:validation>
+    </munit:test>
+
+    <munit:test name="api-main-process-lomapi-agency-reports-integration-test" description="Integration test for API main process lomapi agency reports flow">
+        <munit:behavior>
+            <!-- Mock MQ Subscriber for agency reports -->
+            <munit-tools:mock-when processor="anypoint-mq:subscriber">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="anypoint-mq-config"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='#[readUrl("classpath://requests/c6CompanyEvent.json", "application/json")]'/>
+                    <munit-tools:attributes value='#[{
+                        properties: {correlationId: "test-integration-reports-001"},
+                        ackToken: "test-ack-token-reports-001"
+                    }]'/>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+            <!-- Mock MQ Acknowledgment -->
+            <munit-tools:mock-when processor="anypoint-mq:ack">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="anypoint-mq-config"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='{"status":"acknowledged"}'/>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+            <!-- Mock process applicants details sub-flow -->
+            <munit-tools:mock-when processor="flow-ref">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="name" whereValue="process-applicantsDetails-subflow"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='{"status":"SUCCESS","applicantsProcessed":2,"agencyReportsProcessed":true}'/>
+                    <munit-tools:variables>
+                        <munit-tools:variable key="httpStatus" value="200"/>
+                    </munit-tools:variables>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+            <munit:set-event>
+                <munit:payload value='#[readUrl("classpath://requests/c6CompanyEvent.json", "application/json")]'/>
+                <munit:attributes value='#[{
+                    properties: {correlationId: "test-integration-reports-001"},
+                    ackToken: "test-ack-token-reports-001"
+                }]'/>
+            </munit:set-event>
+        </munit:behavior>
+
+        <munit:execution>
+            <flow-ref name="api-main-process-lomapi-agency-reports"/>
+        </munit:execution>
+
+        <munit:validation>
+            <munit-tools:assert-that expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+            <munit-tools:assert-that expression="#[payload.status]" is="#[MunitTools::equalTo('SUCCESS')]"/>
+            
+            <!-- Verify process applicants details sub-flow was called -->
+            <munit-tools:verify-call processor="flow-ref">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="name" whereValue="process-applicantsDetails-subflow"/>
+                </munit-tools:with-attributes>
+            </munit-tools:verify-call>
+        </munit:validation>
+    </munit:test>
+
+    <munit:test name="api-main-agency-feedback-integration-test" description="Integration test for API main agency feedback flow">
+        <munit:behavior>
+            <!-- Mock MQ Subscriber for agency feedback -->
+            <munit-tools:mock-when processor="anypoint-mq:subscriber">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="anypoint-mq-config"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='#[readUrl("classpath://requests/c7CompanyEvent.json", "application/json")]'/>
+                    <munit-tools:attributes value='#[{
+                        properties: {correlationId: "test-integration-feedback-001"},
+                        ackToken: "test-ack-token-feedback-001"
+                    }]'/>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+            <!-- Mock MQ Acknowledgment -->
+            <munit-tools:mock-when processor="anypoint-mq:ack">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="anypoint-mq-config"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='{"status":"acknowledged"}'/>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+            <!-- Mock agency feedback sub-flow -->
+            <munit-tools:mock-when processor="flow-ref">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="name" whereValue="process-lomapi-agency-feedback-subflow"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='{"status":"SUCCESS","feedbackProcessed":true,"applicantId":"A1"}'/>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+            <munit:set-event>
+                <munit:payload value='#[readUrl("classpath://requests/c7CompanyEvent.json", "application/json")]'/>
+                <munit:attributes value='#[{
+                    properties: {correlationId: "test-integration-feedback-001"},
+                    ackToken: "test-ack-token-feedback-001"
+                }]'/>
+            </munit:set-event>
+        </munit:behavior>
+
+        <munit:execution>
+            <flow-ref name="api-main-process-lomapi-agency-feedback-flow"/>
+        </munit:execution>
+
+        <munit:validation>
+            <munit-tools:assert-that expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+            <munit-tools:assert-that expression="#[payload.status]" is="#[MunitTools::equalTo('SUCCESS')]"/>
+            
+            <!-- Verify agency feedback sub-flow was called -->
+            <munit-tools:verify-call processor="flow-ref">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="name" whereValue="process-lomapi-agency-feedback-subflow"/>
+                </munit-tools:with-attributes>
+            </munit-tools:verify-call>
+        </munit:validation>
+    </munit:test>
+
+    <!-- =============================================== -->
+    <!-- NEGATIVE INTEGRATION TESTS -->
+    <!-- =============================================== -->
+    
+    <munit:test name="api-main-affordability-calculations-mq-error-test" description="Negative integration test for affordability calculations with MQ error">
+        <munit:behavior>
+            <!-- Mock MQ Subscriber to throw error -->
+            <munit-tools:mock-when processor="anypoint-mq:subscriber">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="anypoint-mq-config"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-call flow="mq-error-mock-flow"/>
+            </munit-tools:mock-when>
+
+            <!-- Mock global error handler -->
+            <munit-tools:mock-when processor="error-handler">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="ref" whereValue="mq-global-error-handler"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='{"error":"MQ_ERROR","message":"Message queue error occurred"}'/>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+            <munit:set-event>
+                <munit:payload value='{"invalid": "payload"}'/>
+            </munit:set-event>
+        </munit:behavior>
+
+        <munit:execution>
+            <try doc:name="Try">
+                <flow-ref name="api-main-affordability-calculations"/>
+                <error-handler>
+                    <on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+                        <set-variable value="#[true]" doc:name="Set mqErrorOccurred" variableName="mqErrorOccurred"/>
+                        <set-variable value="#[error.errorType.identifier]" doc:name="Set mqErrorType" variableName="mqErrorType"/>
+                        <set-payload value='{"error": "MQ integration failed"}' doc:name="Set MQ error payload"/>
+                    </on-error-continue>
+                </error-handler>
+            </try>
+        </munit:execution>
+
+        <munit:validation>
+            <munit-tools:assert-that expression="#[vars.mqErrorOccurred default false]" is="#[MunitTools::equalTo(true)]"/>
+        </munit:validation>
+    </munit:test>
+
+    <!-- =============================================== -->
+    <!-- BOUNDARY AND EDGE CASE TESTS -->
+    <!-- =============================================== -->
+    
+    <munit:test name="api-main-boundary-test-large-payload" description="Boundary test for handling large payloads across all flows">
+        <munit:behavior>
+            <!-- Create large payload with multiple applicants -->
+            <ee:transform doc:name="Create Large Test Payload" doc:id="create-large-payload">
+                <ee:message>
+                    <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  data: {
+    payload: {
+      EU_Market__c: "US",
+      EU_ApplicationFormId__c: "LARGE-APP-001",
+      EU_CurrencyIsoCode__c: "USD",
+      EU_Message__c: "A1,A2,A3,A4,A5,A6,A7,A8,A9,A10"
+    }
+  }
+}]]></ee:set-payload>
+                </ee:message>
+            </ee:transform>
+
+            <munit:set-event>
+                <munit:payload value='#[payload]'/>
+                <munit:attributes value='#[{
+                    properties: {correlationId: "test-boundary-large-001"},
+                    ackToken: "test-ack-token-boundary-001"
+                }]'/>
+            </munit:set-event>
+
+            <!-- Mock all sub-flows for large payload processing -->
+            <munit-tools:mock-when processor="flow-ref">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="name" whereValue="affordability-calculations-sub-flow"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='{"status":"SUCCESS","recordsProcessed":10,"message":"Large payload processed successfully"}'/>
+                    <munit-tools:variables>
+                        <munit-tools:variable key="httpStatus" value="200"/>
+                    </munit-tools:variables>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+            <munit-tools:mock-when processor="anypoint-mq:ack">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="anypoint-mq-config"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='{"status":"acknowledged"}'/>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+        </munit:behavior>
+
+        <munit:execution>
+            <flow-ref name="api-main-affordability-calculations"/>
+        </munit:execution>
+
+        <munit:validation>
+            <munit-tools:assert-that expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+            <munit-tools:assert-that expression="#[payload.recordsProcessed]" is="#[MunitTools::equalTo(10)]"/>
+            <munit-tools:assert-that expression="#[vars.correlationId]" is="#[MunitTools::equalTo('test-boundary-large-001')]"/>
+        </munit:validation>
+    </munit:test>
+
+    <!-- =============================================== -->
+    <!-- UTILITY ERROR MOCK FLOWS -->
+    <!-- =============================================== -->
+    
+    <flow name="mq-error-mock-flow" doc:id="mq-error-mock-flow-id">
+        <ee:transform doc:name="Set MQ Error Response" doc:id="set-mq-error-response">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "error": "MQ service unavailable",
+  "message": "Anypoint MQ subscriber failed to process message",
+  "timestamp": now(),
+  "errorCode": "MQ_CONNECTION_ERROR"
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        <raise-error doc:name="Raise MQ error" doc:id="mq-error-raise" type="ANYPOINT-MQ:CONNECTIVITY"/>
+    </flow>
+
+</mule>

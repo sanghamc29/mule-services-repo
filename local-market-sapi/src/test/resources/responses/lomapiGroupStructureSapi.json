@@ -1,0 +1,22 @@
+{
+    "businessPartners": [
+        {
+            "externDisclosure": {
+                "agencies": [
+                    {
+                        "affiliatedCompanies": [
+                            {
+                                "companyId": "504033972",
+                                "affiliationType": "parentCompany",
+                                "companyFlag": true,
+                                "companyName": "TERMOFLUITECNICA - INSTALAÇÕES TÉCNICAS, SOCIEDADE UNIPESSOAL, LDA",
+                                "countryId": "PT",
+                                "companyIdType": "VAT_NUMBER"
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    ]
+}

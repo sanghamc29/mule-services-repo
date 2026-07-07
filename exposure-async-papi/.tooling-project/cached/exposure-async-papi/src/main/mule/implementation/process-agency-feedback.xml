@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<sub-flow name="process-lomapi-agency-feedback-subflow" doc:id="a0635b05-5ab4-4b39-8d47-4ea91e0c1d62" >
+		<ee:transform doc:name="Prepare HTTP Req Mapping SF Applicant Details" doc:id="b6b32014-6df8-40f8-9ae4-bd87a4bb4dd9" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="httpOperation"><![CDATA[%dw 2.0
+output application/java
+---
+"placeholder"]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="sf-accounts-sapi-call-subflow" doc:id="d6b42535-0abc-4252-a8b6-8df8d1a3a786" name="sf-accounts-sapi-call-subflow" target="applicantsDetails" />
+		<ee:transform doc:name="Prepare HTTP Req Mapping Lomapi Sapi-person" doc:id="749a518f-3fcc-4c01-a2d6-da0ade18716e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+vars.applicantsDetails ]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="httpOperation"><![CDATA[%dw 2.0
+output application/java
+---
+"placeholder"]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="local-market-sapi-call-subflow" doc:id="c476e981-d0a4-4893-8917-4a052b3ff76b" name="local-market-sapi-call-subflow" />
+	</sub-flow>
+</mule>

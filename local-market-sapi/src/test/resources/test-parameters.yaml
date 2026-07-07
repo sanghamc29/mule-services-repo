@@ -1,0 +1,66 @@
+getGroupStructures:
+ flowName: "post:\\customers\\affiliatedCompanies:application\\json:api-config"
+ mockAttributeName: "doc:name"
+ mockCall: "Group Structure Request"
+ processor: "http:request" 
+ inPayload: "requests/getPayload.json" 
+ inAttributes: "attributes/getAffiliatedCompanies.json"
+ outPayload: "responses/lomapiGroupStructureSapi.json"
+ mockCallOutput: "responses/lomapiGroupStructureMock.json"
+ 
+companyAffordabilityCalculations:
+ flowName: "get:\\customers\\affordabilityCalculations\\company:api-config"
+ mockAttributeName: "doc:name"
+ mockCall: "Company Affordability Calculation Request"
+ processor: "http:request"
+ inPayload: "requests/getPayload.json" 
+ inAttributes: "attributes/companyAffordabilityCalculations.json"
+ outPayload: "responses/companyAffordabilityCalculations.json"
+ mockCallOutput: "responses/companyAffordabilityCalculationsMock.json"
+ 
+personAffordabilityCalculations:
+ flowName: "post:\\customers\\affordabilityCalculations\\person:application\\json:api-config"
+ mockAttributeName: "doc:name"
+ mockCall: "Person Affordability Calculation Request"
+ processor: "http:request"
+ inPayload: "requests/personAffordabilityCalculations.json"
+ inAttributes: "attributes/personAffordabilityCalculations.json"
+ outPayload: "responses/personAffordabilityCalculations.json"
+ mockCallOutput: "responses/personAffordabilityCalculations.json"
+ 
+apiMain:
+ flowName: "api-main"
+ processor: "apikit:router"
+ mockCall: "api-config"
+ mockAttributeName: "config-ref"
+ inPayload: "requests/personAffordabilityCalculations.json"
+ inAttributes: "attributes/personAffordabilityCalculations.json"
+ outPayload: "responses/personAffordabilityCalculations.json"
+ mockCallOutput: "responses/personAffordabilityCalculations.json"
+
+getCompanies:
+ flowName: "get:\\customers:api-config"
+ mockAttributeName: "doc:name"
+ mockCall: "Company C2 Request"
+ mockCall1 : "Query Salesforce"
+ processor: "http:request"
+ processor1: "salesforce:query"
+ inPayload: "requests/getPayload.json" 
+ inAttributes: "attributes/getCustomers.json"
+ outPayload: "responses/getCustomers.json"
+ mockCallOutput: "responses/getCustomersResponse.json"  
+ mockCallOutput1: "responses/enumTranslatedValuesHousenumberStreet.json"
+ 
+ 
+fraudCheck:
+ flowName: "post:\\customers\\fraudDataCheck\\person:application\\json:api-config"
+ mockAttributeName: "doc:name"
+ mockCall: "Person Fraud Check C5 Request"
+ mockCall1 : "Query Salesforce"
+ processor: "http:request"
+ processor1: "salesforce:query"
+ inPayload: "requests/personFraudCheckReq.json"
+ inAttributes: "attributes/personFraudCheckAttr.json"
+ outPayload: "responses/personFraudCheckResp.json"
+ mockCallOutput: "responses/personFraudCheckMockOutResp.json"
+ mockCallOutput1: "responses/enumTranslatedValuesHousenumberStreet.json"

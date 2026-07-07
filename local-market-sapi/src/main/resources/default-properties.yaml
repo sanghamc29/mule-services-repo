@@ -1,0 +1,84 @@
+custom-error-code-prefix: "ORG_MB"
+application:
+ name: "${project.artifactId}"
+api:
+ name: "${project.artifactId}"
+ instanceId: "19539624" #this should be configured as a runtime property via Runtime Manager
+ version: "${api.build.version}"
+ http:
+  listener:
+   path: "/api/${api.name}/${api.version}/*"
+   host: "0.0.0.0"
+
+#property http.port is replaced by CloudHub 2.0 during the deployment
+http:
+  port: "8081"
+
+log:
+  payloadFlag: "false"
+
+lomapi:
+  protocol: "HTTPS"
+  host: "onehouse-marketlayer-int.api.mercedes-benz.com"
+  port: "443"
+  response:
+    timeout: "30000"
+  oauth2:
+    token:
+      url: "https://sso-int.mercedes-benz.com/as/token.oauth2"
+  groupStructure:
+    path: "api-lomapi/{countryCode}/company/groupStructure"
+  companyAffordability:
+    path: "api-lomapi/{countryCode}/company/marketCalcCompany"
+  personAffordability:
+    path: "api-lomapi/{countryCode}/person/marketCalcPerson"
+  companyByCustomerId:
+    path: "api-lomapi/{countryCode}/company/{customerId}"
+  personFraudCheck:
+    path: "api-lomapi/{countryCode}/dataCheckPerson/C5"
+  agencyData:
+    applicantType:
+      mainApplicant: "MainApplicant" 
+    businessCustomerType: "Business"
+    path: "api-lomapi/{countryCode}/C6"
+    callbackURL: 
+      pt: "https://local-market-eapi-dev-nnkf7u.lonthm.deu-c1.cloudhub.io/api/local-market-eapi/v1/PT/callback/C6"
+      it: "https://local-market-eapi-dev-nnkf7u.lonthm.deu-c1.cloudhub.io/api/local-market-eapi/v1/IT/callback/C6"
+    dataType:
+      person: "Person"
+      company: "Company"
+    requestTypes:
+     initial: "Init"
+     revision: "Revision"   
+  agencyFeedback:
+    businessCustomerType: "Business"
+    path: "api-lomapi/{countryCode}/C7"
+    dataType:
+      person: "Person"
+      company: "Company"
+
+objectstore:
+  token:
+    ttl: "1700"
+    expiry: "1500"
+    
+sfOh:
+  keystore: "${app.home}/ms-to-sf.jks"
+  certAlias: "ms-to-sf"
+  principal: "mulesoft@salesforce.com.integrationuser.devint"
+  aud: "https://test.salesforce.com"
+  tokenEndpoint: "https://oneops-mbm--devint.sandbox.my.salesforce.com/services/oauth2/token"
+  restApiVersion: "v61.0"
+  reconnection:
+    frequencyInMs: "5000"
+
+translation:
+  houseNumber:
+    originalValue: "House Number"
+    nodeName: "houseNumberTranslation"
+    serviceName: "C6 Transformation"
+  C5:
+    incomeDocumentType:
+      nodeName: "incomeDocumentType"
+      serviceName: "C5Scipafi"
+    initialValue: "House Number"

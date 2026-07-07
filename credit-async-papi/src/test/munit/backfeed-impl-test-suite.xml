@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="backfeed-test-suite.xml" />
+	<munit:test name="post-application-details-to-mb-advantage-sapi-subflowTest" doc:id="002f4679-893b-4432-95b6-b301b5fd0c9a" description="Test" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock get-application-by-id-subflow" doc:id="ad706998-c9c9-4bf9-b06a-4bf84b4964db" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="68fb20ef-d34c-434d-b438-f492272e060b" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[%dw 2.0 output application/json --- readUrl('classpath://samples/application-details-from-sf-sapi-mock-response.json', 'application/json')]" mediaType="application/json" />
+					<munit-tools:attributes value="#[{statusCode: 200}]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock post request to MBA" doc:id="d8297f28-5769-44d3-ad3e-7a28808adc32" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="ca51e902-5f59-4a82-89ce-79d756ff1d94" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:attributes value="#[{statusCode:201}]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock post request to SF Sapi" doc:id="03bf4eaa-9d0b-4bb7-b129-2360202c65bd" processor="http:request">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="3ffaf4af-88b4-4916-818b-53a8428e170c" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:attributes value="#[{statusCode:201}]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Anypoint MQ Ack" doc:id="9a63c231-ca4c-44d9-a64c-8da4eda23719" processor="anypoint-mq:ack" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="e9fe5a90-beb8-4685-b07a-96aba0c90128" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Subscribe application details Payload" doc:id="ceb65b6f-f7fd-4584-aef6-f8b8286ba81d" >
+				<munit:payload value='#[output apllication/json --- readUrl("classpath://samples/subscribe-application-details-mock-payload.json", "application/json")]' />
+				<munit:attributes value='#[output apllication/json&#10;---&#10;readUrl("classpath://samples/subscribe-dealer-application-details-ack-id.json", "application/json")]' />
+				<munit:variables >
+					<munit:variable key="appId" value="#[1234]" />
+				</munit:variables>
+			</munit:set-event>
+			<flow-ref doc:name="Flow ref to subscribe-application-details-and-post-to-mba-flow" doc:id="45f497de-b1ee-4888-8eac-133d4a8a8906" name="backfeed-credit-app-created-in-salesforce-to-mb-advantage-flow" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="Validate Response" doc:id="99ec7eac-fe44-4ec3-883f-9c6c1259d157" actual="#[vars.ackId]" expected='#[output application/json&#10;---&#10;(readUrl("classpath://samples/subscribe-dealer-application-details-ack-id.json", "application/json")).ackToken]' />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="post-application-details-to-mba-sapi-subflowTest-AnyErrorScenario" doc:id="6599e5d6-93e9-4ff7-aad4-f25660efd96a" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock get-application-by-id-subflow" doc:id="9f03942d-a1d1-4114-a05d-24c44d0018fb" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="68fb20ef-d34c-434d-b438-f492272e060b" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[%dw 2.0 output application/json --- readUrl('classpath://samples/application-details-from-sf-sapi-mock-response.json', 'application/json')]" mediaType="application/json" />
+					<munit-tools:attributes value="#[{statusCode: 200}]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock post request to MBA" doc:id="f86e5bf3-bdd1-4595-a35f-c4798e71c560" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="ca51e902-5f59-4a82-89ce-79d756ff1d94" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="ANY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock post request to SF Sapi" doc:id="bf57b481-daab-4b32-b8f1-38e96d67eb62" processor="http:request">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="3ffaf4af-88b4-4916-818b-53a8428e170c" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="ANY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Anypoint MQ Publish to DLQ" doc:id="b7574641-633b-42f7-af90-a26acb7f06e5" processor="anypoint-mq:publish" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="d2e8afe3-6962-4fe9-abce-a7ebc5b22706" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Anypoint MQ Ack" doc:id="0b7a3a5f-f5f0-40b3-97d5-f9507eea3204" processor="anypoint-mq:ack" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="6c664f69-83ab-4fdd-b590-487911d80898" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Subscribe application details Payload" doc:id="03984a91-d2e4-4598-a166-db4f06177995" >
+				<munit:payload value='#[output apllication/json --- readUrl("classpath://samples/subscribe-application-details-mock-payload.json", "application/json")]' />
+				<munit:attributes value='#[output apllication/json&#10;---&#10;readUrl("classpath://samples/subscribe-dealer-application-details-ack-id.json", "application/json")]' />
+			</munit:set-event>
+			<flow-ref doc:name="Flow ref to subscribe-application-details-and-post-to-mba-flow" doc:id="c687d7f6-98ec-4ca6-9106-c966abb4b88f" name="get-application-details-and-post-to-mba-sapi" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="Verify MBA Sapi Call Error Log" doc:id="877d7138-6dcc-460e-9e1b-f5b6b9017abb" processor="logger" times="1" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="ee200618-e050-459f-bf83-d23201d0d212" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="post-application-details-to-mba-sapi-subflowTest-ConnectivityErrorScenario" doc:id="eb68cb43-43d7-432b-aeb9-90064d655cf3" description="Test" expectedErrorType="HTTP:CONNECTIVITY" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock get-application-by-id-subflow" doc:id="4be40859-f38a-4eb4-9197-f65c2f3f8068" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="68fb20ef-d34c-434d-b438-f492272e060b" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[%dw 2.0 output application/json --- readUrl('classpath://samples/application-details-from-sf-sapi-mock-response.json', 'application/json')]" mediaType="application/json" />
+					<munit-tools:attributes value="#[{statusCode: 200}]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock post request to MBA" doc:id="1a9dd804-c613-427c-9f35-847a603f6de3" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="ca51e902-5f59-4a82-89ce-79d756ff1d94" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:CONNECTIVITY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock post request to SF Sapi" doc:id="7f46c06c-c4d2-4ca2-8587-84097802c360" processor="http:request">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="3ffaf4af-88b4-4916-818b-53a8428e170c" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:CONNECTIVITY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Anypoint MQ Nack" doc:id="c8eff6a9-b19b-4c91-b494-53b8ee7af69f" processor="anypoint-mq:nack" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="fa555f8d-c903-42f6-a51f-f8a3e2bbbdda" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Subscribe application details Payload" doc:id="b13db6dd-93bb-4545-9726-6f4867208af2" >
+				<munit:payload value='#[output apllication/json --- readUrl("classpath://samples/subscribe-application-details-mock-payload.json", "application/json")]' />
+				<munit:attributes value='#[output apllication/json&#10;---&#10;readUrl("classpath://samples/subscribe-dealer-application-details-ack-id.json", "application/json")]' />
+				<munit:variables >
+					<munit:variable key="appId" value='#["1234"]' />
+				</munit:variables>
+			</munit:set-event>
+			<flow-ref doc:name="Flow ref to subscribe-application-details-and-post-to-mba-flow" doc:id="a83b4ceb-b69f-4af7-ae21-3f4e79e7bf27" name="get-application-details-and-post-to-mba-sapi" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="Verify MBA Sapi Call Error Log" doc:id="f7045156-7eb3-46f1-baa0-597010fd257f" processor="logger" times="1" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="3d697bef-ec3d-41ad-8931-100eeaa3e7aa" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

@@ -1,0 +1,21 @@
+{
+    "data": {
+        "schema": "FdTB-Amg5Q_m7bYT6qh-Jw",
+        "payload": {
+            "EU_EventType__c": "Execute AML",
+            "EU_Market__c": "PT",
+            "CreatedById": "00576000000a38QAAQ",
+            "EU_ApplicationFormId__c": "13X76000000CdDhEAK",
+            "EU_UniqueId__c": null,
+            "EU_IntegrationLogId__c": "a3m760000006YCJAA2",
+            "CreatedDate": "2024-09-18T06:40:08Z",
+            "EU_Message__c":   "{\"Application Type\": \"Retail Small Business\",\"Representatives IDs\":\"[13Y9Z000000Mpv7UAC,13Y9Z000000MpwjUAC,13Y9Z000000MpyLUAS]\"}"
+        },
+        "event": {
+            "EventUuid": "1bba3f12-1a8b-4c3a-a15b-8bb275b732b6",
+            "replayId": 5577395,
+            "EventApiName": "EU_MulesoftIntegrationAsync__e"
+        }
+    },
+    "channel": "/event/Application_And_Credit__chn"
+}

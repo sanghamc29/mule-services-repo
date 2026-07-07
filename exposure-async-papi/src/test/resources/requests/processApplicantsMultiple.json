@@ -1,0 +1,25 @@
+{
+  "request": "start",
+  "applicantIds": ["A1", "A2"],
+  "metadata": {
+    "requestId": "REQ-001",
+    "timestamp": "2024-01-15T10:30:00Z",
+    "source": "agency-system"
+  },
+  "applicants": [
+    {
+      "applicantId": "A1",
+      "name": "John Doe",
+      "type": "individual",
+      "country": "US",
+      "status": "Active"
+    },
+    {
+      "applicantId": "A2",
+      "name": "Jane Smith",
+      "type": "individual", 
+      "country": "US",
+      "status": "Active"
+    }
+  ]
+}

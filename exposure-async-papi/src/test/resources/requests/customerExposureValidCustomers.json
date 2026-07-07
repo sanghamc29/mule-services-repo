@@ -1,0 +1,16 @@
+[
+  {
+    "applicantId": "A1",
+    "accountId": "ACC1",
+    "customerId": "CUST1",
+    "name": "John Doe",
+    "status": "Active"
+  },
+  {
+    "applicantId": "A2",
+    "accountId": "ACC2",
+    "customerId": "CUST2",
+    "name": "Jane Smith", 
+    "status": "Active"
+  }
+]

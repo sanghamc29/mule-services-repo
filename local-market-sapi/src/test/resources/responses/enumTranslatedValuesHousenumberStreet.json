@@ -1,0 +1,26 @@
+[
+  {
+    "EU_Market__c": "IT",
+    "EU_Language__c": "it",
+    "EU_TypeId__c": "",
+    "EU_TypeName__c": "",
+    "EU_TargetValue__c": "Numero civico",
+    "Id": null,
+    "type": "EU_LocalizationMapping__c",
+    "EU_OriginalValue__c": "House Number",
+    "EU_ServiceName__c": "C6 Transformation",
+    "EU_NodeName__c": "houseNumberTranslation"
+  },
+  {
+    "EU_Market__c": "PT",
+    "EU_Language__c": "pt",
+    "EU_TypeId__c": "",
+    "EU_TypeName__c": "",
+    "EU_TargetValue__c": "House Number",
+    "Id": null,
+    "type": "EU_LocalizationMapping__c",
+    "EU_OriginalValue__c": "House Number",
+    "EU_ServiceName__c": "C6 Transformation",
+    "EU_NodeName__c": "houseNumberTranslation"
+  }
+]

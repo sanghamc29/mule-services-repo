@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="   http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd   http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd   http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="agencyData-c6-test-suite.xml"/>
+	<munit:test description="Test" doc:id="de3def38-102b-4086-848b-0b33f313b929" name="api-test-suite-post:\customers\agencyData\person:application\json:api-configTest">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock Lomapi Requester" doc:id="383c89a3-6c40-4ba9-bcf9-06a32a4903c4" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Lomapi Requester" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- (readUrl('classpath://responses/agencyDataResPayload.json','application/json'))]" mediaType="application/json" />
+					<munit-tools:variables >
+						<munit-tools:variable key="enums" value="#[output application/json --- (readUrl('classpath://responses/agencyDataResPayload.json','application/json'))]" mediaType="application/json" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock when Sf translation mudule response" doc:id="fd39c6b7-e802-4103-921e-9f90eead540a" processor="salesforce:query">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Query Salesforce" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- (readUrl('classpath://responses/enumTranslatedValuesHousenumberStreet.json'))]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<munit:set-event doc:name="Set Event" doc:id="cd78f5eb-a43b-45fc-91b4-dcdd815eeb47" >
+				<munit:payload value="#[output application/json --- readUrl('classpath://requests/agencyDataReqPayload.json','application/json')]" mediaType="application/json" />
+				<munit:attributes value="#[output application/json --- readUrl('classpath://attributes/agencyDataAttr.json','application/json')]" mediaType="application/json" />
+				<munit:variables >
+					<munit:variable key="countryCode" value="IT" mediaType="text/plain" />
+				</munit:variables>
+			</munit:set-event>
+			<flow-ref doc:id="31c499f7-136c-498a-801c-a368f3c59a70" doc:name="Flow-ref to post:\customers\agencyData:application\json:api-config" name="post:\customers\agencyData:application\json:api-config"/>
+		</munit:execution>
+	</munit:test>
+
+</mule>

@@ -1,0 +1,10 @@
+{
+  "eventType": "NewBusinessMessage",
+  "entities": [
+    {
+      "type": "Contract",
+      "id": "1015629320",
+      "subId": "1"
+    }
+  ]
+}

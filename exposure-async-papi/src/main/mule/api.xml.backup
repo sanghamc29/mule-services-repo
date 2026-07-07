@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule
+	xmlns:tracing="http://www.mulesoft.org/schema/mule/tracing"
+	xmlns:anypoint-mq="http://www.mulesoft.org/schema/mule/anypoint-mq"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:java="http://www.mulesoft.org/schema/mule/java"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/java http://www.mulesoft.org/schema/mule/java/current/mule-java.xsd
+http://www.mulesoft.org/schema/mule/anypoint-mq http://www.mulesoft.org/schema/mule/anypoint-mq/current/mule-anypoint-mq.xsd
+http://www.mulesoft.org/schema/mule/tracing http://www.mulesoft.org/schema/mule/tracing/current/mule-tracing.xsd">
+	<flow name="api-main-affordability-calculations" doc:id="f4e5fa13-d60b-45b3-b905-ea13d034300d">
+		<anypoint-mq:subscriber
+			doc:name="Subscribe to C4 platform events"
+			doc:id="830601a6-a270-44c7-919b-cda7cf6bc75b"
+			destination="${mq.lomapiInbound.queue}"
+			config-ref="anypoint-mq-config" acknowledgementMode="MANUAL" acknowledgementTimeoutUnit="SECONDS" acknowledgementTimeout="${mq.lomapiInbound.ack.timeout}" primaryNodeOnly="true" circuitBreaker="Circuit_breaker">
+		</anypoint-mq:subscriber>
+		<tracing:with-correlation-id doc:name="With CorrelationID" doc:id="cfcb8557-dd5e-48b1-aebb-7cc323c9c7f3" correlationId="#[message.attributes.properties.correlationId default correlationId]">
+			<ee:transform doc:name="Set Variables" doc:id="f74be1e2-964e-46cd-bf44-bc1350a61215">
+			<ee:message />
+			<ee:variables>
+      				<ee:set-variable
+					resource="dataweaves/v-logging-variable.dwl"
+					variableName="commonLoggingVariable" />
+				<ee:set-variable variableName="correlationId"><![CDATA[%dw 2.0
+output application/java
+---
+message.attributes.properties.correlationId default correlationId]]></ee:set-variable>
+									<ee:set-variable variableName="countryCode"><![CDATA[%dw 2.0
+output application/java
+---
+payload.data.payload.EU_Market__c]]></ee:set-variable>
+				<ee:set-variable variableName="applicationFormId"><![CDATA[%dw 2.0
+output application/java
+---
+payload.data.payload.EU_ApplicationFormId__c default ""]]></ee:set-variable>
+				<ee:set-variable variableName="ackToken"><![CDATA[%dw 2.0
+output application/json
+---
+attributes.ackToken]]></ee:set-variable>
+				<ee:set-variable variableName="originalPayload"><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+				<ee:set-variable variableName="currencyIsoCode"><![CDATA[%dw 2.0
+output application/java
+---
+payload.data.payload.EU_CurrencyIsoCode__c]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+			<logger level="INFO" doc:name="Log Request" doc:id="ce40ef24-f110-451b-8803-951b9bc7f176" message="Message received#[vars.commonLoggingVariable]" />
+			<logger level="INFO" doc:name="Log Request" doc:id="6e3460a1-5c12-4900-a9a0-14a317c2a693" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.correlationId default '' ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode default '' ++ &#10;&quot; \'Application Form ID\': &quot; ++ vars.applicationFormId default '' ++&#10;(if(p('log.payloadFlag') == 'true') (&quot;\'Payload\': &quot; ++ write(payload,&quot;application/json&quot;)) else &quot;&quot;)]" />
+			<flow-ref doc:name="affordability-calculations-sub-flow" doc:id="2cecd93f-c16d-434d-9eb5-33482f13ae4e" name="affordability-calculations-sub-flow" />
+			<anypoint-mq:ack doc:name="Ack" doc:id="c049f088-8d6a-4a15-8e4b-17a36e5e5e13" config-ref="anypoint-mq-config" ackToken="#[vars.ackToken]" />
+			<logger level="INFO" doc:name="Log Response" doc:id="abd1cff6-d924-40c0-9ce6-74a059e1a36c" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.correlationId ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode ++ &#10;&quot; \'Response HTTP Status\': &quot; ++ (vars.httpStatus default '' ) ++&#10;&quot; \'Application Form ID\': &quot; ++ vars.applicationFormId default '' ++&#10;(if(p('log.payloadFlag') == 'true') (&quot;\'Payload\': &quot; ++ write(payload,&quot;application/json&quot;)) else &quot;&quot;)]" />
+			<logger level="INFO" doc:name="Log Response" doc:id="b3c1624f-6bd6-4cab-8106-3a4ceaf33a73" message="Message processed successfully#[vars.commonLoggingVariable]" />
+		</tracing:with-correlation-id>
+		<error-handler ref="mq-global-error-handler"/>
+	</flow>
+	<!-- <flow name="exposure-async-papiFlow" doc:id="421a191b-1e46-476d-ae0a-b815a592b394" >
+		<http:listener doc:name="Listener" doc:id="54eae388-88aa-415b-9b69-30674e06e67b" config-ref="HTTP_Listener_config" path="/lomapi"/>
+		<flow-ref doc:name="Flow Reference" doc:id="3b372b7d-545c-4a40-adb7-b30b419a06e7" name="api-main-affordability-calculations"/>
+	</flow> -->
+	<flow name="api-main-fraud-check" doc:id="0a8246de-02ad-4c30-86b2-31cd6914794d">
+        <anypoint-mq:subscriber doc:name="Subscribe to C5 platform events" doc:id="2751578e-4247-48c2-96db-c37677ccc764" config-ref="anypoint-mq-config" destination="${mq.fraudCheckInbound.queue}" acknowledgementMode="MANUAL" acknowledgementTimeout="${mq.fraudCheckInbound.ack.timeout}" acknowledgementTimeoutUnit="SECONDS" primaryNodeOnly="true" circuitBreaker="Circuit_breaker" />
+        <tracing:with-correlation-id doc:name="With CorrelationID" doc:id="9e042db2-6421-493a-98cf-05a971cffc45" correlationId="#[message.attributes.properties.correlationId default correlationId]">
+            <ee:transform doc:name="Set Variables" doc:id="8432c910-9bcf-494b-aabb-01983b37916f">
+                <ee:message />
+                <ee:variables>
+                    <ee:set-variable variableName="commonLoggingVariable"><![CDATA[%dw 2.0
+output application/java
+---
+"placeholder"]]></ee:set-variable>
+                    <ee:set-variable variableName="correlationId"><![CDATA[%dw 2.0
+output application/java
+---
+message.attributes.properties.correlationId default correlationId]]></ee:set-variable>
+                    <ee:set-variable variableName="countryCode"><![CDATA[%dw 2.0
+output application/java
+---
+payload.data.payload.EU_Market__c]]></ee:set-variable>
+                    <ee:set-variable variableName="applicationFormId"><![CDATA[%dw 2.0
+output application/java
+---
+payload.data.payload.EU_ApplicationFormId__c default ""]]></ee:set-variable>
+                    <ee:set-variable variableName="ackToken"><![CDATA[%dw 2.0
+output application/json
+---
+attributes.ackToken]]></ee:set-variable>
+                    <ee:set-variable variableName="originalPayload"><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+                    <ee:set-variable variableName="applicantIds" ><![CDATA[%dw 2.0
+output application/java
+---
+(payload.data.payload.EU_Message__c default "") replace  " " with ""]]></ee:set-variable>
+                    <ee:set-variable variableName="deliveryCount" ><![CDATA[attributes.deliveryCount]]></ee:set-variable>
+                </ee:variables>
+            </ee:transform>
+            <logger level="INFO" doc:name="Log Request" doc:id="b5dcecf3-97f0-4afe-9219-44bc70de0e74" message="Message received #[vars.commonLoggingVariable]" />
+            <logger level="INFO" doc:name="Log Request" doc:id="ffc24220-bab1-4593-b603-d4b7f2917fc5" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.correlationId default '' ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode default '' ++ &#10;&quot; \'Application Form ID\': &quot; ++ vars.applicationFormId default '' ++&#10;(if(p('log.payloadFlag') == 'true') (&quot;\'Payload\': &quot; ++ write(payload,&quot;application/json&quot;)) else &quot;&quot;)]" />
+            <flow-ref doc:name="fraud check orchestration flow" doc:id="09d00501-2971-48e9-83a3-1f6d8a03ccd0" name="c5-fraud-check-orchestration-flow" />
+            <anypoint-mq:ack doc:name="Ack" doc:id="df2fa4dd-7da8-4b38-b3ee-aedc8fa15a49" config-ref="anypoint-mq-config" ackToken="#[vars.ackToken]" />
+            <logger level="INFO" doc:name="Log Response" doc:id="801b3869-096f-48cf-983b-7b45ece616bf" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.correlationId ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode ++ &#10;&quot; \'Response HTTP Status\': &quot; ++ (vars.httpStatus default '' ) ++&#10;&quot; \'Application Form ID\': &quot; ++ vars.applicationFormId default '' ++&#10;(if(p('log.payloadFlag') == 'true') (&quot;\'Payload\': &quot; ++ write(payload,&quot;application/json&quot;)) else &quot;&quot;)]" />
+            <logger level="INFO" doc:name="Log Response" doc:id="02362891-512e-4f80-a4de-be44bb722f14" message="Message processed successfully#[vars.commonLoggingVariable]" />
+        </tracing:with-correlation-id>
+        <error-handler ref="mq-global-error-handler" />
+    </flow>
+	<flow name="api-main-customer-exposure" doc:id="99e92b0e-12fa-458a-8974-57da766b9d62" >
+		<anypoint-mq:subscriber doc:name="Subscribe to A22 platform events" doc:id="97255974-251e-45c1-833e-e691adf6d918" config-ref="anypoint-mq-config" destination="${mq.exposureInbound.queue}" acknowledgementMode="MANUAL" acknowledgementTimeout="${mq.exposureInbound.ack.timeout}" acknowledgementTimeoutUnit="SECONDS" primaryNodeOnly="true" circuitBreaker="Circuit_breaker">
+		</anypoint-mq:subscriber>
+		<tracing:with-correlation-id doc:name="With CorrelationID" doc:id="b5279851-4396-437f-aead-9985f3a3dcf2" correlationId="#[message.attributes.properties.correlationId default correlationId]">
+			<ee:transform doc:name="Set Variables" doc:id="4647a2f9-28dc-43f7-9a83-b62d7f5c5183">
+			<ee:message />
+			<ee:variables>
+				<ee:set-variable
+					resource="dataweaves/v-logging-variable.dwl"
+					variableName="commonLoggingVariable" />
+				<ee:set-variable variableName="correlationId"><![CDATA[%dw 2.0
+output application/java
+---
+message.attributes.properties.correlationId default correlationId]]></ee:set-variable>
+				<ee:set-variable variableName="countryCode"><![CDATA[%dw 2.0
+output application/java
+---
+payload.data.payload.EU_Market__c]]></ee:set-variable>
+				<ee:set-variable variableName="applicationFormId"><![CDATA[%dw 2.0
+output application/java
+---
+payload.data.payload.EU_ApplicationFormId__c default ""]]></ee:set-variable>
+				<ee:set-variable variableName="ackToken"><![CDATA[%dw 2.0
+output application/json
+---
+attributes.ackToken]]></ee:set-variable>
+				<ee:set-variable variableName="originalPayload"><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+				<ee:set-variable variableName="currencyIsoCode"><![CDATA[%dw 2.0
+output application/java
+---
+payload.data.payload.EU_CurrencyIsoCode__c]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+			<logger level="INFO" doc:name="Log Request" doc:id="df3d6a57-7c42-411f-b0ea-7dff0a912dac" message="Message received#[vars.commonLoggingVariable]" />
+			<logger level="INFO" doc:name="Log Request" doc:id="28f389b0-c4d7-469a-9071-107ed743a7f9" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.correlationId default '' ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode default '' ++ &#10;&quot; \'Application Form ID\': &quot; ++ vars.applicationFormId default '' ++&#10;(if(p('log.payloadFlag') == 'true') (&quot;\'Payload\': &quot; ++ write(payload,&quot;application/json&quot;)) else &quot;&quot;)]" />
+			<flow-ref doc:name="customer-exposure-sub-flow" doc:id="9870b3d0-bc9a-4c3b-b962-34522d7cf8c3" name="customer-exposure-sub-flow" />
+			<anypoint-mq:ack doc:name="Ack" doc:id="72dd911e-f66b-4dcf-a02f-f2ad3ad23b57" config-ref="anypoint-mq-config" ackToken="#[vars.ackToken]" />
+			<logger level="INFO" doc:name="Log Response" doc:id="276a6eea-99bd-44c1-955b-b0f1518f64bc" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.correlationId ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode ++ &#10;&quot; \'Response HTTP Status\': &quot; ++ (vars.httpStatus default '' ) ++&#10;&quot; \'Application Form ID\': &quot; ++ vars.applicationFormId default '' ++&#10;(if(p('log.payloadFlag') == 'true') (&quot;\'Payload\': &quot; ++ write(payload,&quot;application/json&quot;)) else &quot;&quot;)]" />
+			<logger level="INFO" doc:name="Log Response" doc:id="0a82cc4b-8925-4d7a-a6f6-b6eaebfe7a72" message="Message processed successfully#[vars.commonLoggingVariable]" />
+		</tracing:with-correlation-id>
+		<error-handler ref="mq-global-error-handler"/>
+	</flow>
+	<flow name="api-main-process-lomapi-agency-reports" doc:id="9a6c9569-c752-482f-9251-b6f4b341dc0a" >
+		<anypoint-mq:subscriber doc:name="Subscribe to C6 platform events" doc:id="ba006d49-c727-4da9-ae2a-d955da9d8c61" config-ref="anypoint-mq-config" destination="${mq.lomapiAgencyData.queue}" acknowledgementMode="MANUAL" acknowledgementTimeout="${mq.lomapiAgencyData.ack.timeout}" acknowledgementTimeoutUnit="SECONDS" primaryNodeOnly="true" circuitBreaker="Circuit_breaker" />
+		<tracing:with-correlation-id doc:name="With CorrelationID" doc:id="5fdac4f8-8f1e-4b0c-97c8-ecbcd15dfcde" correlationId="#[message.attributes.properties.correlationId default correlationId]">
+			<ee:transform doc:name="Set Variables" doc:id="3e0c69fe-0105-4b15-bd14-037aad81ca1a">
+				<ee:message />
+				<ee:variables>
+					<ee:set-variable variableName="commonLoggingVariable"><![CDATA[%dw 2.0
+output application/java
+---
+"placeholder"]]></ee:set-variable>
+					<ee:set-variable variableName="correlationId"><![CDATA[%dw 2.0
+output application/java
+---
+message.attributes.properties.correlationId default correlationId]]></ee:set-variable>
+					<ee:set-variable variableName="countryCode"><![CDATA[%dw 2.0
+output application/java
+---
+payload.data.payload.EU_Market__c]]></ee:set-variable>
+					<ee:set-variable variableName="applicationFormId"><![CDATA[%dw 2.0
+output application/java
+---
+payload.data.payload.EU_ApplicationFormId__c default ""]]></ee:set-variable>
+					<ee:set-variable variableName="ackToken"><![CDATA[%dw 2.0
+output application/json
+---
+attributes.ackToken]]></ee:set-variable>
+					<ee:set-variable variableName="originalPayload"><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+					<ee:set-variable variableName="appilcantIds" ><![CDATA[%dw 2.0
+output application/java
+---
+(payload.data.payload.EU_Message__c replace "[" with "" ) replace "]" with ""]]></ee:set-variable>
+					<ee:set-variable variableName="requestEventType" ><![CDATA[%dw 2.0
+output application/java
+---
+payload.data.payload.EU_EventType__c ]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<logger level="INFO" doc:name="Log Request" doc:id="a8002199-7284-48ba-b3d4-0b24f425e803" message="Message received#[vars.commonLoggingVariable]" />
+			<logger level="INFO" doc:name="Log Request" doc:id="26de05c6-624c-4623-a6e7-05a78851f77d" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.correlationId default '' ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode default '' ++ &#10;&quot; \'Application Form ID\': &quot; ++ vars.applicationFormId default '' ++&#10;(if(p('log.payloadFlag') == 'true') (&quot;\'Payload\': &quot; ++ write(payload,&quot;application/json&quot;)) else &quot;&quot;)]" />
+			<flow-ref doc:name="process-applicantsDetails-subflow" doc:id="9c943d56-7cb7-414a-8bf1-4f29ea72a270" name="process-applicantsDetails-subflow" />
+			<anypoint-mq:ack doc:name="Ack" doc:id="063bcb43-5a2f-4bda-a5cc-aaea3aee54f4" config-ref="anypoint-mq-config" ackToken="#[vars.ackToken]" />
+			<logger level="INFO" doc:name="Log Response" doc:id="5c204b7d-e208-415e-91b0-ee96c3f5a5d1" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.correlationId ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode ++ &#10;&quot; \'Response HTTP Status\': &quot; ++ (vars.httpStatus default '' ) ++&#10;&quot; \'Application Form ID\': &quot; ++ vars.applicationFormId default '' ++&#10;(if(p('log.payloadFlag') == 'true') (&quot;\'Payload\': &quot; ++ write(payload,&quot;application/json&quot;)) else &quot;&quot;)]" />
+			<logger level="INFO" doc:name="Log Response" doc:id="bf77a6d6-5c4e-40f3-9ecf-dfee38fab306" message="Message processed successfully#[vars.commonLoggingVariable]" />
+		</tracing:with-correlation-id>
+		<error-handler ref="mq-global-error-handler" />
+	</flow>
+	<flow name="api-main-process-lomapi-agency-reports-callbackflow" doc:id="10d82bf3-1fa2-425a-9795-0fe511fd10bd" >
+		<anypoint-mq:subscriber doc:name="Subscribe to C6 (callback) platform events" doc:id="71d5d02c-027d-4403-99c7-ae5ff18dce8b" config-ref="anypoint-mq-config" destination="${mq.lomapiAgencyData.documentsUpload.queue}" acknowledgementMode="MANUAL" acknowledgementTimeout="${mq.lomapiAgencyData.documentsUpload.ack.timeout}" acknowledgementTimeoutUnit="SECONDS" primaryNodeOnly="true" circuitBreaker="Circuit_breaker" />
+		<tracing:with-correlation-id doc:name="With CorrelationID" doc:id="aabe62d5-7fa5-41f9-a5d7-378f51d01fe4" correlationId='#[(payload.entities[0].id)++ "-" ++(payload.entities.uniqueId joinBy"") default correlationId]'>
+			<ee:transform doc:name="Set Variables" doc:id="e9db38e1-98b3-4b08-b173-93ca16e06a88">
+				<ee:message />
+				<ee:variables>
+					<ee:set-variable variableName="correlationId"><![CDATA[%dw 2.0
+output application/java
+---
+(payload.entities[0].id)++ "-" ++(payload.entities.uniqueId joinBy"") default correlationId]]></ee:set-variable>
+					<ee:set-variable variableName="countryCode"><![CDATA[%dw 2.0
+output application/java
+---
+payload.entities.country joinBy"" ]]></ee:set-variable>
+					<ee:set-variable variableName="applicationFormId"><![CDATA[%dw 2.0
+output application/java
+---
+payload.entities.applicationFormId joinBy""]]></ee:set-variable>
+					<ee:set-variable variableName="ackToken"><![CDATA[%dw 2.0
+output application/json
+---
+attributes.ackToken]]></ee:set-variable>
+					<ee:set-variable variableName="originalPayload"><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+					<ee:set-variable variableName="requestEventType" ><![CDATA[%dw 2.0
+output application/java
+---
+payload.eventType]]></ee:set-variable>
+					<ee:set-variable variableName="applicantOriginalDocuments" ><![CDATA[%dw 2.0
+output application/json
+---
+read(payload.eventMetadata, "application/json")]]></ee:set-variable>
+					<ee:set-variable variableName="commonLoggingVariable"><![CDATA[%dw 2.0
+output application/java
+---
+"placeholder"]]></ee:set-variable>
+					<ee:set-variable variableName="applicantId" ><![CDATA[%dw 2.0
+output application/java
+---
+payload.entities[0].id]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<logger level="INFO" doc:name="Log Request" doc:id="ede60274-2b77-4e9e-9614-7887ec3c5730" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.correlationId default '' ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode default '' ++ &#10;&quot; \'Application Form ID\': &quot; ++ vars.applicationFormId default '' ++&#10;(if(p('log.payloadFlag') == 'true') (&quot;\'Payload\': &quot; ++ write(payload,&quot;application/json&quot;)) else &quot;&quot;)]" />
+			<logger level="INFO" doc:name="Log Request" doc:id="969fce46-45ad-4886-8616-b816e29e968e" message="Message received#[vars.commonLoggingVariable]" />
+			<flow-ref doc:name="process-agency-reports-orchestration-subflow" doc:id="5533889a-452e-4eef-96f0-61266503e3d4" name="process-agency-reports-orchestration-subflow" />
+			<anypoint-mq:ack doc:name="Ack" doc:id="77496e7f-c887-4f7d-9306-a44d54c02e4d" config-ref="anypoint-mq-config" ackToken="#[vars.ackToken]" />
+			<logger level="INFO" doc:name="Log Response" doc:id="3862c044-62f0-443e-b2aa-0a085c7bf852" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.correlationId ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode ++ &#10;&quot; \'Response HTTP Status\': &quot; ++ (vars.httpStatus default '' ) ++&#10;&quot; \'Application Form ID\': &quot; ++ vars.applicationFormId default '' ++&#10;(if(p('log.payloadFlag') == 'true') (&quot;\'Payload\': &quot; ++ write(payload,&quot;application/json&quot;)) else &quot;&quot;)]" />
+			<logger level="INFO" doc:name="Log Response" doc:id="4d2d263c-9553-450c-b8ec-ddcc1571c245" message="Message processed successfully#[vars.commonLoggingVariable]" />
+		</tracing:with-correlation-id>
+		<error-handler ref="mq-global-error-handler" />
+	</flow>
+	<flow name="api-main-process-lomapi-agency-feedback-flow" doc:id="2e4b6164-e0ef-41c2-accd-019f7655ade4" >
+		<anypoint-mq:subscriber doc:name="Subscribe to C7 platform events" doc:id="8243d01a-cd6a-4423-90b1-91d179e61699" config-ref="anypoint-mq-config" destination="${mq.lomapiAgencyFeedback.queue}" acknowledgementMode="MANUAL" acknowledgementTimeout="${mq.lomapiAgencyFeedback.ack.timeout}" acknowledgementTimeoutUnit="SECONDS" primaryNodeOnly="true" circuitBreaker="Circuit_breaker" />
+		<tracing:with-correlation-id doc:name="With CorrelationID" doc:id="576a587f-da32-4a51-8d84-7cc9e06234a0" correlationId="#[message.attributes.properties.correlationId default correlationId]" >
+			<ee:transform doc:name="set variables" doc:id="0f23a68c-6044-4ba9-af41-c1039a0ede71" >
+				<ee:message >
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="originalPayload" ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+					<ee:set-variable variableName="commonLoggingVariable" ><![CDATA[%dw 2.0
+output application/java
+---
+" for EventType - " ++ (payload.data.payload.EU_EventType__c default "")  ++ " | ApplicationFormId - " ++ (payload.data.payload.EU_ApplicationFormId__c default "") ++ " | UniqueId - " ++ (payload.data.payload.EU_UniqueId__c default "")]]></ee:set-variable>
+					<ee:set-variable variableName="countryCode" ><![CDATA[%dw 2.0
+output application/java
+---
+payload.data.payload.EU_Market__c]]></ee:set-variable>
+					<ee:set-variable variableName="correlationId" ><![CDATA[%dw 2.0
+output application/java
+---
+message.attributes.properties.correlationId default correlationId]]></ee:set-variable>
+					<ee:set-variable variableName="applicationFormId" ><![CDATA[%dw 2.0
+output application/java
+---
+payload.data.payload.EU_ApplicationFormId__c default ""]]></ee:set-variable>
+                   
+					<ee:set-variable variableName="ackToken" ><![CDATA[%dw 2.0
+output application/json
+---
+attributes.ackToken]]></ee:set-variable>
+					<ee:set-variable variableName="applicantId" ><![CDATA[%dw 2.0
+output application/java
+---
+(payload.data.payload.EU_Message__c replace "[" with "" ) replace "]" with ""]]></ee:set-variable>
+					<ee:set-variable variableName="requestEventType" ><![CDATA[%dw 2.0
+output application/json
+---
+payload.data.payload.EU_EventType__c]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<logger level="INFO" doc:name="Log Request" doc:id="e5915339-c910-4dd4-bbc2-d9939670017c" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.correlationId default '' ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode default '' ++ &#10;&quot; \'Application Form ID\': &quot; ++ vars.applicationFormId default '' ++&#10;(if(p('log.payloadFlag') == 'true') (&quot;\'Payload\': &quot; ++ write(payload,&quot;application/json&quot;)) else &quot;&quot;)]" />
+			<logger level="INFO" doc:name="Log Request" doc:id="694d468e-dd7c-46f7-9f8a-76082fd23f2a" message="Message received#[vars.commonLoggingVariable]" />
+			<flow-ref doc:name="process-lomapi-agency-feedback-subflow" doc:id="0436fc42-4c45-4502-9048-4c23360081e1" name="process-lomapi-agency-feedback-subflow" />
+			<anypoint-mq:ack doc:name="Ack" doc:id="dc070b31-cace-4b15-9bdd-fb7971c33476" config-ref="anypoint-mq-config" ackToken="#[vars.ackToken]" />
+			<logger level="INFO" doc:name="Log Response" doc:id="a552d825-1fb3-4272-b872-80437ef6d8a4" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.correlationId ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode ++ &#10;&quot; \'Application Form ID\': &quot; ++ vars.applicationFormId default '' ++&#10;(if(p('log.payloadFlag') == 'true') (&quot;\'Payload\': &quot; ++ write(payload,&quot;application/json&quot;)) else &quot;&quot;)]" />
+			<logger level="INFO" doc:name="Log Response" doc:id="c0dacabe-62cc-4a5e-9cab-14263c88d1f4" message="Message processed successfully#[vars.commonLoggingVariable]" />
+		</tracing:with-correlation-id>
+		<error-handler ref="mq-global-error-handler" />
+	</flow>
+</mule>

@@ -1,0 +1,22 @@
+{
+  "data": {
+    "schema": "uzgeVyKA6sc_YU-Lb1zYFQ",
+    "payload": {
+      "EU_CurrencyIsoCode__c": "EUR",
+      "CreatedDate": "2024-06-21T15:36:28Z",
+      "CreatedById": "00578000002CczwAAC",
+      "EU_ApplicationFormId__c": "13X9Z000000e0XZUAY",
+      "EU_EventType__c": "C6",
+      "EU_Message__c":"13Y9Z000000QBhNUAW,13Y9Z000000QBsfUAG",
+      "EU_UniqueId__c": "a3U9Z0000010MUbUAM",
+      "EU_IntegrationLogId__c": "a3U9Z0000010MUbUAM",
+      "EU_Market__c": "PT"
+    },
+    "event": {
+      "replayId": 1739729,
+      "EventUuid": "894cef82-36cb-4e40-9005-3d48b9f309bc",
+      "EventApiName": "EU_MulesoftIntegrationAsync__e"
+    }
+  },
+  "channel": "/event/EU_MulesoftIntegrationAsync__e"
+}

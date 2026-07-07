@@ -1,0 +1,68 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------< com.mercedes-benz:exposure-async-papi >----------------
+[INFO] Building exposure-async-papi 1.0.7-SNAPSHOT
+[INFO] --------------------------[ mule-application ]--------------------------
+[INFO] 
+[INFO] --- maven-clean-plugin:3.2.0:clean (default-clean-1) @ exposure-async-papi ---
+[INFO] Deleting /Users/chatterjee.s/git/exposure-async-papi/target
+[INFO] 
+[INFO] --- maven-clean-plugin:3.2.0:clean (default-clean) @ exposure-async-papi ---
+[INFO] 
+[INFO] --- mule-maven-plugin:4.6.1:clean (default-clean) @ exposure-async-papi ---
+[INFO] 
+[INFO] --- mule-maven-plugin:4.6.1:validate (default-validate) @ exposure-async-papi ---
+[INFO] 
+[INFO] --- mule-maven-plugin:4.6.1:initialize (default-initialize) @ exposure-async-papi ---
+[INFO] 
+[INFO] --- mule-maven-plugin:4.6.1:generate-sources (default-generate-sources) @ exposure-async-papi ---
+[INFO] 
+[INFO] --- mule-maven-plugin:4.6.1:process-sources (default-process-sources) @ exposure-async-papi ---
+[INFO] About to fetch required dependencies for artifact: com.mercedes-benz:exposure-async-papi:pom:1.0.7-SNAPSHOT. This may take a while...
+[INFO] 
+[INFO] --- maven-resources-plugin:3.3.1:resources (default-resources) @ exposure-async-papi ---
+[INFO] Copying 46 resources from src/main/resources to target/classes
+[INFO] skip non existing resourceDirectory /Users/chatterjee.s/git/exposure-async-papi/src/main/resources/cert
+[INFO] Copying 42 resources from src/main/mule to target/classes
+[INFO] 
+[INFO] --- mule-maven-plugin:4.6.1:process-resources (default-process-resources) @ exposure-async-papi ---
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.10.1:compile (default-compile) @ exposure-async-papi ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- mule-maven-plugin:4.6.1:compile (default-compile) @ exposure-async-papi ---
+[INFO] 
+[INFO] --- mule-maven-plugin:4.6.1:process-classes (default-process-classes) @ exposure-async-papi ---
+[INFO] Building factory for Mule Runtime version 4.8.9
+[INFO] Building from Mule Runtime distribution in '/Users/chatterjee.s/git/exposure-async-papi/target/build-dependencies/mule-framework-4.8-bundle-1.2.3'
+[INFO] Loaded AbstractMuleFrameworkBuilderFactory implementation 'org.mule.framework.impl.builder.DefaultMuleFrameworkBuilderFactory' from classloader 'java.net.URLClassLoader@4269aad7'
+[INFO] About to fetch required dependencies for artifact: com.mercedes-benz:exposure-async-papi:pom:1.0.7-SNAPSHOT. This may take a while...
+[INFO] Loaded AbstractDataTypeBuilderFactory implementation 'org.mule.runtime.core.api.metadata.DefaultDataTypeBuilderFactory' from classloader 'java.net.URLClassLoader@4269aad7'
+[WARNING] Component 'console' in extension 'APIKit' already has a 'config-ref' parameter defined. Skipping ConfigRefDeclarationEnricher for it.
+[WARNING] Component 'router' in extension 'APIKit' already has a 'config-ref' parameter defined. Skipping ConfigRefDeclarationEnricher for it.
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  7.073 s
+[INFO] Finished at: 2026-01-23T12:15:59+05:30
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.mule.tools.maven:mule-maven-plugin:4.6.1:process-classes (default-process-classes) on project exposure-async-papi: Fail to compile: 
+[ERROR] [implementation/c5-fraud-check.xml:97]: Invalid configuration found for parameter 'resource': dataweaves/p-fraudCheck-sf-flag-update-request.dwl
+[ERROR] [implementation/c5-fraud-check.xml:154]: Invalid configuration found for parameter 'resource': dataweaves/p-fraudCheck-document-update-request.dwl
+[ERROR] [implementation/process-agency-reports.xml:13]: Invalid configuration found for parameter 'resource': dataweaves/p-set-lomapi-error-records-status.dwl
+[ERROR] [implementation/process-agency-reports.xml:77]: Invalid configuration found for parameter 'resource': dataweaves/p-set-applicant-documents-batches.dwl
+[ERROR] [implementation/process-agency-reports.xml:93]: Invalid configuration found for parameter 'resource': dataweaves/p-set-c6-error-payload-mapping.dwl
+[ERROR] [implementation/process-agency-reports.xml:119]: Invalid configuration found for parameter 'resource': dataweaves/p-sf-applicant-documents-upload-status.dwl
+[ERROR] [implementation/process-agency-reports.xml:131]: Invalid configuration found for parameter 'resource': dataweaves/p-set-documents-upload-status-response.dwl
+[ERROR] [implementation/customer-exposure.xml:56]: Invalid configuration found for parameter 'resource': dataweaves/s-customer-exposure-sf-accounts-sapi-request.dwl
+[ERROR] [api.xml:25]: Invalid configuration found for parameter 'resource': dataweaves/v-logging-variable.dwl
+[ERROR] [api.xml:120]: Invalid configuration found for parameter 'resource': dataweaves/v-logging-variable.dwl
+[ERROR] [implementation/affordability-calculations.xml:27]: Invalid configuration found for parameter 'resource': dataweaves/build-person-affordability-calculation-request.dwl
+[ERROR] [implementation/affordability-calculations.xml:50]: Invalid configuration found for parameter 'resource': dataweaves/build-affordability-calculations-request.dwl
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

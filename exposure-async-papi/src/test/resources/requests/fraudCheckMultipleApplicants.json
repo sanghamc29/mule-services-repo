@@ -1,0 +1,26 @@
+[
+  {
+    "applicantId": "A1",
+    "type": "individual",
+    "status": "Active",
+    "name": "John Doe",
+    "nif": "NIF001",
+    "documentType": "ID_CARD"
+  },
+  {
+    "applicantId": "A2", 
+    "type": "business",
+    "status": "Active",
+    "name": "Jane Smith Corp",
+    "nif": "NIF002",
+    "documentType": "BUSINESS_LICENSE"
+  },
+  {
+    "applicantId": "A3",
+    "type": "individual", 
+    "status": "Active",
+    "name": "Bob Wilson",
+    "nif": "NIF003",
+    "documentType": "PASSPORT"
+  }
+]

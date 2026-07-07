@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<sub-flow name="process-agency-reports-orchestration-subflow" doc:id="cf578324-63d2-4765-afc0-c49f307b9de9" >
+		<choice doc:name="Choice" doc:id="46a04a56-bf60-409a-94d0-0ccfd512d5ab" >
+			<when expression="#[vars.applicantOriginalDocuments.statusCode &gt;= 400]">
+				<ee:transform doc:name="transform lomapi error" doc:id="ebf260c0-f309-40f1-ba32-cb930e7490e8" >
+					<ee:message >
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+src/main/mule/implementation/process-agency-reports.xml]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpOperation"><![CDATA[%dw 2.0
+output application/java
+---
+"placeholder"]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<flow-ref doc:name="sf-accounts-sapi-call-subflow" doc:id="23a6f956-291a-4dc0-a5fc-53c81c0f99cb" name="sf-accounts-sapi-call-subflow" />
+			</when>
+			<otherwise>
+				<flow-ref doc:name="c6-get-applicant-sf-documents" doc:id="e24bf2db-97ea-45a5-a1c1-160a98c5ee28" name="c6-get-applicant-sf-documents" />
+				<ee:transform doc:name="list documents" doc:id="7793d061-a717-4545-b3b5-910bc2c4223c">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="applicantDocuments"><![CDATA[%dw 2.0
+output application/java
+---
+"placeholder"]]></ee:set-variable>
+						<ee:set-variable variableName="lomapiErrorDocuments"><![CDATA[%dw 2.0
+output application/java
+---
+"placeholder"]]></ee:set-variable>
+						<ee:set-variable variableName="docswithNodci"><![CDATA[%dw 2.0
+output application/java
+---
+"placeholder"]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+				<flow-ref doc:name="c6-sf-agency-reports-upload" doc:id="ea2cc335-a115-4b91-96e4-d0dbe491238c" name="c6-sf-agency-reports-upload" />
+				<flow-ref doc:name="c6-update-agency-reports-upload-status" doc:id="b9c82529-87f2-41c8-8c01-b4b333bff0de" name="c6-update-agency-reports-upload-status" />
+			</otherwise>
+		</choice>
+	</sub-flow>
+	<sub-flow name="c6-get-applicant-sf-documents" doc:id="1e9eaafa-69ef-456c-a37b-adaa66045da9" >
+		<ee:transform doc:name="Prepare HTTP Req Mapping SF Agency documents" doc:id="3e243f76-73ef-42cd-8474-a197ffd497da">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="httpOperation"><![CDATA[%dw 2.0
+output application/java
+---
+"placeholder"]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="sf-commons-sapi-call-subflow" doc:id="3480e465-f2e7-42c7-942a-f3ec05026d3d" name="sf-commons-sapi-call-subflow"/>
+		<ee:transform doc:name="applicant documents" doc:id="e82ed0b2-964a-4c0f-8729-3f308d91d938" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="getApplicantDocuments"><![CDATA[%dw 2.0
+output application/java
+---
+"placeholder"]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+	</sub-flow>
+	<sub-flow name="c6-sf-agency-reports-upload" doc:id="abb22d6d-7977-400a-9844-d9fcb071312d" >
+		<choice doc:name="Choice" doc:id="67e0ced5-d00d-4b42-a7fc-835f2f0f80aa" >
+			<when expression="#[!isEmpty(vars.applicantDocuments)]" >
+				<ee:transform doc:name="Prepare HTTP Req Mapping SF Agency documents" doc:id="1f091a93-15f1-424b-acf1-e014250fd91c">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+src/main/mule/implementation/process-agency-reports.xml]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="httpOperation"><![CDATA[%dw 2.0
+output application/java
+---
+"placeholder"]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+				<parallel-foreach doc:name="upload agency reports to SF" doc:id="94f09e8d-0e72-4d99-af78-835460ea49de" collection="#[flatten([payload.htmlBatches, payload.pdfBatches])]" maxConcurrency="2">
+					<try doc:name="Try" doc:id="8cd6184a-f41b-4dc3-a25f-1516528b8e54">
+				<flow-ref doc:name="sf-commons-sapi-call-subflow" doc:id="4515eee5-e182-4c5d-96ad-7b26eadf7420" name="sf-commons-sapi-call-subflow" />
+				<error-handler>
+					<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="0498f9e9-a8c8-47e6-b3e9-70df0b70d3b9">
+						<ee:transform doc:name="set error payload" doc:id="9de743ab-55d2-4dcb-8abf-3348ffda2bbd">
+							<ee:message>
+										<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+src/main/mule/implementation/process-agency-reports.xml]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+					</on-error-continue>
+				</error-handler>
+			</try>
+		</parallel-foreach>
+				<ee:transform doc:name="documents upload response" doc:id="2a0c5cd1-f0a6-495a-8b08-ea1a849b32f7">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="agencyReportsUploadResponse"><![CDATA[%dw 2.0
+output application/java
+---
+"placeholder"]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="log no DCI documents" doc:id="d923815a-8134-4a01-a1d3-0e7c00daa9e8" message='#["No Documents with DCI- SKIP Documents Uploading to SF"]'/>
+			</otherwise>
+		</choice>
+	</sub-flow>
+	<sub-flow name="c6-update-agency-reports-upload-status" doc:id="86057e40-4eb0-4b73-8989-e2251d622216" >
+		<ee:transform doc:name="SF account httpRequest and payload" doc:id="49c75f26-e73d-476e-a8ff-48dc455e1596" >
+			<ee:message >
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+src/main/mule/implementation/process-agency-reports.xml]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="httpOperation"><![CDATA[%dw 2.0
+output application/java
+---
+"placeholder"]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="sf-accounts-sapi-call-subflow" doc:id="99f8d0b5-8554-4045-8472-b4fa11319baa" name="sf-accounts-sapi-call-subflow"/>
+		<ee:transform doc:name="documents upload status" doc:id="fb8ceb02-be6c-42f0-ab41-c59aad592c08">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+src/main/mule/implementation/process-agency-reports.xml]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+</mule>

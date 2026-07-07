@@ -1,0 +1,478 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="credit-application-enrichment-impl-test-suite.xml" />
+	<munit:test name="implementation-test-suite-vip-subflow-without-ProgramId-Test" doc:id="19384ef0-6988-4644-b41d-f86cc5794c00" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock call to Salesforce SAPI" doc:id="d4c612db-917b-4a67-af6f-b97043d9c2e8" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="9888f6ef-135a-4c4d-a5b4-9094f2b52e76" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[%dw 2.0&#10;output application/json&#10;--- &#10;readUrl('classpath://samples/vip-subflow-get-default-programId-mock-response.json')]" mediaType="application/json" encoding="UTF-8" />
+					<munit-tools:attributes value='#[output application/java &#10;---&#10; {&#10;  headers: {&#10;    "content-type": "application/json; charset=UTF-8",&#10;    "content-length": "50",&#10;    date: "Fri, 25 Aug 2023 11:10:00 GMT"&#10;  },&#10;  reasonPhrase: "OK",&#10;  statusCode: 200&#10;}]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock call to VIP SAPI" doc:id="1389952c-bcec-418c-9bbf-4d2596eba7b4" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="b4b53710-7c27-4a1a-8358-9422b9b0b0af" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[%dw 2.0&#10;output application/json&#10;--- &#10;readUrl('classpath://samples/vip-subflow-get-credit-conditions-mock-response.json')]" mediaType="application/json" encoding="UTF-8" />
+					<munit-tools:attributes value='#[output application/java &#10;---&#10; {&#10;  headers: {&#10;    "content-type": "application/json; charset=UTF-8",&#10;    "content-length": "355",&#10;    date: "Fri, 25 Aug 2023 11:08:42 GMT"&#10;  },&#10;  reasonPhrase: "OK",&#10;  statusCode: 200&#10;}]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock call to Salesforce SAPI" doc:id="031ad088-2d16-4218-b635-0e4a3bd694eb" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="8f364fc2-4023-4711-9e26-abaf4661c61d" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[null]" encoding="UTF-8" />
+					<munit-tools:attributes value='#[output application/java &#10;---&#10; {&#10;  headers: {&#10;    "content-type": "application/java; charset=UTF-8",&#10;    "content-length": "0",&#10;    date: "Wed, 26 Jul 2023 10:13:24 GMT"&#10;  },&#10;  reasonPhrase: "Created",&#10;  statusCode: 201&#10;}]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="29dfaadb-ee7c-45c5-81e7-20c7c371dc70" >
+				<munit:payload value="#[%dw 2.0&#10;output application/json&#10;--- &#10;readUrl('classpath://samples/vip-subflow-payload-without-programId.json')]" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to vip-subflow" doc:id="6ec6285b-b52f-433b-ae52-9a5486374260" name="vip-subflow" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="implementation-test-suite-csl-subflowTest" doc:id="739725c6-5528-42a5-babc-475cecffb5bb">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock Get Sanction Status" doc:id="d326c061-4902-433c-85f9-d9c20c3a77ed" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="847ab85f-ef09-4181-8135-81ce542f0e3e" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- readUrl('classpath://samples/csl-subflow-get-sanction-status-payload.json','application/json')]" mediaType="application/json" />
+					<munit-tools:attributes value="#[{&#10;	statusCode: 200&#10;}]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+<!-- [STUDIO:"Mock Update Application Party With Sanction Status"]			<munit-tools:mock-when doc:name="Mock Update Application Party With Sanction Status" doc:id="e1f933c2-9c81-4feb-b5dc-4052a2285e63" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="925db5fc-3fdc-43af-b461-baad03bb5f44" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:attributes value="#[{&#10;	statusCode: 200&#10;}&#93;" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when> [STUDIO] -->
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="3929aa82-a6c4-4758-b6d3-65476bc725dc" >
+				<munit:payload value="#[readUrl('classpath://samples/enrichment-subflow-mock-payload-for-ucars.json','application/json')]" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow Ref to csl-subflow" doc:id="dcaca8d4-7bb8-4c0d-8e4b-4fdfb462a38c" name="csl-subflow"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="credit-application-enrichment-subflowTest" doc:id="9128d66b-e37a-45e0-a503-e457f24f7b4f">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock Application Enrichment sub flow" doc:id="ce5b2c09-6790-4b9f-ada5-aa5d479ace0b" processor="flow-ref">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="365da681-d83c-48ff-bb49-d06c5e0f91e5" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Anypoint MQ" doc:id="c85ed7b0-f2a5-4ffe-b94e-0b533fa1569f" processor="anypoint-mq:ack">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="cd1872a4-ec3e-439c-99f8-b4e189dacdd4" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		
+</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event for credit application encrichment sub flow" doc:id="c19a18f6-478f-42c0-ac40-9daf0ae06f78" >
+				<munit:payload value="#[output apllication/json --- readUrl('classpath://samples/enrichment-subflow-mock-payload-for-WebAMS.json','application/json')]" />
+				<munit:attributes value='#[output apllication/json&#10;---&#10;readUrl("classpath://samples/application-enrichment-mock-ack-id.json", "application/json")]' />
+				<munit:variables >
+					<munit:variable key="uniqueApplicationId" value='#["1234"]' />
+				</munit:variables>
+			</munit:set-event>
+			<flow-ref doc:name="Flow Ref to credit-application-enrichment-subflow" doc:id="991a2803-fa99-4f77-bf59-b6a8f09008d6" name="credit-application-enrichment-subflow" />
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-equals doc:name="Assert Patch Flow statusCode" doc:id="43a74dc9-99c4-4b27-a9a9-5d2154875d36" actual="#[vars.originalMessage.attributes.ackToken]" expected='#[output application/json&#10;---&#10;(readUrl("classpath://samples/application-enrichment-mock-ack-id.json", "application/json")).ackToken]' />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="credit-application-enrichment-subflow-Test-ANY-ErrorScenario" doc:id="b611f14a-7a0c-4369-8450-9baaaf4a9d1f">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock Application Enrichment sub flow" doc:id="185ec4dd-1247-470c-8faa-d10ba4d61c05" processor="flow-ref">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="365da681-d83c-48ff-bb49-d06c5e0f91e5" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="ANY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock when Publish DLQ" doc:id="8b619fd7-7d55-410e-b177-dc76631494bd" processor="anypoint-mq:publish">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="357765c8-620b-4801-a1ff-d7ec6476fdb2" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Anypoint MQ" doc:id="4be34153-6f2e-431f-a5ee-69f03b32178f" processor="anypoint-mq:ack" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="c67767e3-ca30-41e5-b145-ad27223ea07c" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event For credit application enrichment Flow" doc:id="aaf5e2b0-34d8-41ef-a12e-879df8915c54" >
+				<munit:payload value="#[readUrl('classpath://samples/enrichment-subflow-mock-payload-for-WebAMS.json','application/json')]" />
+				<munit:attributes value='#[output application/json&#10;---&#10;readUrl("classpath://samples/application-enrichment-mock-ack-id.json", "application/json")]' />
+			</munit:set-event>
+			<flow-ref doc:name="Flow Ref to credit-application-enrichment-subflow" doc:id="937c94c3-afc2-47f1-be1d-df52e7bffdd8" name="credit-application-enrichment-subflow" />
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:verify-call doc:name="Verify call to application encrichment DLQ" doc:id="b470cdee-cf6c-40cf-b62b-bf8f118487f7" processor="logger">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="6a9a5c41-5a52-41f7-ae0f-6a3dd3c64d5e" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="credit-application-enrichment-subflow-Test-connectivity-ErrorScenario" doc:id="4a7a20bd-ffc4-4140-aac4-0a9ce2b21b8c" expectedErrorType="HTTP:CONNECTIVITY" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock Application Enrichment sub flow" doc:id="21620c1b-802d-481a-aa28-f20916968928" processor="flow-ref">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="365da681-d83c-48ff-bb49-d06c5e0f91e5" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:CONNECTIVITY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock when Nack" doc:id="aa71ec11-688c-49bc-add4-ba74f9127271" processor="anypoint-mq:nack" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="cd3ee882-901a-439f-a0be-8f197a0302fc" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Subscribe Application data for Credit Application Enrichment" doc:id="22f104a1-b211-48c7-a91c-b5e7d8100af1" >
+				<munit:payload value="#[readUrl('classpath://samples/enrichment-subflow-mock-payload-for-WebAMS.json','application/json')]" />
+				<munit:attributes value='#[output application/json&#10;---&#10;readUrl("classpath://samples/application-enrichment-mock-ack-id.json", "application/json")]' />
+				<munit:variables >
+					<munit:variable key="uniqueApplicationId" value="#[1234]" />
+				</munit:variables>
+			</munit:set-event>
+			<flow-ref doc:name="Flow Ref to credit-application-enrichment-subflow" doc:id="5560dff2-d8d4-40be-9ab6-6c2e1b49ac80" name="credit-application-enrichment-subflow" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="enrichment-subflow-Test-Country-CA" doc:id="9128d66b-e37a-45e0-a503-e457f24f7b4f">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock sf sapi call" doc:id="f6ed64a3-ad6d-47ad-bfc7-be17f9930b70" processor="http:request">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="Get default Program Id" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="9888f6ef-135a-4c4d-a5b4-9094f2b52e76" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock VIP" doc:id="51b67630-01ac-448f-8d33-0b648ad64875" processor="flow-ref">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="30d8a181-f773-4f26-a69a-f1d2e3aa0297" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[null]" />
+					<munit-tools:attributes value='#[{&#10;	"statusCode": 201&#10;}]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock CSL" doc:id="92f1710f-b5c2-4760-9d9a-bb8ddcc0c85a" processor="flow-ref">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="bf6aa660-8b92-4815-9475-00a7531a1eb5" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[null]" />
+					<munit-tools:attributes value='#[{&#10;	"statusCode": 200&#10;}]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock vehicle pricing flow" doc:id="ff682d45-60ff-484d-8a57-26d494ec3cc0" processor="flow-ref">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="77ebba63-0ad3-4513-9315-6415aa66c05a" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[null]" />
+					<munit-tools:attributes value='#[{&#10;	"statusCode": 200&#10;}]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock PATCH  redit application Flow" doc:id="a9934d3a-8caa-4120-9074-7fdf2ed5c7a2" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="0a7c100b-1652-471a-9db5-cca5f7b56fa5" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[null]" />
+					<munit-tools:attributes value='#[{&#10;	"statusCode": 200&#10;}]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		
+</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event For enrichment Flow" doc:id="2168afe1-c142-485c-b82d-1cf8a88f5d23" >
+				<munit:payload value="#[readUrl('classpath://samples/enrichment-subflow-mock-payload-for-WebAMS.json','application/json')]" />
+
+			</munit:set-event>
+			<flow-ref doc:name="Flow Ref to enrichment-subflow" doc:id="991a2803-fa99-4f77-bf59-b6a8f09008d6" name="enrichment-subflow" />
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-equals doc:name="Assert Patch Flow statusCode" doc:id="43a74dc9-99c4-4b27-a9a9-5d2154875d36" actual="#[attributes.statusCode]" expected='#[200]' />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="enrichment-subflow-Test-Country-US" doc:id="602ec47d-7cba-4fee-83fc-430954495b9d" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock sf sapi call" doc:id="2cbc9f27-7015-4929-910c-8bfd0ca8d682" processor="http:request">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="Get default Program Id" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="9888f6ef-135a-4c4d-a5b4-9094f2b52e76" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock VIP" doc:id="bf86c148-1ed6-45ce-a013-0e18f56e2541" processor="flow-ref" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="30d8a181-f773-4f26-a69a-f1d2e3aa0297" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[null]" />
+					<munit-tools:attributes value='#[{&#10;	"statusCode": 201&#10;}]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock CSL" doc:id="8e95e70c-df01-498d-b701-4c1e6b1a2fb3" processor="flow-ref" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="bf6aa660-8b92-4815-9475-00a7531a1eb5" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[null]" />
+					<munit-tools:attributes value='#[{&#10;	"statusCode": 200&#10;}]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Get Dealer Number" doc:id="4a56a81a-0084-419e-80aa-6453f6bca57c" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="00da39ce-2792-483b-959c-a9c8a306b089" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[null]" />
+					<munit-tools:attributes value='#[{&#10;	"statusCode": 200&#10;}]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Ucars sub flow" doc:id="dc89024f-344d-48cc-b98d-4858bd537b2c" processor="flow-ref">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="d0b372b1-a4b2-4547-ba4b-f1e5639214ce" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock PATCH  credit application Flow" doc:id="4922259a-bfa7-448c-886e-0a92d8e4ce1a" processor="flow-ref" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="5d0dbac6-1ea4-4865-9b21-a0b6f9e9c8e2" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[null]" />
+					<munit-tools:attributes value='#[{&#10;	"statusCode": 200&#10;}]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event For enrichment Flow" doc:id="2cdaf8bf-ef48-4bd2-8c8f-fe25bf046d7b" >
+				<munit:payload value="#[readUrl('classpath://samples/enrichment-subflow-mock-payload-for-us.json','application/json')]" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow Ref to enrichment-subflow" doc:id="d4a8b3a7-8c9e-41cd-a76d-50231c6e4a19" name="enrichment-subflow" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="Assert Patch Flow statusCode" doc:id="c4a52144-b1f2-485c-a1d1-7cef171fcbef" actual="#[attributes.statusCode]" expected="#[200]" />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="implementation-test-suite-vip-subflow-with-ProgramId-Test" doc:id="e80e1fa2-b8cb-4fc4-9811-09918bdfb398" description="Test" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock call to VIP SAPI" doc:id="0b756727-aab0-4b5a-9b87-58faf6e929fc" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="b4b53710-7c27-4a1a-8358-9422b9b0b0af" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[%dw 2.0&#10;output application/json&#10;--- &#10;readUrl('classpath://samples/vip-subflow-get-credit-conditions-mock-response.json')]" mediaType="application/json" encoding="UTF-8" />
+					<munit-tools:attributes value='#[output application/java &#10;---&#10; {&#10;  headers: {&#10;    "content-type": "application/json; charset=UTF-8",&#10;    "content-length": "355",&#10;    date: "Fri, 25 Aug 2023 11:08:42 GMT"&#10;  },&#10;  reasonPhrase: "OK",&#10;  statusCode: 200&#10;}]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock call to Salesforce SAPI" doc:id="7d88cc66-7860-459a-8398-afb5237f515c" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="8f364fc2-4023-4711-9e26-abaf4661c61d" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[null]" encoding="UTF-8" />
+					<munit-tools:attributes value='#[output application/java &#10;---&#10; {&#10;  headers: {&#10;    "content-type": "application/java; charset=UTF-8",&#10;    "content-length": "0",&#10;    date: "Wed, 26 Jul 2023 10:13:24 GMT"&#10;  },&#10;  reasonPhrase: "Created",&#10;  statusCode: 201&#10;}]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="f913e51b-ab15-450c-9cca-253c51aaedea" >
+				<munit:payload value="#[%dw 2.0&#10;output application/json&#10;--- &#10;readUrl('classpath://samples/vip-subflow-payload-with-programId.json')]" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to vip-subflow" doc:id="0b651f4f-744f-4edd-a230-92125f572a9f" name="vip-subflow" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="enrichment-subflow-Test-Country-MX-VehicleCondition-Used-Error" doc:id="5585c475-c889-4e9b-a03e-8d2e8fde5d66" expectedErrorType="MULE:COMPOSITE_ROUTING">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock VIP" doc:id="1921a5e4-5312-4fef-b261-d82bf0e7fd4b" processor="flow-ref" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="30d8a181-f773-4f26-a69a-f1d2e3aa0297" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[null]" />
+					<munit-tools:attributes value='#[{&#10;	"statusCode": 201&#10;}]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock CSL" doc:id="1860df4e-c442-4880-b69e-e9f4cf7c5040" processor="flow-ref" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="bf6aa660-8b92-4815-9475-00a7531a1eb5" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[null]" />
+					<munit-tools:attributes value='#[{&#10;	"statusCode": 200&#10;}]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event For enrichment Flow" doc:id="6d393314-6874-4881-8333-d582bd0e069c" >
+				<munit:payload value="#[readUrl('classpath://samples/enrichment-subflow-mock-payload-for-mx-vehicle-condition-used.json','application/json')]" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow Ref to enrichment-subflow" doc:id="9c991467-4dcf-43d6-b221-e5c2d4aa873d" name="enrichment-subflow" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="enrichment-subflow-test-vehicle-condition-new" doc:id="dc99608a-917e-4b4b-b620-0f9a30fb4788" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock VIP" doc:id="c4de7f2f-e313-4af7-8b37-583faefd40e4" processor="flow-ref" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="30d8a181-f773-4f26-a69a-f1d2e3aa0297" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[null]" />
+					<munit-tools:attributes value='#[{&#10;	"statusCode": 201&#10;}]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock CSL" doc:id="73763cce-6412-4595-ae18-d77524c3d3cd" processor="flow-ref" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="bf6aa660-8b92-4815-9475-00a7531a1eb5" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[null]" />
+					<munit-tools:attributes value='#[{&#10;	"statusCode": 200&#10;}]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Get Dealer Number" doc:id="6690760f-33ff-481a-a5a0-d1572784d20d" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="00da39ce-2792-483b-959c-a9c8a306b089" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[null]" />
+					<munit-tools:attributes value='#[{&#10;	"statusCode": 200&#10;}]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Ucars sub flow" doc:id="e8776d2c-045d-4f75-b9b9-1257d1a2551f" processor="flow-ref" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="d0b372b1-a4b2-4547-ba4b-f1e5639214ce" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock PATCH  credit application Flow" doc:id="1236483c-6719-4be5-bf54-f94501112748" processor="flow-ref" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="5d0dbac6-1ea4-4865-9b21-a0b6f9e9c8e2" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[null]" />
+					<munit-tools:attributes value='#[{&#10;	"statusCode": 200&#10;}]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event For enrichment Flow" doc:id="503c9d27-c5e5-4478-b2af-03726dc15247" >
+				<munit:payload value="#[readUrl('classpath://samples/enrichment-subflow-mock-payload-for-mx-vehicle-condition-new.json','application/json')]" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow Ref to enrichment-subflow" doc:id="d205de2d-7ae5-43ad-8797-aca6c52cf8bb" name="enrichment-subflow" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="Verify call" doc:id="7dd44065-76ce-496e-86a2-1f1533aef89d" processor="logger" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="dbb2b7de-1f4f-48e8-84df-7efa623ef1df" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="get-vehicle-details-from-vehicle-pricing-sapi-flow-for-ca" doc:id="632933c8-da26-4d91-b1c9-f72c7298391a" description="Test">
+		<munit:behavior >
+			<munit-tools:spy doc:name="validate vehicle details for ca" doc:id="36c6f7a5-23a1-4174-9a47-94c778263f13" processor="ee:transform">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="f67ac285-e89f-4bf9-9ef5-114a47fa46b7" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:after-call >
+					<munit-tools:assert doc:name="validate vehicle details" doc:id="eec3434e-b5bb-445d-92f2-b92bfae9cee4" message="Payload doesn't match" >
+						<munit-tools:that ><![CDATA[#[import * from dw::test::Asserts 
+ ---
+vars.vehicleDetails must equalTo(readUrl('classpath://samples/vehicle-details-transformer-expected-response-for-ca.json', 'application/json'))]]]></munit-tools:that>
+					</munit-tools:assert>
+				</munit-tools:after-call>
+			</munit-tools:spy>
+			<munit-tools:mock-when doc:name="mock vehicle pricing sapi requester" doc:id="6c0dbed2-11a3-41cb-be47-889e2b6ca8e2" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="d83707e5-27a7-4497-80e0-080694cfeb1c" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[readUrl('classpath://samples/vehicle-details-from-webams-expected-response.json','application/json')]" />
+					<munit-tools:attributes value="#[{statusCode: 200}]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event For Enrichment Flow" doc:id="55dc1cfb-3a0c-4598-800a-0ad88df2b362">
+				<munit:payload value="#[readUrl('classpath://samples/enrichment-subflow-mock-payload-for-ca.json','application/json')]" />
+				<munit:attributes value="#[{queryParams: {applicationId: 'A4516', vehicleModel: 'GLC300C 4M', vehicleYear: '2020', odometerMileage: '46969', dealerNumber: '74102'}, uriParams: {vin: 'WDC0J8EB0LF696859'}}]" />
+			
+</munit:set-event>
+			<flow-ref doc:name="Flow-ref to get-vehicle-details-by-vin-subflow" doc:id="25bc47fe-81d6-4c3b-a97b-b3fcb7b17819" name="get-vehicle-details-from-vehicle-pricing-sapi"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="assert vehicle pricing request for ca" doc:id="fc1ee56b-ee03-4807-ac5b-21b78e8f51bb" actual="#[attributes.statusCode]" expected="#[200]" />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="get-vehicle-details-from-vehicle-pricing-sapi-flow-for-us" doc:id="f9961a4b-95b8-4262-91b1-3f7e499fb19e" description="Test">
+		<munit:behavior >
+			<munit-tools:spy doc:name="validate vehicle details for us" doc:id="46e0a8d3-0461-457c-aed9-f4792f0592bc" processor="ee:transform">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="f67ac285-e89f-4bf9-9ef5-114a47fa46b7" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:after-call>
+					<munit-tools:assert doc:name="validate vehicle details" doc:id="751ffd41-52b6-4391-bd5d-4dfa8a7fa214" message="Payload doesn't match">
+						<munit-tools:that><![CDATA[#[import * from dw::test::Asserts 
+ ---
+vars.vehicleDetails must equalTo(readUrl('classpath://samples/vehicle-details-transformer-expected-response-for-us.json', 'application/json'))]]]></munit-tools:that>
+					</munit-tools:assert>
+				</munit-tools:after-call>
+			</munit-tools:spy>
+			<munit-tools:mock-when doc:name="mock sf sapi requester for dealer zip" doc:id="78696df7-d0e9-4043-977c-4b125904d334" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="e6e85ec3-b22a-4ab7-a7f2-79896519c392" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[readUrl('classpath://samples/get-dealerZip-From-SF-Mock-Response.json','application/json')]" />
+					<munit-tools:attributes value="#[{statusCode: 400}]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="mock vehicle pricing sapi requester" doc:id="697690ac-e1dd-4803-bd28-c237874762f9" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="d83707e5-27a7-4497-80e0-080694cfeb1c" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[readUrl('classpath://samples/vehicle-details-from-ucars-expected-response.json','application/json')]" />
+					<munit-tools:attributes value="#[{statusCode: 200}]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event For Enrichment Flow" doc:id="1a154f34-8e3c-4ca1-94a2-4477f287534f">
+				<munit:payload value="#[readUrl('classpath://samples/enrichment-subflow-mock-payload-for-us.json','application/json')]" />
+				<munit:attributes value="#[{queryParams: {odometerMileage: '46969', dealerNumber: '74102', condition: '99', dealerZip: '27909'}, uriParams: {vin: '55SWF4KB6FU040459'}}]" />
+			
+</munit:set-event>
+			<flow-ref doc:name="Flow-ref to get-vehicle-details-by-vin-subflow" doc:id="9acef6b2-2a2e-4f3b-97fb-1d0ba4df5eff" name="get-vehicle-details-from-vehicle-pricing-sapi"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="Assert Patch Flow statusCode" doc:id="eca5e746-1a34-4ec8-86a4-f32f6f641b13" actual="#[attributes.statusCode]" expected="#[200]" />
+		</munit:validation>
+	</munit:test>
+</mule>

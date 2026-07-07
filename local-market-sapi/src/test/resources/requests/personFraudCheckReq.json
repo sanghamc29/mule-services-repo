@@ -1,0 +1,93 @@
+
+    {
+        "customerInfo": {
+            "individualPerson": {
+                "firstName": "Kim",
+                "lastName": "Joye",
+                "gender": "Male",
+                "birthDate": "1995-07-01",
+                "placeOfBirth": "Test",
+                "country": "Test",
+                "professionSince": "2020-07-01",
+                "personIdentifications": [
+                    {
+                        "identificationNumber": "123456789"
+                    }
+                ]
+            },
+            "affiliatedCompany": {
+                "companyId": "FOXDRA26C24H872Y",
+                "industryClassification": "a3T9Z000000UkshUAC"
+            },
+            "timestamp": "2025-07-09T14:38:45Z",
+            "applicationNumber": "13X9Z000000dLEHUA2",
+            "customerType": "Individual",
+            "phoneNumbers": [
+                {
+                    "number": "+91 94142 19841"
+                }
+            ],
+            "vatNumber": "1234",
+            "establishmentDate": "2015-01-01",
+            "startOfBusinessDate": "2012-02-03",
+            "addresses": [
+                {
+                    "address": "103 ACD",
+                    "city": "Jaipur",
+                    "postalCode": "302022",
+                    "country": "AG",
+                    "state": "AG"
+                }
+            ],
+            "customerFinanceInfo": {
+                "annualRevenue": 2000,
+                "financingType": "LEASER",
+                "assetCondition": "New",
+                "installments": 36,
+                "totalAmountOfCreditInclusiveVAT": null,
+                "totalAmountOfCreditExclusiveVAT": 32105,
+                "residualValueInclusiveVAT": null,
+                "residualValueExclusiveVAT": 21087,
+                "downPaymentInclusiveVAT": null,
+                "downPaymentExclusiveVAT": 0,
+                "financedAmountInclusiveVAT": null,
+                "financedAmountExclusiveVAT": 32104.6,
+                "yearOfIncomeDocument": "2020",
+                "incomeDocumetType": "Paycheck",
+                "annualIncome": 2000,
+                "incomeDocumetMonth": "01",
+                "incomeDocumetYear": "2020",
+                "financeProductCode": "SFLEA"
+            },
+            "bankAccounts": [
+                {
+                    "bankAccountId": "IT54Z0300203280767761958797"
+                }
+            ],
+            "documents": [
+                {
+                    "docTypeName": "Identity Card",
+                    "referenceNo": "AY0056193",
+                    "creationDate":"2017-12-18",
+                    "expiryDate":"2028-10-13"
+                }
+            ],
+            "role": "MainApplicant",
+            "marketUniqueId": "FOXDRA26C24H872Y",
+            "relatedToMainApplicant": {
+                "firstName": "Kim",
+                "lastName": "Joye",
+                "gender": "Male",
+                "birthDate": "1995-07-01",
+                "placeOfBirth": "Test",
+                "country": "Test",
+                "companyInfo": {
+                    "companyName": "Test",
+                    "vatNumber": "1234"
+                },
+                "addressesInfo": {
+                    "state": "AG"
+                }
+            }
+        }
+    }

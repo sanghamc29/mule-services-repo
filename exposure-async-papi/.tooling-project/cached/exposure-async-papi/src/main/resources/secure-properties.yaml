@@ -1,0 +1,12 @@
+local-market-sapi:
+  client-secret: "![9OdCl7pe4mbKxihdIYwYXuH5lcAHFDmwijSWhCwOJDUf4x0z7TNbUQ==]"
+miles-sapi:
+  client-secret: "![9OdCl7pe4mbKxihdIYwYXuH5lcAHFDmwijSWhCwOJDUf4x0z7TNbUQ==]"
+sf-accounts-sapi:
+  client-secret: "![9OdCl7pe4mbKxihdIYwYXuH5lcAHFDmwijSWhCwOJDUf4x0z7TNbUQ==]"
+common-sf:
+  sapi:
+    client-secret: "![nOL1AW8eNUyxDDB8HeTE+IHfM1if20k8m4AaMdsweyguCXPIRe4kaQ==]"
+      
+mq:
+  clientSecret: "![GSdwl0bd9/xIlGmofMz/iznLP+ikwCLxIPZlf80iuov8DAQ+ODOvsw==]"

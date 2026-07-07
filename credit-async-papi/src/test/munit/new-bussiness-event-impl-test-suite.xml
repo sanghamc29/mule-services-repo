@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config
+		name="new-bussiness-event-impl-test-suite.xml" />
+	<munit:test name="new-business-event-from-alfa-subflow-test"
+		doc:id="81fd5da3-9a58-42f2-bf34-0c7dbfcd5766">
+		<munit:behavior>
+			<munit-tools:mock-when
+				doc:name="Mock Alfa SAPI"
+				doc:id="fae986b6-3119-42e9-a884-d6f31ed44727"
+				processor="http:request">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute
+						whereValue="7818a662-648a-4354-ad1b-012db07babd1"
+						attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:payload
+						value="#[%dw 2.0 output application/json --- readUrl('classpath://samples/new-business-event-details-from-alfa-sapi-mock-response.json', 'application/json')]"
+						mediaType="application/json" />
+					<munit-tools:attributes
+						value="#[{statusCode: 200}]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when
+				doc:name="Mock Salesforce SAPI update financial agreement number"
+				doc:id="8aca5bfc-d998-49c2-b84a-b2526e10b769"
+				processor="http:request">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute
+						whereValue="229ab08a-766a-4162-a991-b9ef4571d41c"
+						attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:payload value="#[null]"
+						mediaType="application/json" />
+					<munit-tools:attributes
+						value="#[{statusCode: 200}]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when
+				doc:name="Mock Anypoint MQ Ack"
+				doc:id="d426e750-492f-47bd-b4ce-26a5b860f36a"
+				processor="anypoint-mq:ack">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute
+						whereValue="df0f0b6b-1f6f-40f1-94ea-7b0feb8d727d"
+						attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<munit:set-event
+				doc:name="Subscribe Alfa Business Event Payload"
+				doc:id="7999cc7d-2971-4153-b921-190fa163bf5e">
+				<munit:payload
+					value='#[output apllication/json --- readUrl("classpath://samples/mock-new-business-event-from-alfa-payload.json", "application/json")]' />
+				<munit:attributes
+					value='#[output apllication/json&#10;---&#10;readUrl("classpath://samples/new-business-event-from-alfa-mock-ack-id.json", "application/json")]' />
+			</munit:set-event>
+			<flow-ref
+				doc:name="Flow Refer to new-business-event-from-alfa-subflow"
+				doc:id="0ee456eb-ca9b-4754-b8e9-ecc376e9ce8f"
+				name="new-business-event-from-alfa-subflow" />
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-equals
+				doc:name="Validate Response"
+				doc:id="a4b711e0-da8b-46e5-90ee-957f9a8e8119"
+				actual="#[vars.originalMessage.attributes.ackToken]"
+				expected='#[output application/json&#10;---&#10;(readUrl("classpath://samples/new-business-event-from-alfa-mock-ack-id.json", "application/json")).ackToken]' />
+		</munit:validation>
+	</munit:test>
+	<munit:test
+		name="new-business-event-from-alfa-subflow-test-ANY-ErrorScenario"
+		doc:id="d1f9e8c3-0f1c-4ac3-94fb-d9bc9f48b3fa">
+		<munit:behavior>
+			<munit-tools:mock-when
+				doc:name="Mock Alfa SAPI"
+				doc:id="51cae681-5646-40fa-95ef-1994f9b18751"
+				processor="http:request">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute
+						whereValue="7818a662-648a-4354-ad1b-012db07babd1"
+						attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:payload
+						value="#[%dw 2.0 output application/json --- readUrl('classpath://samples/new-business-event-details-from-alfa-sapi-mock-response.json', 'application/json')]"
+						mediaType="application/json" />
+					<munit-tools:attributes
+						value="#[{statusCode: 200}]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when
+				doc:name="Mock Salesforce SAPI update financial agreement number"
+				doc:id="d86a8c91-e8f9-4b03-8a54-e3a665ae6e38"
+				processor="http:request">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute
+						whereValue="229ab08a-766a-4162-a991-b9ef4571d41c"
+						attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:error typeId="ANY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when
+				doc:name="Mock when Publish DLQ"
+				doc:id="25d784a1-526f-428b-a588-087f36559d57"
+				processor="anypoint-mq:publish">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute
+						whereValue="756526e2-50f4-481e-81fe-63b2c510750a"
+						attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock when Ack"
+				doc:id="8ce109bd-76eb-4533-bed1-79f9ce29e890"
+				processor="anypoint-mq:ack">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute
+						whereValue="46dd4095-52da-48c7-ab2f-c4976f8758d4"
+						attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<munit:set-event
+				doc:name="Subscribe Alfa Business Event Payload"
+				doc:id="1321425c-3be7-4bb8-b626-5b8998cd3343">
+				<munit:payload
+					value='#[output apllication/json --- readUrl("classpath://samples/mock-new-business-event-from-alfa-payload.json", "application/json")]' />
+				<munit:attributes
+					value='#[output apllication/json&#10;---&#10;readUrl("classpath://samples/new-business-event-from-alfa-mock-ack-id.json", "application/json")]' />
+			</munit:set-event>
+			<flow-ref
+				doc:name="Flow Refer to new-business-event-from-alfa-subflow"
+				doc:id="387ccf15-7720-4357-b660-9394768c63c0"
+				name="new-business-event-from-alfa-subflow" />
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:verify-call
+				doc:name="Verify call to new business event DLQ"
+				doc:id="9d8077cd-9f62-4001-a651-50e969113403" processor="logger">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute
+						whereValue="5bbf42a9-d37d-4a6e-922b-922dace4708f"
+						attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test
+		name="new-business-event-from-alfa-subflow-test-connectivity-ErrorScenario"
+		doc:id="80b1acae-e97a-43f0-8158-04f7255e3196"
+		expectedErrorType="HTTP:CONNECTIVITY">
+		<munit:behavior>
+			<munit-tools:mock-when
+				doc:name="Mock Anypoint MQ Ack"
+				doc:id="2f001349-ff22-4bf7-b2a1-a853f84d6670"
+				processor="anypoint-mq:ack">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute
+						whereValue="df0f0b6b-1f6f-40f1-94ea-7b0feb8d727d"
+						attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:error typeId="HTTP:CONNECTIVITY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when
+				doc:name="Mock when Nack"
+				doc:id="2d1e2b05-3838-4908-b1f3-75c3990f2d95"
+				processor="anypoint-mq:nack">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute
+						whereValue="93770a5f-e45a-417a-a74a-558410c450f8"
+						attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<munit:set-event
+				doc:name="Subscribe Alfa Business Event Payload"
+				doc:id="2d3d8021-4e1f-434c-9b32-ec9975036724">
+				<munit:payload
+					value='#[output apllication/json --- readUrl("classpath://samples/mock-new-business-event-from-alfa-payload.json", "application/json")]' />
+				<munit:attributes
+					value='#[output apllication/json&#10;---&#10;readUrl("classpath://samples/new-business-event-from-alfa-mock-ack-id.json", "application/json")]' />
+			</munit:set-event>
+			<flow-ref
+				doc:name="Flow Refer to new-business-event-from-alfa-subflow"
+				doc:id="99c7bd7b-5684-4033-a8a4-4191a2426acd"
+				name="new-business-event-from-alfa-subflow" />
+		</munit:execution>
+	</munit:test>
+</mule>

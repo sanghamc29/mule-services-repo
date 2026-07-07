@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:anypoint-mq="http://www.mulesoft.org/schema/mule/anypoint-mq"
+	xmlns:tracing="http://www.mulesoft.org/schema/mule/tracing"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/tracing http://www.mulesoft.org/schema/mule/tracing/current/mule-tracing.xsd
+http://www.mulesoft.org/schema/mule/anypoint-mq http://www.mulesoft.org/schema/mule/anypoint-mq/current/mule-anypoint-mq.xsd">
+	<sub-flow name="credit-application-enrichment-subflow" doc:id="7ed45773-e2e0-4bb0-9516-909d332ce775" >
+		<set-variable value="#[message]" doc:name="Set originalMessage" doc:id="9675558d-6b2a-4c81-8aa2-dccc9e943674" variableName="originalMessage" />
+		<try doc:name="Try" doc:id="a09c6007-9496-4daf-a89a-6fd42b8147b5">
+				<logger level="INFO" doc:name="Log Credit Application ID for Enrichment Request" doc:id="7e6f153d-dcb5-4c99-899a-28ae8f5dab2c" message="#[import try from dw::Runtime&#10;output application/java --- &quot;\'Credit Application details received via MQ for the enrichment\': &quot; ++ &quot; \'applicationId\': &quot; ++ (vars.uniqueApplicationId) ++ &quot; \'correlationId\': &quot; ++ (attributes.properties.correlationId default correlationId) ++ if(p('log.payloadFlag') == 'true'  and  try(() -&gt; isEmpty(payload)).success) (&quot;\'Payload\': &quot; ++ write(payload,&quot;application/json&quot;)) else &quot;&quot;]" />
+			<flow-ref doc:name="enrich credit application received from MQ" doc:id="365da681-d83c-48ff-bb49-d06c5e0f91e5" name="enrichment-subflow" />
+				<anypoint-mq:ack doc:name="Acknowledge MQ message" doc:id="cd1872a4-ec3e-439c-99f8-b4e189dacdd4" config-ref="anypoint-mq-config" ackToken="#[vars.originalMessage.attributes.ackToken]" />
+			<error-handler>
+					<on-error-propagate enableNotifications="false" logException="false" doc:name="On Error Propagate" doc:id="ae6a832c-31a1-4ff1-8d46-4958c47dbfdc" type="HTTP:CONNECTIVITY, HTTP:SERVICE_UNAVAILABLE, HTTP:TIMEOUT, HTTP:TOO_MANY_REQUESTS">
+						<logger level="ERROR" doc:name="Log Message" doc:id="148359bd-227e-4520-8517-31eeeaed3056" message='#["Error: " ++ (error.detailedDescription as String) ++ " occured while processing the credit application for enrichment. Not acknowledge message for credit application event: " ++ (vars.originalMessage.attributes.properties.inspectionSfdcId default "no event")]' />
+						<anypoint-mq:nack doc:name="NOT Acknowledge MQ Message" doc:id="cd3ee882-901a-439f-a0be-8f197a0302fc" config-ref="anypoint-mq-config" ackToken="#[vars.originalMessage.attributes.ackToken]" />
+					</on-error-propagate>
+					<on-error-continue enableNotifications="false" logException="false" doc:name="On Error Continue" doc:id="87d2e103-2722-4bf1-8945-b2c211e9260c" type="ANY">
+						<logger level="ERROR" doc:name="Log Message" doc:id="6a9a5c41-5a52-41f7-ae0f-6a3dd3c64d5e" message='#["Error: " ++ (error.detailedDescription as String) ++ " occurred while processing credit application for enrichment. Moving message to DLQ : " ++ (vars.originalMessage.attributes.properties.inspectionSfdcId default "no application ID")]' />
+						<anypoint-mq:publish doc:name="Publish originalMessage to DLQ" doc:id="357765c8-620b-4801-a1ff-d7ec6476fdb2" config-ref="anypoint-mq-config" destination="${mq.creditApplicationEnrichment.dlq}" messageId="#[vars.originalMessage.attributes.headers.messageId]" messageGroupId="#[vars.originalMessage.attributes.headers.messageGroupId]">
+							<anypoint-mq:body><![CDATA[#[output application/json
+---
+{
+	originalPayload: vars.originalMessage.payload,
+	errorMessage: error.detailedDescription
+}]]]></anypoint-mq:body>
+							<anypoint-mq:properties><![CDATA[#[output application/java
+---
+{
+	"correlationId" : vars.originalMessage.attributes.properties.correlationId default "no correlationId"	
+}]]]></anypoint-mq:properties>
+						</anypoint-mq:publish>
+						<anypoint-mq:ack doc:name="Acknowledge MQ message" doc:id="c67767e3-ca30-41e5-b145-ad27223ea07c" config-ref="anypoint-mq-config" ackToken="#[vars.originalMessage.attributes.ackToken]" />
+					</on-error-continue>
+				</error-handler>
+			</try>
+	</sub-flow>
+	<sub-flow name="enrichment-subflow" doc:id="6649460e-79df-4f2d-b28b-9417c205dae7" >
+		<choice doc:name="Choice" doc:id="c8ba5f84-d119-4a1d-94a1-6a863b25b3a8">
+			<when expression='#[payload.country != "MX"]'>
+				<flow-ref doc:name="get-default-program-id-and-dealer-details-subflow" doc:id="db3a840f-ff7b-46c0-b5d2-7cbae2ce5b61" name="get-default-program-id-and-dealer-details-subflow"/>
+			</when>
+			<otherwise>
+				<logger level="INFO" doc:name="payload with MX" doc:id="0ae8d90d-1c49-4bdf-ad89-26c578d6ede7" message="Not calling sf for Mexico" />
+			</otherwise>
+		</choice>
+		<scatter-gather doc:name="Scatter-Gather" doc:id="600fa721-0af0-4ffb-9813-72f8534fcb66">
+			<route>
+				<flow-ref doc:name="vip-subflow" doc:id="30d8a181-f773-4f26-a69a-f1d2e3aa0297" name="vip-subflow" />
+			</route>
+			<route >
+				<choice doc:name="Choice" doc:id="f99dfac9-f4a5-4af1-80a6-0d767d00865f" >
+					<when expression='#[payload.country != "MX"]'>
+						<flow-ref doc:name="csl-subflow" doc:id="bf6aa660-8b92-4815-9475-00a7531a1eb5" name="csl-subflow" />
+					</when>
+					<otherwise >
+						<logger level="INFO" doc:name="skip CSL for MX" doc:id="155fcff6-c567-4e0f-8ff8-c832ff888f39" message="Skipping CSL for Mexico"/>
+					</otherwise>
+				</choice>
+			</route>
+			<route >
+				<choice doc:name="If the application vehicle is used" doc:id="ef56da8f-17a5-4065-b8f7-c8aa999f8d19">
+					<when expression="#[payload.applicationVehicle.vehicleCondition == 'Used']">
+						<flow-ref doc:name="vehicle pricing subflow" doc:id="77ebba63-0ad3-4513-9315-6415aa66c05a" name="get-vehicle-details-from-vehicle-pricing-sapi" />
+					</when>
+					<otherwise >
+						<logger level="INFO" doc:name="Log message when the vehicle condition is not 'Used'" doc:id="dbb2b7de-1f4f-48e8-84df-7efa623ef1df" message="#[&quot;To get the vehicle pricing details, the vehicle condition must be 'Used'&quot;]"/>
+					</otherwise>
+				</choice>
+			</route>
+</scatter-gather>
+<ee:transform doc:name="Build Full request to SF SAPI" doc:id="3f7410c6-69f0-4223-8cf5-fd86d04ba24d" >
+			<ee:message >
+				<ee:set-payload resource="dataweaves/build-enrichment-update.dwl" />
+			
+</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="Flow to PATCH /applications/{applicationID} Endpoint in SF SAPI" doc:id="5d0dbac6-1ea4-4865-9b21-a0b6f9e9c8e2" name="Patch-Credit-Application"/>
+	</sub-flow>
+	<sub-flow name="vip-subflow" doc:id="b58197e8-fbbc-4291-af5e-0eed7df76551" >
+		<ee:transform doc:name="Build Request to VIP SAPI" doc:id="9204b86a-be06-4841-adf1-0baff5d9aba2">
+			<ee:message>
+				<ee:set-payload resource="dataweaves/build-request-to-vip.dwl" />
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="Get credit conditions" doc:id="66f38c87-fa0a-47ae-9d3a-e34852c52d0e" name="get-credit-conditions-subflow" />
+		<ee:transform doc:name="Build Request to update Credit Conditions via Salesforce SAPI" doc:id="782c4d26-957b-4ad8-8c01-43a47aa10bb1">
+			<ee:message>
+				<ee:set-payload resource="dataweaves/parse-rates-and-residuals.dwl" />
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+	<sub-flow name="get-default-program-id-and-dealer-details-subflow" doc:id="5d82ee6f-61bf-4fa2-8170-71097833e93b">
+		<http:request method="GET" doc:name="Get default Program Id" doc:id="9888f6ef-135a-4c4d-a5b4-9094f2b52e76" config-ref="http-salesforce-sapi-config" path="/applications/default-program-id" target="programCodeApplicationDetails">
+					<http:body ><![CDATA[#[null]]]></http:body>
+			<http:query-params><![CDATA[#[output application/java
+---
+{
+	"applicationId" : payload.applicationID,
+	"country" : payload.country,
+	"financeType" : payload.applicationProduct.financeType
+}]]]></http:query-params>
+				</http:request>
+	</sub-flow>
+	<sub-flow name="get-credit-conditions-subflow" doc:id="e5010997-292a-417a-8bc2-7683951c3af4">
+		<http:request method="POST" doc:name="Get Credit decisions from VIP" doc:id="b4b53710-7c27-4a1a-8358-9422b9b0b0af" config-ref="http-vip-sapi-config" path="/program-conditions">
+		</http:request>
+	</sub-flow>
+	<sub-flow name="csl-subflow" doc:id="daaf3661-e96a-4335-9a67-97eabcb4657b" >
+		<ee:transform doc:name="Store Application Party details and Application ID" doc:id="bc51b58c-0dfc-450a-b30c-a89d24e5dbb8">
+					<ee:message>
+				<ee:set-payload resource="dataweaves/store-application-party-details.dwl" />
+					</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="applicationId" ><![CDATA[%dw 2.0
+output application/json
+---
+payload.applicationID]]></ee:set-variable>
+			</ee:variables>
+				</ee:transform>
+		<parallel-foreach doc:name="Parallel For Each" doc:id="7ec5dbb6-5a8c-4474-ae2f-809a37f6ba68" collection='#[payload filter ((item, index) -&gt; !([null,"","RE"] contains item.applicationPartyRole))]'>
+			<set-variable value="#[payload.applicationPartyRole]" doc:name="Get Application Party Roles" doc:id="abb11ea6-3864-465a-afb9-aff84d8282e3" variableName="applicationPartyRole"/>
+			<flow-ref doc:name="get-sanction-status-subflow" doc:id="fd0c8e3b-0eb7-4b0e-9e63-7111a27b953f" name="get-sanction-status-subflow"/>
+			<ee:transform doc:name="Build Request to SF SAPI" doc:id="db8ec5ff-e366-4deb-bd48-c4cd59e9d2f8" >
+				<ee:message >
+					<ee:set-payload resource="dataweaves/build-request-to-salesforce-sapi.dwl" />
+				</ee:message>
+			</ee:transform>
+		</parallel-foreach>
+		<ee:transform doc:name="Get applicationParties Array" doc:id="3f789510-f7a3-4f21-a8c5-a9bfbd754660" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload.payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+	<sub-flow name="get-sanction-status-subflow" doc:id="21f26b6d-8b60-4be2-890a-9418d67b5862" >
+		<ee:transform doc:name="Prepare query params for CSL" doc:id="cf82c0dd-4248-49ec-b8f4-120040306ee4" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[output application/json skipNullOn = "everywhere"
+---
+{
+	"businessTaxId" : payload.businessTaxId,
+	"country" : payload.country,
+	"name" : payload.name,
+	"currentCity" : payload.currentCity,
+	"dateOfBirth" : payload.dateOfBirth,
+	"entityType" : payload.entityType,
+	"individualTaxId" : payload.individualTaxId
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<http:request method="GET" doc:name="Get Sanction Status from CSL" doc:id="847ab85f-ef09-4181-8135-81ce542f0e3e" config-ref="http-csl-sapi-config" path="/sanctionStatus">
+			<http:query-params ><![CDATA[#[output application/java skipNullOn = "everywhere"
+---
+payload]]]></http:query-params>
+		</http:request>
+	</sub-flow>
+	<sub-flow name="get-vehicle-details-from-vehicle-pricing-sapi" doc:id="3aff12b5-07aa-4571-a952-070f2fc02042" >
+		<ee:transform doc:name="store application vehicle details" doc:id="f67ac285-e89f-4bf9-9ef5-114a47fa46b7">
+			<ee:message>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable resource="dataweaves/store-vehicle-details-for-vehicle-pricing-sapi.dwl" variableName="vehicleDetails" />
+			</ee:variables>
+		</ee:transform>
+		<choice doc:name="check if country is US or CA" doc:id="d02ee0e2-e948-4089-ab16-4abb0edb7600" >
+			<when expression="#[payload.country == 'US']">
+				<http:request method="GET" doc:name="get dealer zip with dealer number" doc:id="e6e85ec3-b22a-4ab7-a7f2-79896519c392" config-ref="http-salesforce-sapi-config" path="/applications/dealers/{dealerNumber}/zip" >
+					<http:body ><![CDATA[#[null]]]></http:body>
+					<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"dealerNumber" : payload.dealerNumberNA
+}]]]></http:uri-params>
+				</http:request>
+				<ee:transform doc:name="store dealerzip" doc:id="e86d42a4-497d-4da9-bbac-742c0cb19c4e" >
+					<ee:message />
+					<ee:variables >
+						<ee:set-variable resource="dataweaves/store-dealer-zip-for-us.dwl" variableName="dealerZip" />
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Log message when the country is not 'US'" doc:id="6b714798-5675-4682-90ba-2f3a2c28bc0b" message='#["dealer zip is not required for" ++ payload.country]'/>
+			</otherwise>
+		</choice>
+		<http:request method="GET" doc:name="get vehicle details from vehicle pricing sapi" doc:id="d83707e5-27a7-4497-80e0-080694cfeb1c" config-ref="http-vehicle-pricing-sapi-configuration" path="/credit/applications/{applicationId}/vehicles/{vin}/vehiclePricing" >
+			<http:body ><![CDATA[#[null]]]></http:body>
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"applicationId" : vars.vehicleDetails.applicationId,
+	"vin" : vars.vehicleDetails.vin
+}]]]></http:uri-params>
+		<http:query-params ><![CDATA[#[output application/java
+---
+{
+	("vehicleModel" : vars.vehicleDetails.vehicleModel) if(vars.vehicleDetails.vehicleModel !=null),
+	("dealerZip" : vars.dealerZip) if(vars.dealerZip !=null),
+	("dealerNumber" : vars.vehicleDetails.dealerNumber) if(vars.vehicleDetails.dealerNumber !=null),
+	("countryCode" : vars.vehicleDetails.country) if(vars.vehicleDetails.country !=null),
+	("vehicleYear" : vars.vehicleDetails.vehicleYear) if(vars.vehicleDetails.vehicleYear !=null),
+	("odometerMileage" : vars.vehicleDetails.odometerMileage) if(vars.vehicleDetails.odometerMileage !=null),
+	("vehicleCondition" : vars.vehicleDetails.condition) if(vars.vehicleDetails.condition !=null)
+}]]]></http:query-params>
+		</http:request>
+	</sub-flow>
+</mule>

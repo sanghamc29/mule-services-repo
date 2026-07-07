@@ -1,0 +1,18 @@
+[
+  {
+    "externalID1": "NIF001",
+    "applicantId": "APP1",
+    "accountId": "ACC1",
+    "name": "John Doe",
+    "income": 50000,
+    "creditHistory": "Good"
+  },
+  {
+    "externalID1": "NIF002",
+    "applicantId": "APP2",
+    "accountId": "ACC2", 
+    "name": "Jane Smith",
+    "income": 75000,
+    "creditHistory": "Excellent"
+  }
+]

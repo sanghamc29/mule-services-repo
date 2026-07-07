@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="   http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd   http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd   http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="agencyFeedback-c7-test-suite.xml"/>
+	<munit:test description="Test" doc:id="1d7e6e3e-df5b-4f78-900a-d7145ae653c5" name="api-test-suite-post:\customers\agencyFeedback:application\json:api-configTest">
+		<munit:behavior>
+			<munit-tools:mock-when doc:id="82660f43-c68b-4f7c-9e33-8c9a8c0e291c" doc:name="Mock Lomapi Requester" processor="http:request">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute attributeName="doc:name" whereValue="Lomapi Requester"/>
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:payload mediaType="application/json" value="#[output application/json --- (readUrl('classpath://responses/agencyDataResPayload.json','application/json'))]"/>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock when Sf translation mudule response" doc:id="5457493d-a158-46bc-95ec-756dde5f674f" processor="salesforce:query" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Query Salesforce" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json --- (readUrl('classpath://responses/enumTranslatedValuesHousenumberStreet.json'))]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<munit:set-event doc:name="Set Event" doc:id="9afc39ac-542a-4ba3-9e02-d787f7611069">
+				<munit:payload value="#[output application/json --- readUrl('classpath://requests/agencyDataReqPayload.json','application/json')]" mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:id="0fb14582-03f5-4a07-b7ec-c0aea4d09e31" doc:name="Flow-ref to post:\customers\agencyFeedback:application\json:api-config" name="post:\customers\agencyFeedback:application\json:api-config"/>
+		</munit:execution>
+	</munit:test>
+
+</mule>

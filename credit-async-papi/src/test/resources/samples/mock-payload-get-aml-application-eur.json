@@ -1,0 +1,58 @@
+[
+    {
+        "applicationID": "fc816d79-9c75-42eb-ac6c-9d45802fcb4a",
+        "applicationParties": [
+            {
+                "idNumber": "SF_0000002417",
+                "applicationPartyId": "13Y760000008RvrEAE",
+                "referenceBusinessName": "Zwetschgen Datschi",
+                "exposure": 20000,
+                "numberOfActiveContracts": 1,
+                "issuingEntity": "Private Equity Company",
+                "businessTaxID": "516959336",
+                "individualTaxID": "",
+                "localIndustryCode": "66300",
+                "secondaryLocalIndustryCode": "71200",
+                "currentStreetAddress": "Pflaumenstr. 2",
+                "currentState": "Pflaumenstr. 2",
+                "currentZip": "12324",
+                "currentCity": "Baumstadt",
+                "countryOfBirth": "PT",
+                "holdingCountry": "PT",
+                "creditRegistrationCode": "2343-2343-2343",
+                "creditRegistrationIssuingEntity": "PT Ministry of Affairs",
+                "applicationPartyRole": "MainApplicant",
+                "relationshipToPrimaryApplicant": "mainapplicant"
+            },
+            {
+                "individualTaxID": "",
+                "countryOfBirth": "PT",
+                "applicationPartyRole": "Other",
+                "relationshipToPrimaryApplicant": "legalRepresentative",
+                "firstName": "Barbara",
+                "lastName": "Rhabarbar",
+                "dateOfBirth": "1983-07-28",
+                "nationality": "PT",
+                "occupation": "Agriculture and Others",
+                "politicallyExposedFlag": false,
+                "applicationDocuments": [
+                    {
+                        "documentType": "Citizen Card",
+                        "issuingCountry": "PT",
+                        "documentNumber": "2937530253"
+                    }
+                ]
+            }
+        ],
+        "applicationProductOffer": {
+            "proposalID": "16v760000004CYXAA2",
+            "currencyIsoCode": "EUR",
+            "capitalReduction": 6725.39,
+            "amountFinanced": 503481.07,
+            "term": 36
+        },
+        "applicationProduct": {
+            "financialProduct": "Finance Lease"
+        }
+    }
+]

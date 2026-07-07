@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="   http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd   http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd   http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="sync-decision-or-comments-to-mba-impl-test-suite.xml"/>
+	<munit:test description="Test" doc:id="b9e598a6-d502-440d-b3be-8fb58a0dc605" expectedErrorType="HTTP:CONNECTIVITY" name="implementation-test-suite-sync-updates-in-credit-app-call-mb-advantage-connectivity-error-subflowTest">
+		<munit:behavior>
+			<munit-tools:mock-when doc:id="e8f4b5cd-84eb-42ee-8326-7c4d00685c5f" doc:name="mock sf request get app details" processor="flow-ref">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute attributeName="doc:id" whereValue="b70c6f6c-8f1e-42fb-800a-a29d38f284b9"/>
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:payload value="#[output apllication/json --- readUrl(&quot;classpath://samples/sync-updates-in-credit-app-to-mb-advantage-mock-sf-request.json&quot;, &quot;application/json&quot;)]"/>
+					<munit-tools:attributes value="#[{statusCode:200}]"/>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:id="638966a5-d48c-40c8-9831-00b707cce3e9" doc:name="Mock to Call MB Advantage" processor="http:request">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute attributeName="doc:id" whereValue="08073f61-6abf-4a7c-9bef-312b210a1df6"/>
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:error typeId="HTTP:CONNECTIVITY"/>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:id="52de9485-d250-4f6d-b631-b207d930b9d7" doc:name="Mock Anypoint MQ Ack" processor="anypoint-mq:nack">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute attributeName="doc:name" whereValue="NOT Acknowledge MQ"/>
+					<munit-tools:with-attribute attributeName="doc:id" whereValue="c5921439-9239-4f1b-82ba-b963c3656612"/>
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<munit:set-event doc:id="2ae75dd3-7c2e-47d9-91c2-9c7b8838984a" doc:name="Subscribe Sync updates in Credit App Payload">
+				<munit:payload value='#[output application/json --- readUrl("classpath://samples/sync-updates-in-credit-app-to-mb-advantage-mock-payload.json", "application/json")]' />
+				<munit:variables >
+					<munit:variable key="appId" value='#["1234"]' />
+				</munit:variables>
+			</munit:set-event>
+			<flow-ref doc:id="dc313893-d80f-41e1-af92-d59c90ad8077" doc:name="sync-updates-in-credit-app-to-mb-advantage-subflow" name="sync-updates-or-comments-in-credit-app-to-mb-advantage-subflow"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test description="Test" doc:id="f5d88674-7399-4e32-b5c7-520853a1c7e0" name="implementation-test-suite-sync-updates-in-credit-app-to-mb-advantage-error-subflowTest">
+		<munit:behavior>
+			<munit-tools:mock-when doc:id="8c8b5807-34f2-49e0-9d58-f29280c34553" doc:name="mock sf request get app details" processor="flow-ref">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute attributeName="doc:id" whereValue="b70c6f6c-8f1e-42fb-800a-a29d38f284b9"/>
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:payload value="#[output apllication/json --- readUrl(&quot;classpath://samples/sync-updates-in-credit-app-to-mb-advantage-mock-sf-request.json&quot;, &quot;application/json&quot;)]"/>
+					<munit-tools:attributes value="#[{statusCode:200}]"/>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:id="832270ef-61c4-4c59-9d7d-ec87a915cf64" doc:name="Mock to Call MB Advantage sapi" processor="http:request">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute attributeName="doc:id" whereValue="bac7d430-ee4f-4295-b051-db8962a8fd74"/>
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:attributes value="#[{statusCode:400}]"/>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:id="339cb46a-a8ff-473f-8dbd-f1b898b0eb2c" doc:name="Mock Anypoint MQ Publish" processor="anypoint-mq:publish">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute attributeName="doc:name" whereValue="Publish Sync updates in Credit App to DLQ"/>
+					<munit-tools:with-attribute attributeName="doc:id" whereValue="6f244868-26c1-496f-b0b5-93ddda74b709"/>
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:id="69a388f2-e874-48e6-aef9-7058d0b95087" doc:name="Mock Anypoint MQ Ack" processor="anypoint-mq:ack">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute attributeName="doc:name" whereValue="Acknowledge MQ"/>
+					<munit-tools:with-attribute attributeName="doc:id" whereValue="dd53d9d8-cc4a-443d-9f18-5418893eda54"/>
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<munit:set-event doc:id="0d9ebd65-e5cb-4a67-b66e-d1aa374f1d6c" doc:name="Subscribe Sync updates in Credit App Payload">
+				<munit:payload value="#[output application/json --- readUrl(&quot;classpath://samples/sync-updates-in-credit-app-to-mb-advantage-mock-payload.json&quot;, &quot;application/json&quot;)]"/>
+			</munit:set-event>
+			<flow-ref doc:id="5af89dba-c288-4af8-b54a-58a21cffc72c" doc:name="sync-updates-in-credit-app-to-mb-advantage-subflow" name="sync-updates-or-comments-in-credit-app-to-mb-advantage-subflow"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test description="Test" doc:id="cdf26734-61a5-4e7a-99e7-99888e3297d1" name="implementation-test-suite-sync-updates-in-credit-app-to-mb-advantage-any-error-subflowTest">
+		<munit:behavior>
+			<munit-tools:mock-when doc:id="ef051c65-794f-4552-b585-ecce140d6c81" doc:name="mock sf request get app details" processor="flow-ref">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute attributeName="doc:id" whereValue="b70c6f6c-8f1e-42fb-800a-a29d38f284b9"/>
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:payload value="#[output apllication/json --- readUrl(&quot;classpath://samples/sync-updates-in-credit-app-to-mb-advantage-mock-sf-request.json&quot;, &quot;application/json&quot;)]"/>
+					<munit-tools:attributes value="#[{statusCode:200}]"/>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:id="ce574d04-bda2-4fa3-bd60-912452c844c4" doc:name="Mock to Call MB Advantage" processor="http:request">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute attributeName="doc:id" whereValue="bac7d430-ee4f-4295-b051-db8962a8fd74"/>
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:error typeId="ANY"/>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:id="c43c9d54-3c0c-4db2-bb55-ca2b92ad5a30" doc:name="Mock Anypoint MQ Publish" processor="anypoint-mq:publish">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute attributeName="doc:name" whereValue="Publish Sync updates in Credit App to DLQ"/>
+					<munit-tools:with-attribute attributeName="doc:id" whereValue="93b0f4ed-54bb-4277-bfae-1f5222861592"/>
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:id="3654a779-b361-4bc2-89fe-9fdaad099ef4" doc:name="Mock Anypoint MQ Ack" processor="anypoint-mq:ack">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute attributeName="doc:name" whereValue="Acknowledge MQ"/>
+					<munit-tools:with-attribute attributeName="doc:id" whereValue="dd53d9d8-cc4a-443d-9f18-5418893eda54"/>
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<munit:set-event doc:id="0385a924-7c1a-4132-9020-771313188ab9" doc:name="Subscribe Sync updates in Credit App Payload">
+				<munit:payload value="#[output application/json --- readUrl(&quot;classpath://samples/sync-updates-in-credit-app-to-mb-advantage-mock-payload.json&quot;, &quot;application/json&quot;)]"/>
+			</munit:set-event>
+			<flow-ref doc:id="7f43416e-0451-4069-8420-a7ddc19fc4c9" doc:name="sync-updates-in-credit-app-to-mb-advantage-subflow" name="sync-updates-or-comments-in-credit-app-to-mb-advantage-subflow"/>
+		</munit:execution>
+	</munit:test>
+
+
+</mule>

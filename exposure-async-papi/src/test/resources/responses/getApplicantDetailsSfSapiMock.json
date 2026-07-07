@@ -1,0 +1,20 @@
+[
+    {
+        "action": "affordabilityCalculation",
+        "customerId": "12434",
+        "homeOwnership": null,
+        "professionalSituation": null,
+        "totalIncome": null,
+        "regularExpenses": null,
+        "household": null,
+        "IBAN": null,
+        "externalID1": "999900033333",
+        "gender": null,
+        "maritalStatus": null,
+        "dateOfBirth": null,
+        "applicantId": "13Y760000004CTmEAM",
+        "accountId": "0017600000g61BrAAI",
+        "eu_Type": "Individual",
+        "role": "Primary Applicant"
+    }
+]

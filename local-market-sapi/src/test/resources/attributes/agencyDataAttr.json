@@ -1,0 +1,36 @@
+{
+  "headers": {
+    "x-client-id": "1ad597f688a6412499cdea319bfbf1bf",
+    "x-client-secret": "c55Fa363e91a4d71ab8E70800cdE3e40",
+    "x-correlation-id": "13XbY000000S7o9UAC-a3UbY000000nYQOUA2",
+    "x-country-code": "IT",
+    "content-type": "application/json",
+    "user-agent": "PostmanRuntime/7.49.0",
+    "accept": "*/*",
+    "postman-token": "040c42ed-791d-4782-a289-8e29529490d1",
+    "host": "localhost:8081",
+    "accept-encoding": "gzip, deflate, br",
+    "connection": "keep-alive",
+    "content-length": "2076"
+  },
+  "clientCertificate": null,
+  "method": "POST",
+  "scheme": "http",
+  "queryParams": {
+    
+  },
+  "requestUri": "/api/local-market-sapi/v1/customers/agencyData",
+  "queryString": "",
+  "version": "HTTP/1.1",
+  "maskedRequestPath": "/customers/agencyData",
+  "listenerPath": "/api/local-market-sapi/v1/*",
+  "localAddress": "/127.0.0.1:8081",
+  "relativePath": "/api/local-market-sapi/v1/customers/agencyData",
+  "uriParams": {
+    
+  },
+  "rawRequestUri": "/api/local-market-sapi/v1/customers/agencyData",
+  "rawRequestPath": "/api/local-market-sapi/v1/customers/agencyData",
+  "remoteAddress": "/127.0.0.1:63685",
+  "requestPath": "/api/local-market-sapi/v1/customers/agencyData"
+}

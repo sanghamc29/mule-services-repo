@@ -1,0 +1,482 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" 
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" 
+      xmlns:munit="http://www.mulesoft.org/schema/mule/munit" 
+      xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" 
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" 
+      xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd 
+                          http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd 
+                          http://www.mulesoft.org/schema/mule/munit-tools http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+	http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+    
+    <munit:config name="exposure-async-papi-comprehensive-test-suite.xml">
+        <munit:parameterizations file="comprehensive-test-parameters.yaml"/>
+    </munit:config>
+    
+    <!-- ========================================== -->
+    <!-- POSITIVE TEST CASES - AFFORDABILITY CALCULATIONS -->
+    <!-- ========================================== -->
+    
+    <munit:test name="affordability-calculations-positive-test" description="${positiveTests.affordabilityCalculations.testScenarios.description}" ignore="#[not ('${positiveTests.affordabilityCalculations.testScenarios.name}' contains 'Applicant')]">
+        <munit:behavior>
+            <set-variable variableName="applicationFormId" value="${positiveTests.affordabilityCalculations.testScenarios.applicationFormId}"/>
+            <set-variable variableName="correlationId" value="${positiveTests.affordabilityCalculations.testScenarios.correlationId}"/>
+            <set-variable variableName="countryCode" value="${positiveTests.affordabilityCalculations.testScenarios.countryCode}"/>
+            <set-variable variableName="currencyIsoCode" value="${positiveTests.affordabilityCalculations.testScenarios.currencyIsoCode}"/>
+
+            <!-- Dynamic payload loading based on scenario -->
+            <choice doc:name="Load Test Data">
+                <when expression='#["${positiveTests.affordabilityCalculations.testScenarios.name}" == "multipleApplicants"]'>
+                    <munit:set-event>
+                        <munit:payload value='[
+                          {"externalID1": "NIF001", "applicantId": "APP1", "accountId": "ACC1", "name": "John Doe"},
+                          {"externalID1": "NIF002", "applicantId": "APP2", "accountId": "ACC2", "name": "Jane Smith"}
+                        ]'/>
+                    </munit:set-event>
+                </when>
+                <otherwise>
+                    <munit:set-event>
+                        <munit:payload value='[
+                          {"externalID1": "NIF001", "applicantId": "APP1", "accountId": "ACC1", "name": "Hans Mueller"}
+                        ]'/>
+                    </munit:set-event>
+                </otherwise>
+            </choice>
+
+            <!-- Mock SF Accounts SAPI calls -->
+            <munit-tools:mock-when processor="http:request">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="${mockConfigurations.sfSapiSuccess.config}"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='#[if ("${positiveTests.affordabilityCalculations.testScenarios.name}" == "multipleApplicants") [{"externalID1": "NIF001", "applicantId": "APP1", "accountId": "ACC1", "name": "John Doe", "income": 50000}, {"externalID1": "NIF002", "applicantId": "APP2", "accountId": "ACC2", "name": "Jane Smith", "income": 75000}] else [{"externalID1": "NIF001", "applicantId": "APP1", "accountId": "ACC1", "name": "Hans Mueller", "income": 60000}]]'/>
+                    <munit-tools:attributes value='#[{statusCode: ${mockConfigurations.sfSapiSuccess.statusCode}}]'/>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+            <!-- Mock Local Market SAPI calls -->
+            <munit-tools:mock-when processor="http:request">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="${mockConfigurations.lomapiSuccess.config}"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='{"status":"SUCCESS","affordabilityScore": 750,"payload":{"calculation":"completed","creditScore":750}}'/>
+                    <munit-tools:attributes value='#[{statusCode: ${mockConfigurations.lomapiSuccess.statusCode}}]'/>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+        </munit:behavior>
+
+        <munit:execution>
+            <flow-ref name="${positiveTests.affordabilityCalculations.flowName}"/>
+        </munit:execution>
+
+        <munit:validation>
+            <munit-tools:assert-that expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+            <munit-tools:assert-that expression="#[payload.status]" is="#[MunitTools::equalTo('${positiveTests.affordabilityCalculations.testScenarios.expectedStatus}')]"/>
+            <munit-tools:assert-that expression="#[payload.recordsProcessed default 0]" is="#[MunitTools::equalTo(${positiveTests.affordabilityCalculations.testScenarios.expectedRecordsProcessed})]"/>
+        </munit:validation>
+    </munit:test>
+
+    <!-- ========================================== -->
+    <!-- POSITIVE TEST CASES - CUSTOMER EXPOSURE -->
+    <!-- ========================================== -->
+    
+    <munit:test name="customer-exposure-positive-test" description="${positiveTests.customerExposure.testScenarios.description}" ignore="#[not ('${positiveTests.customerExposure.testScenarios.name}' contains 'Customer')]">
+        <munit:behavior>
+            <set-variable variableName="applicationFormId" value="${positiveTests.customerExposure.testScenarios.applicationFormId}"/>
+            <set-variable variableName="correlationId" value="${positiveTests.customerExposure.testScenarios.correlationId}"/>
+            <set-variable variableName="countryCode" value="${positiveTests.customerExposure.testScenarios.countryCode}"/>
+            <set-variable variableName="currencyIsoCode" value="${positiveTests.customerExposure.testScenarios.currencyIsoCode}"/>
+
+            <!-- Dynamic test data based on scenario -->
+            <choice doc:name="Load Customer Test Data">
+                <when expression='#["${positiveTests.customerExposure.testScenarios.name}" == "validCustomers"]'>
+                    <munit:set-event>
+                        <munit:payload value='[
+                          {"applicantId": "A1", "accountId": "ACC1", "customerId": "CUST1"},
+                          {"applicantId": "A2", "accountId": "ACC2", "customerId": "CUST2"}
+                        ]'/>
+                    </munit:set-event>
+                </when>
+                <otherwise>
+                    <munit:set-event>
+                        <munit:payload value='[
+                          {"applicantId": "A1", "accountId": "ACC1", "customerId": "CUST1"},
+                          {"applicantId": "A2", "accountId": "ACC2", "customerId": null}
+                        ]'/>
+                    </munit:set-event>
+                </otherwise>
+            </choice>
+
+            <!-- Mock SF Accounts SAPI -->
+            <munit-tools:mock-when processor="http:request">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="${mockConfigurations.sfSapiSuccess.config}"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='#[payload]'/>
+                    <munit-tools:attributes value='#[{statusCode: ${mockConfigurations.sfSapiSuccess.statusCode}}]'/>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+            <!-- Mock Miles SAPI -->
+            <munit-tools:mock-when processor="http:request">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="${mockConfigurations.milesSapiSuccess.config}"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='{"status":"SUCCESS","exposureCalculated": true}'/>
+                    <munit-tools:attributes value='#[{statusCode: ${mockConfigurations.milesSapiSuccess.statusCode}}]'/>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+        </munit:behavior>
+
+        <munit:execution>
+            <flow-ref name="${positiveTests.customerExposure.flowName}"/>
+        </munit:execution>
+
+        <munit:validation>
+            <munit-tools:assert-that expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+            <munit-tools:assert-that expression="#[sizeOf(payload)]" is="#[MunitTools::equalTo(${positiveTests.customerExposure.testScenarios.expectedFilteredCount})]"/>
+        </munit:validation>
+    </munit:test>
+
+    <!-- ========================================== -->
+    <!-- POSITIVE TEST CASES - FRAUD CHECK -->
+    <!-- ========================================== -->
+    
+    <munit:test name="fraud-check-positive-test" description="${positiveTests.fraudCheck.testScenarios.description}" ignore="#[not ('${positiveTests.fraudCheck.testScenarios.name}' contains 'Success')]">
+        <munit:behavior>
+            <set-variable variableName="applicationFormId" value="${positiveTests.fraudCheck.testScenarios.applicationFormId}"/>
+            <set-variable variableName="correlationId" value="${positiveTests.fraudCheck.testScenarios.correlationId}"/>
+            <set-variable variableName="countryCode" value="${positiveTests.fraudCheck.testScenarios.countryCode}"/>
+            <set-variable variableName="applicantIds" value="${positiveTests.fraudCheck.testScenarios.applicantIds}"/>
+            <set-variable variableName="deliveryCount" value="1"/>
+
+            <!-- Dynamic test data -->
+            <choice doc:name="Load Fraud Check Test Data">
+                <when expression='#["${positiveTests.fraudCheck.testScenarios.name}" == "allApplicantsSuccess"]'>
+                    <munit:set-event>
+                        <munit:payload value='[
+                          {"applicantId":"A1","type":"individual","status":"Active"},
+                          {"applicantId":"A2","type":"business","status":"Active"},
+                          {"applicantId":"A3","type":"individual","status":"Active"}
+                        ]'/>
+                    </munit:set-event>
+                </when>
+                <otherwise>
+                    <munit:set-event>
+                        <munit:payload value='[
+                          {"applicantId":"A1","type":"individual","status":"Active"}
+                        ]'/>
+                    </munit:set-event>
+                </otherwise>
+            </choice>
+
+            <!-- Mock all fraud check sub-flows -->
+            <munit-tools:mock-when processor="flow-ref">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="name" whereValue="c5-fraud-check-get-applicant-details"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='#[payload]'/>
+                    <munit-tools:variables>
+                        <munit-tools:variable key="fraudCheckData" value='#[payload map {"applicantId": $.applicantId, "isSuccessful": true}]'/>
+                    </munit-tools:variables>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+            <!-- Mock other fraud check flows -->
+            <munit-tools:mock-when processor="flow-ref">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="name" whereValue="c5-fraud-check-lomapi-request-flow"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='#[payload]'/>
+                    <munit-tools:variables>
+                        <munit-tools:variable key="fraudCheckData" value='#[payload map {"applicantId": $.applicantId, "isSuccessful": true}]'/>
+                    </munit-tools:variables>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+            <munit-tools:mock-when processor="flow-ref">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="name" whereValue="c5-fraud-check-sf-applicants-flag-update"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='{"status":"SUCCESS","updated": ${positiveTests.fraudCheck.testScenarios.expectedAllSuccess}}'/>
+                    <munit-tools:variables>
+                        <munit-tools:variable key="fraudCheckData" value='#[payload map {"applicantId": $.applicantId, "isSuccessful": true}]'/>
+                    </munit-tools:variables>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+            <munit-tools:mock-when processor="flow-ref">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="name" whereValue="c5-get-sf-documents-for-applicants"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='#[payload]'/>
+                    <munit-tools:variables>
+                        <munit-tools:variable key="fraudCheckData" value='#[payload map {"applicantId": $.applicantId, "isSuccessful": true}]'/>
+                    </munit-tools:variables>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+            <munit-tools:mock-when processor="flow-ref">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="name" whereValue="c5-sf-document-update"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='{"status":"SUCCESS","documentsUpdated": ${positiveTests.fraudCheck.testScenarios.expectedAllSuccess}}'/>
+                    <munit-tools:variables>
+                        <munit-tools:variable key="fraudCheckData" value='#[payload map {"applicantId": $.applicantId, "isSuccessful": true}]'/>
+                    </munit-tools:variables>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+        </munit:behavior>
+
+        <munit:execution>
+            <flow-ref name="${positiveTests.fraudCheck.flowName}"/>
+        </munit:execution>
+
+        <munit:validation>
+            <munit-tools:assert-that expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+            <munit-tools:assert-that expression="#[vars.fraudCheckFailed default false]" is="#[MunitTools::equalTo(false)]"/>
+        </munit:validation>
+    </munit:test>
+
+    <!-- ========================================== -->
+    <!-- NEGATIVE TEST CASES - AFFORDABILITY CALCULATIONS -->
+    <!-- ========================================== -->
+    
+    <munit:test name="affordability-calculations-negative-test" description="${negativeTests.affordabilityCalculations.testScenarios.description}" ignore="#[not ('${negativeTests.affordabilityCalculations.testScenarios.name}' contains 'Error' or '${negativeTests.affordabilityCalculations.testScenarios.name}' contains 'empty')]">
+        <munit:behavior>
+            <set-variable variableName="applicationFormId" value="${negativeTests.affordabilityCalculations.testScenarios.applicationFormId}"/>
+            <set-variable variableName="correlationId" value="${negativeTests.affordabilityCalculations.testScenarios.correlationId}"/>
+            <set-variable variableName="countryCode" value="${negativeTests.affordabilityCalculations.testScenarios.countryCode}"/>
+            <set-variable variableName="currencyIsoCode" value="${negativeTests.affordabilityCalculations.testScenarios.currencyIsoCode}"/>
+
+            <!-- Dynamic test data for negative scenarios -->
+            <choice doc:name="Load Negative Test Data">
+                <when expression='#["${negativeTests.affordabilityCalculations.testScenarios.name}" == "emptyApplicants"]'>
+                    <munit:set-event>
+                        <munit:payload value='[]'/>
+                    </munit:set-event>
+                </when>
+                <otherwise>
+                    <munit:set-event>
+                        <munit:payload value='[
+                          {"externalID1": "NIF001", "applicantId": "APP1", "accountId": "ACC1", "name": "Test User"}
+                        ]'/>
+                    </munit:set-event>
+                </otherwise>
+            </choice>
+
+            <!-- Dynamic mocking based on error type -->
+            <choice doc:name="Setup Error Mocks">
+                <when expression='#["${negativeTests.affordabilityCalculations.testScenarios.mockError default \"\"}" == "SF_SAPI_ERROR"]'>
+                    <munit-tools:mock-when processor="http:request">
+                        <munit-tools:with-attributes>
+                            <munit-tools:with-attribute attributeName="config-ref" whereValue="${mockConfigurations.sfSapiError.config}"/>
+                        </munit-tools:with-attributes>
+                        <munit-tools:then-call flow="error-mock-flow"/>
+                    </munit-tools:mock-when>
+                </when>
+                <when expression='#["${negativeTests.affordabilityCalculations.testScenarios.mockError default \"\"}" == "LOMAPI_ERROR"]'>
+                    <munit-tools:mock-when processor="http:request">
+                        <munit-tools:with-attributes>
+                            <munit-tools:with-attribute attributeName="config-ref" whereValue="${mockConfigurations.sfSapiSuccess.config}"/>
+                        </munit-tools:with-attributes>
+                        <munit-tools:then-return>
+                            <munit-tools:payload value='[{"externalID1": "NIF001", "applicantId": "APP1", "accountId": "ACC1", "name": "Test User", "income": 50000}]'/>
+                        </munit-tools:then-return>
+                    </munit-tools:mock-when>
+                    <munit-tools:mock-when processor="http:request">
+                        <munit-tools:with-attributes>
+                            <munit-tools:with-attribute attributeName="config-ref" whereValue="${mockConfigurations.lomapiError.config}"/>
+                        </munit-tools:with-attributes>
+                        <munit-tools:then-call flow="error-mock-flow"/>
+                    </munit-tools:mock-when>
+                </when>
+                <otherwise>
+                    <!-- Empty applicants scenario -->
+                    <munit-tools:mock-when processor="http:request">
+                        <munit-tools:with-attributes>
+                            <munit-tools:with-attribute attributeName="config-ref" whereValue="${mockConfigurations.sfSapiSuccess.config}"/>
+                        </munit-tools:with-attributes>
+                        <munit-tools:then-return>
+                            <munit-tools:payload value='[]'/>
+                        </munit-tools:then-return>
+                    </munit-tools:mock-when>
+                </otherwise>
+            </choice>
+        </munit:behavior>
+
+        <munit:execution>
+            <choice doc:name="Handle Expected Errors">
+                <when expression='#["${negativeTests.affordabilityCalculations.testScenarios.expectedError default false}" == "true"]'>
+                    <try doc:name="Try">
+                        <flow-ref name="${negativeTests.affordabilityCalculations.flowName}"/>
+                        <error-handler>
+                            <on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+                                <set-variable value="#[true]" doc:name="Set errorOccurred" variableName="errorOccurred"/>
+                                <set-payload value='{"error": "Expected error occurred"}' doc:name="Set error payload"/>
+                            </on-error-continue>
+                        </error-handler>
+                    </try>
+                </when>
+                <otherwise>
+                    <flow-ref name="${negativeTests.affordabilityCalculations.flowName}"/>
+                </otherwise>
+            </choice>
+        </munit:execution>
+
+        <munit:validation>
+            <choice doc:name="Validate Based on Expected Outcome">
+                <when expression='#["${negativeTests.affordabilityCalculations.testScenarios.expectedError default false}" == "true"]'>
+                    <munit-tools:assert-that expression="#[vars.errorOccurred default false]" is="#[MunitTools::equalTo(true)]"/>
+                </when>
+                <otherwise>
+                    <munit-tools:assert-that expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+                    <munit-tools:assert-that expression="#[payload.recordsProcessed default 0]" is="#[MunitTools::equalTo(${negativeTests.affordabilityCalculations.testScenarios.expectedRecordsProcessed default 0})]"/>
+                </otherwise>
+            </choice>
+        </munit:validation>
+    </munit:test>
+
+    <!-- ========================================== -->
+    <!-- NEGATIVE TEST CASES - CUSTOMER EXPOSURE -->
+    <!-- ========================================== -->
+    
+    <munit:test name="customer-exposure-negative-test" description="${negativeTests.customerExposure.testScenarios.description}" ignore="#[not ('${negativeTests.customerExposure.testScenarios.name}' contains 'Failure' or '${negativeTests.customerExposure.testScenarios.name}' contains 'noValid')]">
+        <munit:behavior>
+            <set-variable variableName="applicationFormId" value="${negativeTests.customerExposure.testScenarios.applicationFormId}"/>
+            <set-variable variableName="correlationId" value="${negativeTests.customerExposure.testScenarios.correlationId}"/>
+            <set-variable variableName="countryCode" value="${negativeTests.customerExposure.testScenarios.countryCode}"/>
+            <set-variable variableName="currencyIsoCode" value="${negativeTests.customerExposure.testScenarios.currencyIsoCode}"/>
+
+            <!-- Load test data based on negative scenario -->
+            <choice doc:name="Load Negative Customer Test Data">
+                <when expression='#["${negativeTests.customerExposure.testScenarios.name}" == "noValidCustomers"]'>
+                    <munit:set-event>
+                        <munit:payload value='[
+                          {"applicantId": "A1", "accountId": "ACC1", "customerId": null},
+                          {"applicantId": "A2", "accountId": "ACC2", "customerId": null}
+                        ]'/>
+                    </munit:set-event>
+                </when>
+                <otherwise>
+                    <munit:set-event>
+                        <munit:payload value='[
+                          {"applicantId": "A1", "accountId": "ACC1", "customerId": "CUST1"}
+                        ]'/>
+                    </munit:set-event>
+                </otherwise>
+            </choice>
+
+            <!-- Setup error mocks based on scenario -->
+            <choice doc:name="Setup Customer Error Mocks">
+                <when expression='#["${negativeTests.customerExposure.testScenarios.mockError default \"\"}" == "SF_SAPI_ERROR"]'>
+                    <munit-tools:mock-when processor="http:request">
+                        <munit-tools:with-attributes>
+                            <munit-tools:with-attribute attributeName="config-ref" whereValue="${mockConfigurations.sfSapiError.config}"/>
+                        </munit-tools:with-attributes>
+                        <munit-tools:then-call flow="error-mock-flow"/>
+                    </munit-tools:mock-when>
+                </when>
+                <when expression='#["${negativeTests.customerExposure.testScenarios.mockError default \"\"}" == "MILES_SAPI_ERROR"]'>
+                    <munit-tools:mock-when processor="http:request">
+                        <munit-tools:with-attributes>
+                            <munit-tools:with-attribute attributeName="config-ref" whereValue="${mockConfigurations.sfSapiSuccess.config}"/>
+                        </munit-tools:with-attributes>
+                        <munit-tools:then-return>
+                            <munit-tools:payload value='#[payload]'/>
+                        </munit-tools:then-return>
+                    </munit-tools:mock-when>
+                    <munit-tools:mock-when processor="http:request">
+                        <munit-tools:with-attributes>
+                            <munit-tools:with-attribute attributeName="config-ref" whereValue="${mockConfigurations.milesSapiError.config}"/>
+                        </munit-tools:with-attributes>
+                        <munit-tools:then-call flow="error-mock-flow"/>
+                    </munit-tools:mock-when>
+                </when>
+                <otherwise>
+                    <!-- No valid customers scenario -->
+                    <munit-tools:mock-when processor="http:request">
+                        <munit-tools:with-attributes>
+                            <munit-tools:with-attribute attributeName="config-ref" whereValue="${mockConfigurations.sfSapiSuccess.config}"/>
+                        </munit-tools:with-attributes>
+                        <munit-tools:then-return>
+                            <munit-tools:payload value='#[payload]'/>
+                        </munit-tools:then-return>
+                    </munit-tools:mock-when>
+                </otherwise>
+            </choice>
+        </munit:behavior>
+
+        <munit:execution>
+            <choice doc:name="Handle Customer Expected Errors">
+                <when expression='#["${negativeTests.customerExposure.testScenarios.expectedError default false}" == "true"]'>
+                    <try doc:name="Try">
+                        <flow-ref name="${negativeTests.customerExposure.flowName}"/>
+                        <error-handler>
+                            <on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+                                <set-variable value="#[true]" doc:name="Set errorOccurred" variableName="errorOccurred"/>
+                                <set-payload value='{"error": "Expected customer exposure error occurred"}' doc:name="Set error payload"/>
+                            </on-error-continue>
+                        </error-handler>
+                    </try>
+                </when>
+                <otherwise>
+                    <flow-ref name="${negativeTests.customerExposure.flowName}"/>
+                </otherwise>
+            </choice>
+        </munit:execution>
+
+        <munit:validation>
+            <choice doc:name="Validate Customer Outcome">
+                <when expression='#["${negativeTests.customerExposure.testScenarios.expectedError default false}" == "true"]'>
+                    <munit-tools:assert-that expression="#[vars.errorOccurred default false]" is="#[MunitTools::equalTo(true)]"/>
+                </when>
+                <otherwise>
+                    <munit-tools:assert-that expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+                    <munit-tools:assert-that expression="#[sizeOf(payload)]" is="#[MunitTools::equalTo(${negativeTests.customerExposure.testScenarios.expectedFilteredCount default 0})]"/>
+                </otherwise>
+            </choice>
+        </munit:validation>
+    </munit:test>
+
+    <!-- ========================================== -->
+    <!-- UTILITY FLOWS FOR ERROR MOCKING -->
+    <!-- ========================================== -->
+    
+    <flow name="error-mock-flow" doc:id="error-mock-flow-id">
+        <raise-error doc:name="Raise configurable error" doc:id="configurable-error-raise" type="HTTP:INTERNAL_SERVER_ERROR"/>
+    </flow>
+
+    <!-- Additional utility flow for HTTP errors -->
+    <flow name="http-error-mock-flow" doc:id="http-error-mock-flow-id">
+        <ee:transform doc:name="Set Error Response" doc:id="set-error-response">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "error": "Simulated HTTP error",
+  "message": "This is a test error for negative scenarios",
+  "timestamp": now()
+}]]></ee:set-payload>
+            </ee:message>
+            <ee:variables>
+                <ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/java
+---
+500]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <raise-error doc:name="Raise HTTP error" doc:id="http-error-raise" type="HTTP:INTERNAL_SERVER_ERROR"/>
+    </flow>
+
+</mule>

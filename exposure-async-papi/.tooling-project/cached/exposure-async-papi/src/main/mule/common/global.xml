@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:anypoint-mq="http://www.mulesoft.org/schema/mule/anypoint-mq" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:oauth="http://www.mulesoft.org/schema/mule/oauth" xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/oauth http://www.mulesoft.org/schema/mule/oauth/current/mule-oauth.xsd http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd
+http://www.mulesoft.org/schema/mule/anypoint-mq http://www.mulesoft.org/schema/mule/anypoint-mq/current/mule-anypoint-mq.xsd">
+    <configuration-properties doc:name="Configuration properties" doc:id="0656042c-f751-474a-90fb-aaec39c07141" file="default-properties.yaml" />
+    <http:request-config name="HTTP_Local_Market_Sapi_Request_configuration" doc:name="HTTP Request configuration" doc:id="57c88418-f1a6-434d-8c0a-876d4aa3560c" responseTimeout="${local-market-sapi.response.timeout}">
+        <http:request-connection protocol="${local-market-sapi.protocol}" host="${local-market-sapi.host}" port="${local-market-sapi.port}">
+        </http:request-connection>
+    </http:request-config>
+    <http:request-config name="HTTP_Miles_Sapi_Request_configuration" doc:name="HTTP Request configuration" doc:id="3273e558-8884-4b1d-94a6-e47a61dccfb2" responseTimeout="${miles-sapi.response.timeout}">
+        <http:request-connection protocol="${miles-sapi.protocol}" host="${miles-sapi.host}" port="${miles-sapi.port}">
+        </http:request-connection>
+    </http:request-config>
+    <http:request-config name="HTTP_Sf_Accounts_Sapi_Request_configuration" doc:name="HTTP Request configuration" doc:id="c6ddb2de-bfe7-4430-8290-3a1cd634c824" responseTimeout="${sf-accounts-sapi.response.timeout}">
+        <http:request-connection protocol="${sf-accounts-sapi.protocol}" host="${sf-accounts-sapi.host}" port="${sf-accounts-sapi.port}">
+        </http:request-connection>
+    </http:request-config>
+    <secure-properties:config name="secure-properties-config" doc:name="Secure Properties Config" doc:id="c6640da7-ec4a-4437-bb3e-5b10856c085f" file="secure-properties.yaml" key="${encryption.key}">
+        <secure-properties:encrypt algorithm="Blowfish" />
+    </secure-properties:config>
+    <anypoint-mq:config name="anypoint-mq-config" doc:name="Anypoint MQ Config" doc:id="505c68cd-9755-4ac7-9994-d8090c11a95b">
+        <anypoint-mq:connection url="${mq.url}" clientId="${mq.clientId}" clientSecret="${secure::mq.clientSecret}" >
+			<reconnection >
+				<reconnect frequency="${mq.lomapiInbound.reconnection.frequency}" count="${mq.lomapiInbound.reconnection.attempts}"/>
+			</reconnection>
+		</anypoint-mq:connection>
+    </anypoint-mq:config>
+    <http:request-config name="http-salesforce-common-sapi-config" doc:name="HTTP Request configuration" doc:id="3177d747-e771-4ef9-874f-51bc63069b5e" basePath="${common-sf.sapi.basePath}" responseTimeout="${common-sf.sapi.response.timeout}">
+        <http:request-connection host="${common-sf.sapi.host}" port="${common-sf.sapi.port}" protocol="${common-sf.sapi.protocol}" />
+        <http:default-headers>
+            <http:default-header key="x-client-id" value="${common-sf.sapi.client-id}" />
+            <http:default-header key="x-client-secret" value="${secure::common-sf.sapi.client-secret}" />
+        </http:default-headers>
+    </http:request-config>
+	<anypoint-mq:circuit-breaker name="Circuit_breaker" tripTimeout="${mq.circuitBreaker.tripTimeout}" doc:name="Circuit breaker" doc:id="16d916df-bc90-484f-9c8b-b62181831fae" onErrorTypes="HTTP:TIMEOUT" errorsThreshold="${mq.circuitBreaker.errorsThreshold}" tripTimeoutUnit="SECONDS" />
+</mule>

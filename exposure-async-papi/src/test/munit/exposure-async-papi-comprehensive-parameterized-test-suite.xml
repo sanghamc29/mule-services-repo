@@ -1,0 +1,590 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" 
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" 
+      xmlns:munit="http://www.mulesoft.org/schema/mule/munit" 
+      xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" 
+      xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+      xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd 
+                          http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd 
+                          http://www.mulesoft.org/schema/mule/munit-tools http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+                          http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+    
+    <munit:config name="exposure-async-papi-comprehensive-parameterized-test-suite.xml">
+        <munit:parameterizations file="comprehensive-test-parameters.yaml"/>
+    </munit:config>
+    
+    <!-- =============================================== -->
+    <!-- COMPREHENSIVE PARAMETERIZED POSITIVE TESTS -->
+    <!-- =============================================== -->
+    
+    <munit:test name="comprehensive-positive-affordability-calculations-test" 
+                description="Parameterized positive test for affordability calculations flow">
+        <munit:behavior>
+            <set-variable variableName="applicationFormId" value="AFFC-POS-001"/>
+            <set-variable variableName="correlationId" value="test-corr-affc-pos-001"/>
+            <set-variable variableName="countryCode" value="US"/>
+            <set-variable variableName="currencyIsoCode" value="USD"/>
+
+            <!-- Mock SF Accounts SAPI for initial applicant details call -->
+            <munit-tools:mock-when processor="http:request">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="HTTP_Sf_Accounts_Sapi_Request_configuration"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='#[readUrl("classpath://requests/affordabilityCalculationsMultipleApplicants.json", "application/json")]'/>
+                    <munit-tools:attributes value='#[{statusCode: 200}]'/>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+            <!-- Mock Local Market SAPI for parallel affordability calculations -->
+            <munit-tools:mock-when processor="http:request">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="HTTP_Local_Market_Sapi_Request_configuration"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='{"status":"SUCCESS","affordabilityScore": 750,"payload":{"calculation":"completed","creditScore":750,"approved":true}}'/>
+                    <munit-tools:attributes value='#[{statusCode: 200}]'/>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+            <!-- Set initial event payload -->
+            <munit:set-event>
+                <munit:payload value='#[readUrl("classpath://requests/affordabilityCalculationsMultipleApplicants.json", "application/json")]'/>
+            </munit:set-event>
+        </munit:behavior>
+
+        <munit:execution>
+            <flow-ref name="affordability-calculations-sub-flow"/>
+        </munit:execution>
+
+        <munit:validation>
+            <munit-tools:assert-that expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+            <!-- Verify the parallel processing worked -->
+            <munit-tools:assert-that expression="#[sizeOf(payload)]" is="#[MunitTools::greaterThan(0)]"/>
+            
+            <!-- Verify SF SAPI was called multiple times (initial + final post) -->
+            <munit-tools:verify-call processor="http:request" atLeast="2">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="HTTP_Sf_Accounts_Sapi_Request_configuration"/>
+                </munit-tools:with-attributes>
+            </munit-tools:verify-call>
+            
+            <!-- Verify Local Market SAPI was called in parallel foreach -->
+            <munit-tools:verify-call processor="http:request" atLeast="2">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="HTTP_Local_Market_Sapi_Request_configuration"/>
+                </munit-tools:with-attributes>
+            </munit-tools:verify-call>
+        </munit:validation>
+    </munit:test>
+
+    <munit:test name="comprehensive-positive-customer-exposure-test" 
+                description="Parameterized positive test for customer exposure flow">
+        <munit:behavior>
+            <set-variable variableName="applicationFormId" value="CEXP-POS-001"/>
+            <set-variable variableName="correlationId" value="test-corr-cexp-pos-001"/>
+            <set-variable variableName="countryCode" value="US"/>
+            <set-variable variableName="currencyIsoCode" value="USD"/>
+
+            <!-- Mock SF Accounts SAPI for applicant details -->
+            <munit-tools:mock-when processor="http:request">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="HTTP_Sf_Accounts_Sapi_Request_configuration"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='#[readUrl("classpath://requests/customerExposureValidCustomers.json", "application/json")]'/>
+                    <munit-tools:attributes value='#[{statusCode: 200}]'/>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+            <!-- Mock Miles SAPI for parallel exposure calculations -->
+            <munit-tools:mock-when processor="http:request">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="HTTP_Miles_Sapi_Request_configuration"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='{"status":"SUCCESS","exposureCalculated": true,"payload":{"exposureAmount":1000,"currency":"USD"}}'/>
+                    <munit-tools:attributes value='#[{statusCode: 200}]'/>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+            <munit:set-event>
+                <munit:payload value='#[readUrl("classpath://requests/customerExposureValidCustomers.json", "application/json")]'/>
+            </munit:set-event>
+        </munit:behavior>
+
+        <munit:execution>
+            <flow-ref name="customer-exposure-sub-flow"/>
+        </munit:execution>
+
+        <munit:validation>
+            <munit-tools:assert-that expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+            <!-- Verify filtering worked - only customers with valid customerId should remain -->
+            <munit-tools:assert-that expression="#[sizeOf(payload)]" is="#[MunitTools::equalTo(2)]"/>
+            
+            <!-- Verify SF SAPI was called (initial + final) -->
+            <munit-tools:verify-call processor="http:request" atLeast="2">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="HTTP_Sf_Accounts_Sapi_Request_configuration"/>
+                </munit-tools:with-attributes>
+            </munit-tools:verify-call>
+            
+            <!-- Verify Miles SAPI was called for parallel processing -->
+            <munit-tools:verify-call processor="http:request" atLeast="2">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="HTTP_Miles_Sapi_Request_configuration"/>
+                </munit-tools:with-attributes>
+            </munit-tools:verify-call>
+        </munit:validation>
+    </munit:test>
+
+    <!-- =============================================== -->
+    <!-- COMPREHENSIVE NEGATIVE TESTS -->
+    <!-- =============================================== -->
+    
+    <munit:test name="comprehensive-negative-affordability-calculations-sf-error-test" 
+                description="Negative test for affordability calculations when SF SAPI fails">
+        <munit:behavior>
+            <set-variable variableName="applicationFormId" value="AFFC-NEG-001"/>
+            <set-variable variableName="correlationId" value="test-corr-affc-neg-001"/>
+            <set-variable variableName="countryCode" value="DE"/>
+            <set-variable variableName="currencyIsoCode" value="EUR"/>
+
+            <!-- Mock SF Accounts SAPI to throw error -->
+            <munit-tools:mock-when processor="http:request">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="HTTP_Sf_Accounts_Sapi_Request_configuration"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-call flow="sf-sapi-error-mock-flow"/>
+            </munit-tools:mock-when>
+
+            <munit:set-event>
+                <munit:payload value='[{"externalID1": "NIF001", "applicantId": "APP1", "accountId": "ACC1", "name": "Test User"}]'/>
+            </munit:set-event>
+        </munit:behavior>
+
+        <munit:execution>
+            <try doc:name="Try">
+                <flow-ref name="affordability-calculations-sub-flow"/>
+                <error-handler>
+                    <on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+                        <set-variable value="#[true]" doc:name="Set errorOccurred" variableName="errorOccurred"/>
+                        <set-variable value="#[error.errorType.identifier]" doc:name="Set errorType" variableName="errorType"/>
+                        <set-payload value='{"error": "SF SAPI call failed", "errorType": "HTTP:BAD_REQUEST"}' doc:name="Set error payload"/>
+                    </on-error-continue>
+                </error-handler>
+            </try>
+        </munit:execution>
+
+        <munit:validation>
+            <munit-tools:assert-that expression="#[vars.errorOccurred default false]" is="#[MunitTools::equalTo(true)]"/>
+            <munit-tools:assert-that expression="#[vars.errorType]" is="#[MunitTools::containsString('HTTP')]"/>
+        </munit:validation>
+    </munit:test>
+
+    <munit:test name="comprehensive-negative-affordability-calculations-lomapi-error-test" 
+                description="Negative test for affordability calculations when Local Market SAPI fails">
+        <munit:behavior>
+            <set-variable variableName="applicationFormId" value="AFFC-NEG-002"/>
+            <set-variable variableName="correlationId" value="test-corr-affc-neg-002"/>
+            <set-variable variableName="countryCode" value="FR"/>
+            <set-variable variableName="currencyIsoCode" value="EUR"/>
+
+            <!-- Mock SF Accounts SAPI to succeed initially -->
+            <munit-tools:mock-when processor="http:request">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="HTTP_Sf_Accounts_Sapi_Request_configuration"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='[{"externalID1": "NIF001", "applicantId": "APP1", "accountId": "ACC1", "name": "Test User", "income": 50000}]'/>
+                    <munit-tools:attributes value='#[{statusCode: 200}]'/>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+            <!-- Mock Local Market SAPI to throw error -->
+            <munit-tools:mock-when processor="http:request">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="HTTP_Local_Market_Sapi_Request_configuration"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-call flow="lomapi-error-mock-flow"/>
+            </munit-tools:mock-when>
+
+            <munit:set-event>
+                <munit:payload value='[{"externalID1": "NIF001", "applicantId": "APP1", "accountId": "ACC1", "name": "Test User"}]'/>
+            </munit:set-event>
+        </munit:behavior>
+
+        <munit:execution>
+            <try doc:name="Try">
+                <flow-ref name="affordability-calculations-sub-flow"/>
+                <error-handler>
+                    <on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+                        <set-variable value="#[true]" doc:name="Set errorOccurred" variableName="errorOccurred"/>
+                        <set-variable value="#[error.errorType.identifier]" doc:name="Set errorType" variableName="errorType"/>
+                        <set-payload value='{"error": "Local Market SAPI call failed", "errorType": "HTTP:INTERNAL_SERVER_ERROR"}' doc:name="Set error payload"/>
+                    </on-error-continue>
+                </error-handler>
+            </try>
+        </munit:execution>
+
+        <munit:validation>
+            <munit-tools:assert-that expression="#[vars.errorOccurred default false]" is="#[MunitTools::equalTo(true)]"/>
+            <munit-tools:assert-that expression="#[vars.errorType]" is="#[MunitTools::containsString('HTTP')]"/>
+        </munit:validation>
+    </munit:test>
+
+    <munit:test name="comprehensive-negative-customer-exposure-no-valid-customers-test" 
+                description="Negative test for customer exposure with no valid customers">
+        <munit:behavior>
+            <set-variable variableName="applicationFormId" value="CEXP-NEG-001"/>
+            <set-variable variableName="correlationId" value="test-corr-cexp-neg-001"/>
+            <set-variable variableName="countryCode" value="US"/>
+            <set-variable variableName="currencyIsoCode" value="USD"/>
+
+            <!-- Mock SF Accounts SAPI -->
+            <munit-tools:mock-when processor="http:request">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="HTTP_Sf_Accounts_Sapi_Request_configuration"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='[
+                      {"applicantId": "A1", "accountId": "ACC1", "customerId": null, "name": "John Doe"},
+                      {"applicantId": "A2", "accountId": "ACC2", "customerId": null, "name": "Jane Smith"}
+                    ]'/>
+                    <munit-tools:attributes value='#[{statusCode: 200}]'/>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+            <munit:set-event>
+                <munit:payload value='[
+                  {"applicantId": "A1", "accountId": "ACC1", "customerId": null, "name": "John Doe"},
+                  {"applicantId": "A2", "accountId": "ACC2", "customerId": null, "name": "Jane Smith"}
+                ]'/>
+            </munit:set-event>
+        </munit:behavior>
+
+        <munit:execution>
+            <flow-ref name="customer-exposure-sub-flow"/>
+        </munit:execution>
+
+        <munit:validation>
+            <!-- Should return empty array as all customers are filtered out -->
+            <munit-tools:assert-that expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+            <munit-tools:assert-that expression="#[sizeOf(payload)]" is="#[MunitTools::equalTo(0)]"/>
+            
+            <!-- Verify SF SAPI was called but Miles SAPI was not (no valid customers) -->
+            <munit-tools:verify-call processor="http:request" atLeast="1">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="HTTP_Sf_Accounts_Sapi_Request_configuration"/>
+                </munit-tools:with-attributes>
+            </munit-tools:verify-call>
+        </munit:validation>
+    </munit:test>
+
+    <munit:test name="comprehensive-negative-customer-exposure-miles-sapi-error-test" 
+                description="Negative test for customer exposure when Miles SAPI fails">
+        <munit:behavior>
+            <set-variable variableName="applicationFormId" value="CEXP-NEG-002"/>
+            <set-variable variableName="correlationId" value="test-corr-cexp-neg-002"/>
+            <set-variable variableName="countryCode" value="GB"/>
+            <set-variable variableName="currencyIsoCode" value="GBP"/>
+
+            <!-- Mock SF Accounts SAPI to succeed -->
+            <munit-tools:mock-when processor="http:request">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="HTTP_Sf_Accounts_Sapi_Request_configuration"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='#[readUrl("classpath://requests/customerExposureValidCustomers.json", "application/json")]'/>
+                    <munit-tools:attributes value='#[{statusCode: 200}]'/>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+            <!-- Mock Miles SAPI to throw error -->
+            <munit-tools:mock-when processor="http:request">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="HTTP_Miles_Sapi_Request_configuration"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-call flow="miles-sapi-error-mock-flow"/>
+            </munit-tools:mock-when>
+
+            <munit:set-event>
+                <munit:payload value='#[readUrl("classpath://requests/customerExposureValidCustomers.json", "application/json")]'/>
+            </munit:set-event>
+        </munit:behavior>
+
+        <munit:execution>
+            <try doc:name="Try">
+                <flow-ref name="customer-exposure-sub-flow"/>
+                <error-handler>
+                    <on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue">
+                        <set-variable value="#[true]" doc:name="Set errorOccurred" variableName="errorOccurred"/>
+                        <set-variable value="#[error.errorType.identifier]" doc:name="Set errorType" variableName="errorType"/>
+                        <set-payload value='{"error": "Miles SAPI call failed", "errorType": "HTTP:TIMEOUT"}' doc:name="Set error payload"/>
+                    </on-error-continue>
+                </error-handler>
+            </try>
+        </munit:execution>
+
+        <munit:validation>
+            <munit-tools:assert-that expression="#[vars.errorOccurred default false]" is="#[MunitTools::equalTo(true)]"/>
+            <munit-tools:assert-that expression="#[vars.errorType]" is="#[MunitTools::containsString('HTTP')]"/>
+        </munit:validation>
+    </munit:test>
+
+    <munit:test name="comprehensive-negative-fraud-check-partial-failure-test" 
+                description="Negative test for C5 fraud check with partial applicant failures">
+        <munit:behavior>
+            <set-variable variableName="applicationFormId" value="FRAUD-NEG-001"/>
+            <set-variable variableName="correlationId" value="test-corr-fraud-neg-001"/>
+            <set-variable variableName="countryCode" value="US"/>
+            <set-variable variableName="applicantIds" value="A1,A2,A3"/>
+            <set-variable variableName="deliveryCount" value="1"/>
+
+            <!-- Mock sub-flows with mixed success/failure results -->
+            <munit-tools:mock-when processor="flow-ref">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="name" whereValue="c5-fraud-check-get-applicant-details"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='[{"applicantId":"A1","isSuccessful": true},{"applicantId":"A2","isSuccessful": false},{"applicantId":"A3","isSuccessful": true}]'/>
+                    <munit-tools:variables>
+                        <munit-tools:variable key="fraudCheckData" value='[{"applicantId":"A1","isSuccessful": true},{"applicantId":"A2","isSuccessful": false},{"applicantId":"A3","isSuccessful": true}]'/>
+                    </munit-tools:variables>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+            <munit-tools:mock-when processor="flow-ref">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="name" whereValue="c5-fraud-check-lomapi-request-flow"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='[{"applicantId":"A1","status":"SUCCESS"},{"applicantId":"A2","status":"FAILED"},{"applicantId":"A3","status":"SUCCESS"}]'/>
+                    <munit-tools:variables>
+                        <munit-tools:variable key="fraudCheckData" value='[{"applicantId":"A1","isSuccessful": true},{"applicantId":"A2","isSuccessful": false},{"applicantId":"A3","isSuccessful": true}]'/>
+                    </munit-tools:variables>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+            <munit-tools:mock-when processor="flow-ref">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="name" whereValue="c5-fraud-check-sf-applicants-flag-update"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='{"status":"PARTIAL_SUCCESS","updated": 2}'/>
+                    <munit-tools:variables>
+                        <munit-tools:variable key="fraudCheckData" value='[{"applicantId":"A1","isSuccessful": true},{"applicantId":"A2","isSuccessful": false},{"applicantId":"A3","isSuccessful": true}]'/>
+                    </munit-tools:variables>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+            <munit-tools:mock-when processor="flow-ref">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="name" whereValue="c5-get-sf-documents-for-applicants"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='[{"applicantId":"A1","documentId":"DOC1"},{"applicantId":"A3","documentId":"DOC3"}]'/>
+                    <munit-tools:variables>
+                        <munit-tools:variable key="fraudCheckData" value='[{"applicantId":"A1","isSuccessful": true},{"applicantId":"A2","isSuccessful": false},{"applicantId":"A3","isSuccessful": true}]'/>
+                    </munit-tools:variables>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+            <munit-tools:mock-when processor="flow-ref">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="name" whereValue="c5-sf-document-update"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='{"status":"PARTIAL_SUCCESS","documentsUpdated": 2}'/>
+                    <munit-tools:variables>
+                        <munit-tools:variable key="fraudCheckData" value='[{"applicantId":"A1","isSuccessful": true},{"applicantId":"A2","isSuccessful": false},{"applicantId":"A3","isSuccessful": true}]'/>
+                    </munit-tools:variables>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+            <!-- Mock error handling flow -->
+            <munit-tools:mock-when processor="flow-ref">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="name" whereValue="custom-sf-error-object-ipe"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='{"status":"ERROR_LOGGED","errorId":"ERR-001"}'/>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+            <munit:set-event>
+                <munit:payload value='[{"applicantId":"A1","type":"individual"},{"applicantId":"A2","type":"business"},{"applicantId":"A3","type":"individual"}]'/>
+            </munit:set-event>
+        </munit:behavior>
+
+        <munit:execution>
+            <flow-ref name="c5-fraud-check-orchestration-flow"/>
+        </munit:execution>
+
+        <munit:validation>
+            <munit-tools:assert-that expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+            <munit-tools:assert-that expression="#[vars.fraudCheckFailed default false]" is="#[MunitTools::equalTo(true)]"/>
+            
+            <!-- Verify error handling flow was called -->
+            <munit-tools:verify-call processor="flow-ref">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="name" whereValue="custom-sf-error-object-ipe"/>
+                </munit-tools:with-attributes>
+            </munit-tools:verify-call>
+            
+            <!-- Verify flag update was called twice (normal + error handling) -->
+            <munit-tools:verify-call processor="flow-ref" times="2">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="name" whereValue="c5-fraud-check-sf-applicants-flag-update"/>
+                </munit-tools:with-attributes>
+            </munit-tools:verify-call>
+        </munit:validation>
+    </munit:test>
+
+    <munit:test name="comprehensive-negative-process-applicants-empty-test" 
+                description="Negative test for process applicants details with empty applicants list">
+        <munit:behavior>
+            <set-variable variableName="applicationFormId" value="PROC-NEG-001"/>
+            <set-variable variableName="correlationId" value="test-corr-proc-neg-001"/>
+            <set-variable variableName="countryCode" value="US"/>
+            <set-variable variableName="appilcantIds" value=""/>
+
+            <!-- Mock SF Accounts SAPI returning empty result -->
+            <munit-tools:mock-when processor="http:request">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="HTTP_Sf_Accounts_Sapi_Request_configuration"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='[]'/>
+                    <munit-tools:attributes value='#[{statusCode: 200}]'/>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+            <!-- Mock Local Market SAPI for empty payload processing -->
+            <munit-tools:mock-when processor="http:request">
+                <munit-tools:with-attributes>
+                    <munit-tools:with-attribute attributeName="config-ref" whereValue="HTTP_Local_Market_Sapi_Request_configuration"/>
+                </munit-tools:with-attributes>
+                <munit-tools:then-return>
+                    <munit-tools:payload value='{"status":"SUCCESS","processed":0,"message":"No applicants to process"}'/>
+                    <munit-tools:attributes value='#[{statusCode: 200}]'/>
+                </munit-tools:then-return>
+            </munit-tools:mock-when>
+
+            <munit:set-event>
+                <munit:payload value='{"request": "start", "applicantIds": []}'/>
+            </munit:set-event>
+        </munit:behavior>
+
+        <munit:execution>
+            <flow-ref name="process-applicantsDetails-subflow"/>
+        </munit:execution>
+
+        <munit:validation>
+            <munit-tools:assert-that expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+            <munit-tools:assert-that expression="#[payload.status]" is="#[MunitTools::equalTo('SUCCESS')]"/>
+            <munit-tools:assert-that expression="#[payload.processed]" is="#[MunitTools::equalTo(0)]"/>
+            <!-- Verify that applicantsDetails target variable contains empty array -->
+            <munit-tools:assert-that expression="#[vars.applicantsDetails]" is="#[MunitTools::notNullValue()]"/>
+            <munit-tools:assert-that expression="#[sizeOf(vars.applicantsDetails)]" is="#[MunitTools::equalTo(0)]"/>
+        </munit:validation>
+    </munit:test>
+
+    <!-- =============================================== -->
+    <!-- ERROR MOCK FLOWS -->
+    <!-- =============================================== -->
+    
+    <flow name="sf-sapi-error-mock-flow" doc:id="sf-sapi-error-mock-flow-id">
+        <ee:transform doc:name="Set SF SAPI Error Response" doc:id="set-sf-sapi-error-response">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "error": "SF SAPI service unavailable",
+  "message": "Salesforce Accounts SAPI returned an error",
+  "timestamp": now(),
+  "statusCode": 400
+}]]></ee:set-payload>
+            </ee:message>
+            <ee:variables>
+                <ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/java
+---
+400]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <raise-error doc:name="Raise SF SAPI error" doc:id="sf-sapi-error-raise" type="HTTP:BAD_REQUEST"/>
+    </flow>
+
+    <flow name="lomapi-error-mock-flow" doc:id="lomapi-error-mock-flow-id">
+        <ee:transform doc:name="Set Local Market SAPI Error Response" doc:id="set-lomapi-error-response">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "error": "Local Market SAPI service error",
+  "message": "Local Market SAPI processing failed",
+  "timestamp": now(),
+  "statusCode": 500
+}]]></ee:set-payload>
+            </ee:message>
+            <ee:variables>
+                <ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/java
+---
+500]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <raise-error doc:name="Raise Local Market SAPI error" doc:id="lomapi-error-raise" type="HTTP:INTERNAL_SERVER_ERROR"/>
+    </flow>
+
+    <flow name="miles-sapi-error-mock-flow" doc:id="miles-sapi-error-mock-flow-id">
+        <ee:transform doc:name="Set Miles SAPI Error Response" doc:id="set-miles-sapi-error-response">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "error": "Miles SAPI timeout",
+  "message": "Miles SAPI request timed out",
+  "timestamp": now(),
+  "statusCode": 408
+}]]></ee:set-payload>
+            </ee:message>
+            <ee:variables>
+                <ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/java
+---
+408]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <raise-error doc:name="Raise Miles SAPI error" doc:id="miles-sapi-error-raise" type="HTTP:TIMEOUT"/>
+    </flow>
+
+    <flow name="sf-commons-error-mock-flow" doc:id="sf-commons-error-mock-flow-id">
+        <ee:transform doc:name="Set SF Commons Error Response" doc:id="set-sf-commons-error-response">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "error": "SF Commons SAPI unauthorized",
+  "message": "Authentication failed for SF Commons SAPI",
+  "timestamp": now(),
+  "statusCode": 401
+}]]></ee:set-payload>
+            </ee:message>
+            <ee:variables>
+                <ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/java
+---
+401]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <raise-error doc:name="Raise SF Commons error" doc:id="sf-commons-error-raise" type="HTTP:UNAUTHORIZED"/>
+    </flow>
+
+</mule>

@@ -1,0 +1,47 @@
+companyAffordabilityCalculations:
+ flowName: "api-main-affordability-calculations"
+ mockAttributeNameSfSapi: "config-ref"
+ mockCallSfSapi: "HTTP_Sf_Accounts_Sapi_Request_configuration"
+ mockAttributeNameLocalMarketSapi: "config-ref"
+ mockCallLocalMarketSapi: "HTTP_Local_Market_Sapi_Request_configuration"
+ mockAttributeNameSfCommonSapi: "config-ref"
+ mockCallSfCommonSapi: "http-salesforce-common-sapi-config"
+ mockAttributeNameAnypointMQ: "config-ref"
+ mockCallAnypointMQ: "anypoint-mq-config"
+ processor: "http:request"
+ processorAnypointMQ: "anypoint-mq:ack"
+ inPayload: "requests/c4CompanyEvent.json"
+ mockCallOutputLocalMarketSapi: "responses/companyAffordabilityCalculationsLocalMarketSapiMock.json"
+
+customerExposure:
+ flowName: "api-main-customer-exposure"
+ mockAttributeNameSfSapi: "config-ref"
+ mockCallSfSapi: "HTTP_Sf_Accounts_Sapi_Request_configuration"
+ mockAttributeNameLocalMarketSapi: "config-ref"
+ mockCallLocalMarketSapi: "HTTP_Miles_Sapi_Request_configuration"
+ mockAttributeNameSfCommonSapi: "config-ref"
+ mockCallSfCommonSapi: "http-salesforce-common-sapi-config"
+ mockAttributeNameAnypointMQ: "config-ref"
+ mockCallAnypointMQ: "anypoint-mq-config"
+ processor: "http:request"
+ processorAnypointMQ: "anypoint-mq:ack"
+ inPayload: "requests/c4CompanyEvent.json"
+ mockCallOutputLocalMarketSapi: "responses/companyAffordabilityCalculationsLocalMarketSapiMock.json"
+ 
+lomapiAgencyData:
+  flowName: "api-main-process-lomapi-agency-reports"
+  mockAttributeNameSfSapi: "config-ref"
+  mockCallSfSapi: "HTTP_Sf_Accounts_Sapi_Request_configuration"
+  mockAttributeNameLocalMarketSapi: "config-ref"
+  mockCallLocalMarketSapi: "HTTP_Local_Market_Sapi_Request_configuration" 
+  mockAttributeNameSfCommonSapi: "config-ref"
+  mockCallSfCommonSapi: "http-salesforce-common-sapi-config"
+  mockAttributeNameAnypointMQ: "config-ref"
+  mockCallAnypointMQ: "anypoint-mq-config"
+  processor: "http:request"
+  processorAnypointMQ: "anypoint-mq:ack"
+  inPayload: "requests/c6CompanyEvent.json"
+  mockCallOutputLocalMarketSapi: "responses/getApplicantsDetails.json"
+ 
+
+ 

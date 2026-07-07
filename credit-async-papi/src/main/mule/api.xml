@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:tracing="http://www.mulesoft.org/schema/mule/tracing" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:anypoint-mq="http://www.mulesoft.org/schema/mule/anypoint-mq" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:java="http://www.mulesoft.org/schema/mule/java" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting" xmlns:vm="http://www.mulesoft.org/schema/mule/vm" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/java http://www.mulesoft.org/schema/mule/java/current/mule-java.xsd http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd http://www.mulesoft.org/schema/mule/anypoint-mq http://www.mulesoft.org/schema/mule/anypoint-mq/current/mule-anypoint-mq.xsd
+http://www.mulesoft.org/schema/mule/tracing http://www.mulesoft.org/schema/mule/tracing/current/mule-tracing.xsd">
+	<flow name="credit-application-enrichment" doc:id="3d582d06-8e37-4811-a94f-788449f36f57" >
+		<anypoint-mq:subscriber doc:name="Subscribe to Credit Application Enrichment Queue" doc:id="fcd15f0d-66c5-44f4-82bf-0ed761cc8c60" config-ref="anypoint-mq-config" destination="${mq.creditApplicationEnrichment.queue}" circuitBreaker="circuit-breaker" acknowledgementMode="MANUAL"/>
+		<tracing:with-correlation-id doc:name="With CorrelationID" doc:id="3a93c952-66b5-4ad8-98d8-01419879d431" correlationId="#[message.attributes.properties.correlationId default correlationId]">
+			<ee:transform doc:name="store applicationId" doc:id="32fab371-746c-458c-a29e-f8cf30474cbe">
+			<ee:message />
+			<ee:variables>
+				<ee:set-variable variableName="uniqueApplicationId"><![CDATA[%dw 2.0
+output application/json
+---
+payload.applicationID]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+			<flow-ref doc:name="credit-application-enrichment-subflow" doc:id="17581eed-4545-4fa5-821b-3d334e56b089" name="credit-application-enrichment-subflow" />
+			<logger level="INFO" doc:name="Log Response for Credit Application ID" doc:id="ef72c89c-dcf1-4c6d-8baf-68e0c05d1c68" message="#[import try from dw::Runtime&#10;output application/java --- &quot;\'credit application enrichment is processed for the applicationId\': &quot; ++ (vars.uniqueApplicationId) ++ if(p('log.payloadFlag') == 'true'  and  try(() -&gt; isEmpty(payload)).success) (&quot;\'Payload\': &quot; ++ write(payload,&quot;application/json&quot;)) else &quot;&quot;]" />
+		</tracing:with-correlation-id>
+	</flow>
+    <flow name="get-credit-decision-and-post-to-sf" doc:id="45c58690-7aae-41e5-968f-c26329918944" >
+		<anypoint-mq:subscriber doc:name="receive applicationId to get credit decision" doc:id="06be3864-22c6-4c10-a816-d6f88f734667" config-ref="anypoint-mq-config" destination="${mq.decisionOutbound.queue}" acknowledgementMode="MANUAL" >
+			<reconnect frequency="${mq.reconnection.frequency}" count="${mq.reconnection.attempts}" />
+		</anypoint-mq:subscriber>
+		<tracing:with-correlation-id doc:name="With CorrelationID" doc:id="e0ffb6b3-8e41-4dec-9a4e-a1909cf7abd8" correlationId="#[message.attributes.properties.correlationId default correlationId]">
+			<ee:transform doc:name="store application id, details and ack token from mq" doc:id="127a327e-2303-44fe-b1e2-60b27ec25007">
+			<ee:message />
+			<ee:variables>
+				<ee:set-variable variableName="ackId"><![CDATA[%dw 2.0
+output application/json
+---
+attributes.ackToken]]></ee:set-variable>
+				<ee:set-variable variableName="appID"><![CDATA[%dw 2.0
+output application/json
+---
+payload.applicationId default payload.data.payload.EU_ApplicationFormId__c]]></ee:set-variable>
+				<ee:set-variable variableName="appDetails"><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+				<ee:set-variable variableName="platformEventLogId"><![CDATA[%dw 2.0
+output application/java
+---
+payload.data.payload.EU_IntegrationLogId__c default payload.iperecordId]]></ee:set-variable>
+					<ee:set-variable variableName="creditCheckRequestReason" ><![CDATA[%dw 2.0
+output application/java
+---
+payload.data.payload.EU_AmendmentReasonCode__c default ""]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+			<flow-ref doc:name="credit-decision-subflow" doc:id="68505397-7a46-4a26-bf62-18a701c5d7c0" name="get-credit-decision-flow" />
+			<logger level="INFO" doc:name="Log Response of ApplicationId" doc:id="e1cc211a-5d7d-4ee8-9471-77cda77835bb" message="#[import try from dw::Runtime&#10;output application/json --- &quot;\'credit decision is processed for the applicationId\': &quot; ++ (vars.appID) ++ if(p('log.payloadFlag') == 'true'  and  try(() -&gt; isEmpty(payload)).success) (&quot;\'Payload\': &quot; ++ write(payload,&quot;application/json&quot;)) else &quot;&quot;]" />
+		</tracing:with-correlation-id>
+	</flow>
+    <flow name="new-business-event-from-alfa-mbfs-credit" doc:id="71b1cfaa-97d9-414b-9c2f-3b04b00d19a6">
+        <anypoint-mq:subscriber doc:name="Subscribe to New Business Events from Alfa" doc:id="c4c3988e-c693-48a9-b750-c4564285a768" config-ref="anypoint-mq-config" destination="${mq.events.queue}" acknowledgementMode="MANUAL" circuitBreaker="circuit-breaker" />
+        <tracing:with-correlation-id doc:name="With CorrelationID" doc:id="46f49a95-e647-438f-a7e3-918395a0a9b7" correlationId="#[message.attributes.properties.correlationId default correlationId]">
+			<logger level="INFO" doc:name="Log New Business Event Message" doc:id="5ad786ed-b989-4996-af5e-43a68dc9b9cc" message="#[import try from dw::Runtime&#10;output application/java --- &quot;\'New Business Event from Alfa received via MQ. Event Type\': &quot; ++ &quot; \'correlationId\': &quot; ++ (attributes.properties.correlationId default correlationId) ++ if(p('log.payloadFlag') == 'true'  and  try(() -&gt; isEmpty(payload)).success) (&quot;\'Payload\': &quot; ++ write(payload,&quot;application/json&quot;)) else &quot;&quot;]" />
+			<flow-ref doc:name="New Business Event From Alfa" doc:id="529a0f6e-a6e9-4fdc-aba9-196edb309f39" name="new-business-event-from-alfa-subflow" />
+			<logger level="INFO" doc:name="Log New Business Event Response" doc:id="1d31ed65-89fc-4b76-901e-6ecdf159f368" message="#[import try from dw::Runtime&#10;output application/java --- &quot;\'Processed new Event from Alfa. EventType is \': &quot; ++ &quot; \'correlationId\': &quot; ++ (vars.originalMessage.attributes.properties.correlationId default correlationId) ++ if(p('log.payloadFlag') == 'true'  and  try(() -&gt; isEmpty(payload)).success) (&quot;\'Payload\': &quot; ++ write(payload,&quot;application/json&quot;)) else &quot;&quot;]" />
+		</tracing:with-correlation-id>
+    </flow>
+	<flow name="sync-updates-or-comments-in-credit-application-with-mb-advantage-flow" doc:id="86d3b49d-e2eb-4f6e-8ada-b9e820d095a2" >
+		<anypoint-mq:subscriber doc:name="Subscribe to Sync updates or comments in Credit Application With MBAdvantage" doc:id="eb46de1f-798f-4bca-815b-eb06a6d1a852" config-ref="anypoint-mq-config" destination="${mq.syncUpdateCreditApp.queue}" acknowledgementMode="MANUAL" >
+			<reconnect frequency="${mq.reconnection.frequency}" count="${mq.reconnection.attempts}" />
+		</anypoint-mq:subscriber>
+		<tracing:with-correlation-id doc:name="With CorrelationID" doc:id="2c5c5388-b920-413d-8fc3-09e3b4fa7674" correlationId="#[message.attributes.properties.correlationId default correlationId]">
+			<ee:transform doc:name="store applicationId and payload" doc:id="882a5826-dd9b-4831-ac75-8f7c6a83e05f">
+			<ee:message />
+			<ee:variables>
+				<ee:set-variable variableName="appID"><![CDATA[%dw 2.0
+output application/json
+---
+payload.applicationId]]></ee:set-variable>
+				<ee:set-variable variableName="syncUpdatesCreditApp"><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+			<flow-ref doc:name="sync-updates-in-credit-app-to-mb-advantage-subflow" doc:id="0f13a5ac-2d3c-42b4-885b-86c910d77ee4" name="sync-updates-or-comments-in-credit-app-to-mb-advantage-subflow" />
+			<logger level="INFO" doc:name="Log ApplicationId for synchronization Response" doc:id="9ab3d740-e91d-48e4-a2a0-45e1ae0e3efd" message="#[import try from dw::Runtime&#10;output application/java --- &quot;\'Successfully processed Sync updates in Credit App from SF EAPI\': &quot; ++ &quot; \'correlation Id\': &quot; ++ correlationId ++ if(p('log.payloadFlag') == 'true'  and  try(() -&gt; isEmpty(payload)).success) (&quot;\'Payload\': &quot; ++ write(payload,&quot;application/json&quot;)) else &quot;&quot;]" />
+		</tracing:with-correlation-id>
+	</flow>
+	<flow name="backfeed-credit-app-created-in-salesforce-to-mb-advantage-flow" doc:id="c3ad38a1-0477-4af5-9b94-e1a25660cc8e" >
+		<anypoint-mq:subscriber doc:name="Backfeed Credit application details from Salesforce to MB Advantage" doc:id="debab580-5809-4e08-ae4f-edaec6b21b94" config-ref="anypoint-mq-config" destination="${mq.applicationOutbound.queue}" acknowledgementMode="MANUAL" >
+			<reconnect frequency="${mq.reconnection.frequency}" count="${mq.reconnection.attempts}" />
+		</anypoint-mq:subscriber>
+		<tracing:with-correlation-id doc:name="With CorrelationID" doc:id="1bcfaab1-6ca3-4079-855d-d0e563649815" correlationId="#[message.attributes.properties.correlationId default correlationId]">
+			<ee:transform doc:name="store application id, payload and ack token from mq" doc:id="84a1877f-21d2-440d-961b-5e93325ad704">
+			<ee:message />
+			<ee:variables>
+				<ee:set-variable variableName="ackId"><![CDATA[%dw 2.0
+output application/json
+---
+attributes.ackToken]]></ee:set-variable>
+				<ee:set-variable variableName="appID"><![CDATA[%dw 2.0
+output application/json
+---
+payload.applicationId]]></ee:set-variable>
+				<ee:set-variable variableName="appDetails"><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+			<flow-ref doc:name="Get application details with application Id for backfeed" doc:id="556c67dc-b74c-4a50-8757-e70d5eee3b2e" name="get-application-details-and-post-to-mba-sapi" />
+			<logger level="INFO" doc:name="Log ApplicationId for Backfeed Response" doc:id="bedd4746-261c-441c-8cc2-09a9140f9f01" message="#[import try from dw::Runtime&#10;output application/java --- &quot;\'Backfeed process is successfully completedfor the applicationId\': &quot; ++ (vars.appID) ++ if(p('log.payloadFlag') == 'true'  and  try(() -&gt; isEmpty(payload)).success) (&quot;\'Payload\': &quot; ++ write(payload,&quot;application/json&quot;)) else &quot;&quot;]" />
+		</tracing:with-correlation-id>
+	</flow>
+	<flow name="get-aml-decision-and-post-to-verify-plus" doc:id="b5d60c06-70f8-42aa-b052-374eb6497cd9">
+		<anypoint-mq:subscriber doc:name="receive applicationId to get aml decision" doc:id="ad434b79-a29c-401c-b92a-c1e5deaffbd0" config-ref="anypoint-mq-config" destination="${mq.amlDecisionOutbound.queue}" acknowledgementMode="MANUAL">
+			<reconnect frequency="${mq.reconnection.frequency}" count="${mq.reconnection.attempts}" />
+		</anypoint-mq:subscriber>
+		<tracing:with-correlation-id doc:name="With CorrelationID" doc:id="5d5a762c-9031-458f-9cdc-092d80a3d1bc" correlationId="#[message.attributes.properties.correlationId default correlationId]">
+			<ee:transform doc:name="store application id, details and ack token from mq" doc:id="7637d0b2-ccd3-40c6-8675-c2d6c409a51c">
+			<ee:message />
+			<ee:variables>
+				<ee:set-variable variableName="ackId"><![CDATA[%dw 2.0
+output application/json
+---
+attributes.ackToken]]></ee:set-variable>
+				<ee:set-variable variableName="correlationId"><![CDATA[%dw 2.0
+output application/json
+---
+payload.data.event.EventUuid]]></ee:set-variable>
+				<ee:set-variable variableName="applicationFormId"><![CDATA[%dw 2.0
+output application/json
+---
+payload.data.payload.EU_ApplicationFormId__c]]></ee:set-variable>
+				<ee:set-variable variableName="originalPayload"><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+			<logger level="INFO" doc:name="Log Credit Decision ApplicationId" doc:id="f5f96cac-1e06-4a6f-8584-6a2bb8a296a2" message="#[import try from dw::Runtime&#10;output application/java --- &quot;\'Received a platform event from salesforce\': &quot; ++ &quot; \'applicationId\': &quot; ++ (vars.applicationFormId) ++ &quot;\'MQ Delivery Count\': &quot; ++ (attributes.headers.deliveryCount as String) ++ if(p('log.payloadFlag') == 'true'  and  try(() -&gt; isEmpty(payload)).success) (&quot;\'Payload\': &quot; ++ write(payload,&quot;application/json&quot;)) else &quot;&quot;]" />
+			<flow-ref doc:name="aml-decision-impl-flow" doc:id="d921486e-5d58-4540-ab8d-ccee356b3b3d" name="aml-decision-impl-flow" />
+			<logger level="INFO" doc:name="Log Response of ApplicationId" doc:id="0d6301ec-7919-49a5-babf-f997beea849f" message="#[import try from dw::Runtime&#10;output application/json --- &quot;\'credit decision is processed for the applicationId\': &quot; ++ (vars.applicationFormId) ++ if(p('log.payloadFlag') == 'true'  and  try(() -&gt; isEmpty(payload)).success) (&quot;\'Payload\': &quot; ++ write(payload,&quot;application/json&quot;)) else &quot;&quot;]" />
+		</tracing:with-correlation-id>
+	</flow>
+	<flow name="get-credit-decision-and-post-to-miles" doc:id="3e7b533f-a247-4ae2-9f28-f0709115c10d" >
+		<anypoint-mq:subscriber doc:name="receive applicationId to get credit decision" doc:id="68f99363-d935-472f-8e95-f6da916102b5" config-ref="anypoint-mq-config" destination="${mq.creditDecisionOutbound.queue}" acknowledgementMode="MANUAL" >
+			<reconnect frequency="${mq.reconnection.frequency}" count="${mq.reconnection.attempts}" />
+		</anypoint-mq:subscriber>
+		<tracing:with-correlation-id doc:name="With CorrelationID" doc:id="d11500d7-d1f2-4636-8551-b5cb9b61b9f5" correlationId="#[message.attributes.properties.correlationId default correlationId]" >
+			<ee:transform doc:name="store application id, details and ack token from mq" doc:id="415df6d6-b201-44fd-8880-d2c9e539f8b6" >
+				<ee:message />
+				<ee:variables >
+					<ee:set-variable variableName="ackId" ><![CDATA[%dw 2.0
+output application/json
+---
+attributes.ackToken]]></ee:set-variable>
+					<ee:set-variable variableName="correlationId" ><![CDATA[%dw 2.0
+output application/json
+---
+payload.data.event.EventUuid]]></ee:set-variable>
+					<ee:set-variable variableName="applicationFormId" ><![CDATA[%dw 2.0
+output application/json
+---
+payload.data.payload.EU_ApplicationFormId__c]]></ee:set-variable>
+					<ee:set-variable variableName="originalPayload" ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<logger level="INFO" doc:name="Log Credit Decision ApplicationId" doc:id="ad4abc60-732d-40da-8ae8-c3a7edc4db60" message="#[import try from dw::Runtime&#10;output application/java --- &quot;\'Received a platform event from salesforce\': &quot; ++ &quot; \'applicationId\': &quot; ++ (vars.applicationFormId) ++ &quot;\'MQ Delivery Count\': &quot; ++ (attributes.headers.deliveryCount as String) ++ if(p('log.payloadFlag') == 'true'  and  try(() -&gt; isEmpty(payload)).success) (&quot;\'Payload\': &quot; ++ write(payload,&quot;application/json&quot;)) else &quot;&quot;]" />
+			<flow-ref doc:name="miles-credit-decision-impl-flow" doc:id="43500ffd-cdb7-4fcf-818e-80e6dd4a2484" name="miles-credit-decision-impl-flow" />
+			<logger level="INFO" doc:name="Log Response of ApplicationId" doc:id="706cefbc-46b3-49fc-98b3-23d243750a1f" message="#[import try from dw::Runtime&#10;output application/json --- &quot;\'credit decision is processed for the applicationId\': &quot; ++ (vars.applicationFormId) ++ if(p('log.payloadFlag') == 'true'  and  try(() -&gt; isEmpty(payload)).success) (&quot;\'Payload\': &quot; ++ write(payload,&quot;application/json&quot;)) else &quot;&quot;]" />
+		</tracing:with-correlation-id>
+	</flow>
+</mule>

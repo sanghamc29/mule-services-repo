@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:anypoint-mq="http://www.mulesoft.org/schema/mule/anypoint-mq"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/anypoint-mq http://www.mulesoft.org/schema/mule/anypoint-mq/current/mule-anypoint-mq.xsd">
+	<sub-flow name="affordability-calculations-sub-flow" doc:id="f1f89c96-5449-4337-ac2d-b59f5265d0b6" >
+		<ee:transform doc:name="Prepare HTTP Req Mapping SF Applicant Details" doc:id="1c891909-b6c9-493a-b0eb-017abc982d94" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+			<ee:message />
+			<ee:variables>
+				<ee:set-variable variableName="httpOperation"><![CDATA[%dw 2.0
+output application/java
+---
+"placeholder"]]></ee:set-variable>
+			
+</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="sf-accounts-sapi-call-subflow" doc:id="dce3dad1-4023-496d-8436-10eb764ce417" name="sf-accounts-sapi-call-subflow" />
+		<parallel-foreach doc:name="Parallel For Each" doc:id="9b872883-4d20-4165-a7a5-d46ec608912b">
+			<ee:transform doc:name="Prepare HTTP Req Mapping Lomapi Sapi" doc:id="45985887-8921-4f1f-b2b8-afdcee4cdeb0" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+src/main/mule/implementation/affordability-calculations.xml]]></ee:set-payload>
+				</ee:message>
+				<ee:variables>
+					<ee:set-variable variableName="httpOperation"><![CDATA[%dw 2.0
+output application/java
+---
+"placeholder"]]></ee:set-variable>
+					<ee:set-variable variableName="salesforceAttributes"><![CDATA[%dw 2.0
+output application/json
+---
+{
+	NIF: payload.externalID1,
+	applicantId: payload.applicantId,
+	accountId: payload.accountId,
+	partyId: if(!isEmpty(payload.accountId)) payload.accountId else payload.applicantId,
+	applicationFormId: vars.applicationFormId,
+	recordTypeId: Mule::p('sf-accounts-sapi.affordabilityCalculations.recordTypeId')
+}]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<flow-ref doc:name="local-market-sapi-call-subflow" doc:id="17ebfd21-5cf9-469c-9e61-b0671399ea91" name="local-market-sapi-call-subflow" />
+			<ee:transform doc:name="Prepare HTTP Req Sf accounts sapi" doc:id="392a85d6-f4dd-42f3-a05f-0fd2a7401b86">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+src/main/mule/implementation/affordability-calculations.xml]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		</parallel-foreach>
+		<ee:transform doc:name="Accumulate HTTP Req Sf accounts sapi" doc:id="8d7e2cc0-5aa7-4241-a0b5-d2915cab47fa">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload..payload]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="httpOperation"><![CDATA[%dw 2.0
+output application/java
+---
+"placeholder"]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="sf-accounts-sapi-call-subflow" doc:id="32ef43fa-20ed-49e3-9348-296562d8ccb6" name="sf-accounts-sapi-call-subflow" />
+	</sub-flow>
+</mule>

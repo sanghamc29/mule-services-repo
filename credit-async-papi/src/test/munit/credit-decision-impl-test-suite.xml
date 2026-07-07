@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="credit-decision-impl-test-suite.xml" />
+	<munit:test name="implementation-test-suite-credit-platform-subflow" doc:id="baf29eae-a2cb-4294-a230-667a3b8ced2c">
+		<munit:behavior >
+		
+
+  
+			<munit-tools:mock-when doc:name="Mock Subscribe Source Message from Async MQ" doc:id="f150d439-60b8-40b8-82ef-f6ef7d553ace" processor="anypoint-mq:subscriber">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="06be3864-22c6-4c10-a816-d6f88f734667" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="anypoint-mq-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[%dw 2.0&#10;output application/json&#10;--- &#10;readUrl('classpath://samples/credit-decision-source-mq-message-mock.json')]" />
+					<munit-tools:attributes value='#[{&#10;	"ackToken" : "1234"&#10;}]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="mock get call to salesforce sapi" doc:id="ea61d66e-44e0-429e-a92b-3a0eaafcae27" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="68fb20ef-d34c-434d-b438-f492272e060b" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[%dw 2.0&#10;output application/json&#10;--- &#10;readUrl('classpath://samples/application-details-from-sf-sapi-mock-response.json')]" />
+					<munit-tools:attributes value='#[output application/java &#10;---&#10; {&#10;  headers: {&#10;    "content-type": "application/java; charset=UTF-8",&#10;    "content-length": "0",&#10;    date: "Wed, 26 Jul 2023 10:13:24 GMT"&#10;  },&#10;  reasonPhrase: "Ok",&#10;  statusCode: 200&#10;}]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock call to credit platform sapi" doc:id="747451de-4ccf-4235-a61d-caf772bd151c" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="1d214a97-054f-45fc-938e-2ef371f20c2e" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[%dw 2.0&#10;output application/json&#10;--- &#10;readUrl('classpath://samples/get-credit-decision-mock-response.json')]" encoding="UTF-8" />
+					<munit-tools:attributes value='#["statusCode" : 200]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock post call to salesforce sapi" doc:id="45aff80a-cbec-4a07-8856-76c59dcbe142" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="a6bfb98c-2490-4604-9f27-e263aa3bb27e" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[{&#10;  "compositeResponse": [&#10;    {&#10;      "body": {&#10;        "id": "a0t760000007X3hAAE",&#10;        "success": true,&#10;        "errors": [&#10;          &#10;        ]&#10;      },&#10;      "httpHeaders": {&#10;        "Location": "/services/data/v61.0/sobjects/FS_CreditSummary__c/a0t760000007X3hAAE"&#10;      },&#10;      "httpStatusCode": 201,&#10;      "referenceId": "creditSummaryRef"&#10;    },&#10;    {&#10;      "body": {&#10;        "id": "a3h760000008t26AAA",&#10;        "success": true,&#10;        "errors": [&#10;          &#10;        ]&#10;      },&#10;      "httpHeaders": {&#10;        "Location": "/services/data/v61.0/sobjects/EU_BusinessPolicyRule__c/a3h760000008t26AAA"&#10;      },&#10;      "httpStatusCode": 201,&#10;      "referenceId": "policyRuleRefForSummary0"&#10;    },&#10;    {&#10;      "body": {&#10;        "id": "a3h760000008t27AAA",&#10;        "success": true,&#10;        "errors": [&#10;          &#10;        ]&#10;      },&#10;      "httpHeaders": {&#10;        "Location": "/services/data/v61.0/sobjects/EU_BusinessPolicyRule__c/a3h760000008t27AAA"&#10;      },&#10;      "httpStatusCode": 201,&#10;      "referenceId": "policyRuleRefForSummary1"&#10;    },&#10;    {&#10;      "body": {&#10;        "id": "a3h760000008t28AAA",&#10;        "success": true,&#10;        "errors": [&#10;          &#10;        ]&#10;      },&#10;      "httpHeaders": {&#10;        "Location": "/services/data/v61.0/sobjects/EU_BusinessPolicyRule__c/a3h760000008t28AAA"&#10;      },&#10;      "httpStatusCode": 201,&#10;      "referenceId": "policyRuleRefForSummary2"&#10;    },&#10;    {&#10;      "body": {&#10;        "id": "a3h760000008t29AAA",&#10;        "success": true,&#10;        "errors": [&#10;          &#10;        ]&#10;      },&#10;      "httpHeaders": {&#10;        "Location": "/services/data/v61.0/sobjects/EU_BusinessPolicyRule__c/a3h760000008t29AAA"&#10;      },&#10;      "httpStatusCode": 201,&#10;      "referenceId": "policyRuleRefForSummary3"&#10;    },&#10;    {&#10;      "body": {&#10;        "id": "a0s76000000txreAAA",&#10;        "success": true,&#10;        "errors": [&#10;          &#10;        ]&#10;      },&#10;      "httpHeaders": {&#10;        "Location": "/services/data/v61.0/sobjects/FS_CreditReport__c/a0s76000000txreAAA"&#10;      },&#10;      "httpStatusCode": 201,&#10;      "referenceId": "creditReportRef0"&#10;    },&#10;    {&#10;      "body": {&#10;        "id": "a3h760000008t2AAAQ",&#10;        "success": true,&#10;        "errors": [&#10;          &#10;        ]&#10;      },&#10;      "httpHeaders": {&#10;        "Location": "/services/data/v61.0/sobjects/EU_BusinessPolicyRule__c/a3h760000008t2AAAQ"&#10;      },&#10;      "httpStatusCode": 201,&#10;      "referenceId": "policyRuleRefForReport00"&#10;    },&#10;    {&#10;      "body": {&#10;        "id": "a3h760000008t2BAAQ",&#10;        "success": true,&#10;        "errors": [&#10;          &#10;        ]&#10;      },&#10;      "httpHeaders": {&#10;        "Location": "/services/data/v61.0/sobjects/EU_BusinessPolicyRule__c/a3h760000008t2BAAQ"&#10;      },&#10;      "httpStatusCode": 201,&#10;      "referenceId": "policyRuleRefForReport01"&#10;    },&#10;    {&#10;      "body": {&#10;        "id": "a3h760000008t2CAAQ",&#10;        "success": true,&#10;        "errors": [&#10;          &#10;        ]&#10;      },&#10;      "httpHeaders": {&#10;        "Location": "/services/data/v61.0/sobjects/EU_BusinessPolicyRule__c/a3h760000008t2CAAQ"&#10;      },&#10;      "httpStatusCode": 201,&#10;      "referenceId": "policyRuleRefForReport02"&#10;    },&#10;    {&#10;      "body": {&#10;        "id": "a3h760000008t2DAAQ",&#10;        "success": true,&#10;        "errors": [&#10;          &#10;        ]&#10;      },&#10;      "httpHeaders": {&#10;        "Location": "/services/data/v61.0/sobjects/EU_BusinessPolicyRule__c/a3h760000008t2DAAQ"&#10;      },&#10;      "httpStatusCode": 201,&#10;      "referenceId": "policyRuleRefForReport03"&#10;    }&#10;  ]&#10;}]' />
+					<munit-tools:attributes value='#[output application/java &#10;---&#10; {&#10;  headers: {&#10;    "content-type": "application/java; charset=UTF-8",&#10;    "content-length": "0",&#10;    date: "Wed, 26 Jul 2023 10:13:24 GMT"&#10;  },&#10;  reasonPhrase: "Created",&#10;  statusCode: 201&#10;}]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="mock anypoint mq" doc:id="0dc7ebdd-197d-4d43-9093-881e1454c586" processor="anypoint-mq:ack" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="b011ed64-c727-482c-91c5-18562fe7a9a5" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event for credit application encrichment sub flow" doc:id="8c0052b3-83e4-436c-8568-801bcb290be0">
+				<munit:payload value="#[output apllication/json --- readUrl('classpath://samples/input-payload-from-mq-to-get-decision.json','application/json')]" />
+				<munit:attributes value='#[output apllication/json&#10;---&#10;readUrl("classpath://samples/credit-decision-mock-ack-id.json", "application/json")]' />
+			</munit:set-event>
+			<flow-ref doc:name="Get Credit Decision and Create Credit Application" doc:id="fab4a8b0-57ee-421b-9119-3d3759126c00" name="get-credit-decision-and-post-to-sf" />
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-equals doc:name="verify ack token" doc:id="b866970c-b655-4d56-b234-1bce09689ba5" actual="#[vars.originalMessage.attributes.ackToken]" expected='#[output application/json&#10;---&#10;(readUrl("classpath://samples/credit-decision-mock-ack-id.json", "application/json")).ackToken]' />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="implementation-test-suite-credit-platform-subflow-any-error-scenario" doc:id="8d19f444-1770-48d7-af0b-191540893415" ignore="true">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock Subscribe Source Message from Async MQ" doc:id="86e5b295-03af-461f-84fb-740a3b56a63f" processor="anypoint-mq:subscriber">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="06be3864-22c6-4c10-a816-d6f88f734667" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="anypoint-mq-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[%dw 2.0&#10;output application/json&#10;--- &#10;readUrl('classpath://samples/credit-decision-source-mq-message-mock.json')]" />
+					<munit-tools:attributes value='#[output application/json&#10;---&#10;(readUrl("classpath://samples/subscribe-dealer-application-details-ack-id.json", "application/json")).ackToken]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="mock get call to salesforce sapi" doc:id="ea643318-c574-4fef-9918-3101810acf68" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="a1c496af-a81c-47d4-9b90-3745a1a7f3a6" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[%dw 2.0&#10;output application/json&#10;--- &#10;readUrl('classpath://samples/application-details-from-sf-sapi-mock-response.json')]" />
+					<munit-tools:attributes value='#[output application/java &#10;---&#10; {&#10;  headers: {&#10;    "content-type": "application/java; charset=UTF-8",&#10;    "content-length": "0",&#10;    date: "Wed, 26 Jul 2023 10:13:24 GMT"&#10;  },&#10;  reasonPhrase: "Ok",&#10;  statusCode: 200&#10;}]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock call to credit platform sapi" doc:id="84ac1edc-43ab-4b84-b321-1ce0fae2dde7" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="bfc676f4-81a0-4927-9bef-68946dbc4446" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[%dw 2.0&#10;output application/json&#10;--- &#10;readUrl('classpath://samples/get-credit-decision-mock-response.json')]" encoding="UTF-8" />
+					<munit-tools:attributes value='#["statusCode" : 200]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock post call to salesforce sapi" doc:id="2b8bc701-71c3-45ba-ba27-b0732c341f17" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="6a584124-6f0e-43f9-b222-6e76d3777e52" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="ANY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Publish DLQ" doc:id="ed77c0cd-c43d-4888-b9d6-adfda2011a76" processor="anypoint-mq:publish">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="1baa9c68-084b-47a2-930c-d947f7324120" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock call to create SF IPE Error Object" doc:id="44e88add-ded8-4527-a43a-912281c50bfc" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="05d9541f-0434-4ea8-83b4-66a224153ca2" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="http-salesforce-common-sapi-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:attributes value='#[output application/java &#10;---&#10; {&#10;  headers: {&#10;    "content-type": "application/java; charset=UTF-8",&#10;    "content-length": "0",&#10;    date: "Wed, 26 Jul 2023 10:13:24 GMT"&#10;  },&#10;  reasonPhrase: "Created",&#10;  statusCode: 201&#10;}]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event for credit application encrichment sub flow" doc:id="a405f9ee-5237-4d72-962a-531f3d4b81ba" >
+				<munit:payload value="#[output apllication/json --- readUrl('classpath://samples/input-payload-from-mq-to-get-decision.json','application/json')]" />
+				<munit:attributes value='#[output apllication/json&#10;---&#10;readUrl("classpath://samples/credit-decision-mock-ack-id.json", "application/json")]' />
+			</munit:set-event>
+			<flow-ref doc:name="Get Credit Decision and Create Credit Application" doc:id="39291331-fc97-4403-b761-48e62037821d" name="get-credit-decision-and-post-to-sf" />
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:verify-call doc:name="Verify call to credit decison dlq" doc:id="e352d6e5-4e77-4be5-bab9-e575ab84bdab" processor="logger" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="a85a2faf-f3f4-4b70-bb39-ff0a7f5a6cc3" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

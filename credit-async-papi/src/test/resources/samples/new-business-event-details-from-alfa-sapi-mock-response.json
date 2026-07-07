@@ -1,0 +1,98 @@
+[
+    {
+        "miscInfoClass": "StringMiscInfo",
+        "miscInfoNumber": 66181512,
+        "ticket": "eJxNTkEOwyAMu+8VfQERk1b1gLjvsEdEjK5IIamAHvb7UVq0nmI7iW0TcbW3YTCeS/ruqOJcUuCPdRKVW1YnnDcqVVFIM6q3RAysXiE7T4TsZctPniVFLEHYwPl+eJ3+DV8yGiepZ+OoJ/3QdwON/reBi9UG9tEN4NoSevWuHsoPUJw96w==",
+        "owningExternalSystemCode": "",
+        "code": "APID",
+        "value": "1111121200080"
+    },
+    {
+        "miscInfoClass": "ListMiscInfo",
+        "miscInfoNumber": 66181525,
+        "ticket": "eJxNTkEOgzAMu+8VvKARk0CbFPW+wx4RdYVVahPUlsN+v1Ko4BTbSWxjoEXfug4t5/jbUMEpR8ezNhKU+S5GOK0+F0WRn0h9JJBj9XbJWO+JrazpxZPEQNkJIxzvu9fhX/Elo3Iv5Wwc+0c/3AeESs+t46yfCNtoBnBtCa16U3flD1NZPfc=",
+        "owningExternalSystemCode": "",
+        "code": "CCI",
+        "value": "2"
+    },
+    {
+        "miscInfoClass": "StringMiscInfo",
+        "miscInfoNumber": 69830953,
+        "ticket": "eJxNTkEOgzAMu+8VvKCdhIaGFPW+wx4RdYVFahPUlsN+v1Ko4BTbSWxDwMXcug4c5/jbUMEpR+LZWAnKfhcrnFafi6LQT6g+EpBYvSlZ5z2ykzW9eJIYMJMw6ON99zr8K75kVO6lnA3js7+Pjx50peeWOJsB9Daagb621K16U3flD1V6Pf0=",
+        "owningExternalSystemCode": "",
+        "code": "CID",
+        "value": "4NDALLW/ALL W ACCOUNTS 10-30"
+    },
+    {
+        "miscInfoClass": "ListMiscInfo",
+        "miscInfoNumber": 66181518,
+        "ticket": "eJxNTjEOwyAM3PuKvADE0CiDxZ6hj7AoaSyBHQEZ+vsSEtRMvjvbdwcRN/sYBvBc0vdAFeeSiD/WSVRu3Zxw3kOpisKwoHpLRGL1oux8CMhe9jzzIiliIWHQ1/vpdfk3fMtoPEg9G0czmaeZQDf63xIXa0Afoxvoe0vdq3f1VH5SUj3x",
+        "owningExternalSystemCode": "",
+        "code": "COT",
+        "value": "RBC"
+    },
+    {
+        "miscInfoClass": "DateMiscInfo",
+        "miscInfoNumber": 66181516,
+        "ticket": "eJxNTjEOwyAM3PuKvADEUJQBsXfoIyxKWkvGjoAM/X0JCWom353tu3MJVn+bJhe55u+OGi41I799kKTCZw3CZaPaFAW0gHpJAmT1xBIiEXCUrTx4kZygorDT5/vhdfp3fMnonKSdWWtmczfW6U7/W+TqjdP7GAb62lKP6kM9lB9RwD3v",
+        "owningExternalSystemCode": "",
+        "code": "FAND",
+        "value": "2012-02-14"
+    },
+    {
+        "miscInfoClass": "ListMiscInfo",
+        "miscInfoNumber": 66181523,
+        "ticket": "eJxNTkEOwyAMu+8VfQGITat2iLjvsEdEjG5IIamAHvr7UVq0nmI7iW2IONvLMIDnktYNVZxLCvyxTqJy39kJ54VKVRTShOotEQOrV8jOEyF7WfKTJ0kRSxAGfbzvXod/w6eMxknq2Tiah7lfb6Ab/W8DF2tAb6Mb6HNL3at3dVd+US897Q==",
+        "owningExternalSystemCode": "",
+        "code": "LANG",
+        "value": "E"
+    },
+    {
+        "miscInfoClass": "StringMiscInfo",
+        "miscInfoNumber": 66181521,
+        "ticket": "eJxNjjEOwyAMRfeeIicAUalRBsTeoYewKGksGTsCMvT2JSSomfz9bH9/G2F1t2GwgUv67qrqXBLyx3mJyi+rF84blUoU0AzqLRGQ1QuzD0TAQbb85FlShILCVp/nh9fp3/TlR+tJ6to4msk87sbq1v6nyMVVupduoK8pdY/e6UF+UJ096w==",
+        "owningExternalSystemCode": "",
+        "code": "MORT",
+        "value": "6.9"
+    },
+    {
+        "miscInfoClass": "DateMiscInfo",
+        "miscInfoNumber": 333977928,
+        "ticket": "eJxNTkEOwyAMu+8VfQFM49BVirjvsEdEjG5IkFSQHvb7UVq0nmI7iW1IuNjLMIAnyd8NVVwkB3pbx0m5z+KYyhqlKgrjjOrFCQOpZyjOx4jkeS0PmjknlMAE+njfvQ7/hk8ZjUeuZ8aYaRyn2x104/91ILFX0NvoDvpcU/fuXd2VH4+aPi8=",
+        "owningExternalSystemCode": "",
+        "code": "MWRD",
+        "value": "2017-12-27"
+    },
+    {
+        "miscInfoClass": "StringMiscInfo",
+        "miscInfoNumber": 66181513,
+        "ticket": "eJxNTkEOwyAMu+8VfQERmlb1gLjvsEdEjK5IIamAHvb7UVq0nmI7iW0TcbW3YTCeS/ruqOJcUuCPdRKVW1YnnDcqVVFIM6q3RAysXiE7T4TsZctPniVFLEHYwPl+eJ3+DV8yGiepZ+OoJ/3QdwON/reBi9UG9tEN4NoSevWuHsoPUOU97A==",
+        "owningExternalSystemCode": "",
+        "code": "OCRT",
+        "value": "6.9"
+    },
+    {
+        "miscInfoClass": "StringMiscInfo",
+        "miscInfoNumber": 66181514,
+        "ticket": "eJxNTkEOwyAMu+8VfQER0lb1gLjvsEdEjK5IIamAHvb7UVq0nmI7iW0TcbW3YTCeS/ruqOJcUuCPdRKVW1YnnDcqVVFIM6q3RAysXiE7T4TsZctPniVFLEHYwPl+eJ3+DV8yGiepZ+OoJ/3QdwON/reBi9UG9tEN4NoSevWuHsoPUS497Q==",
+        "owningExternalSystemCode": "",
+        "code": "ODBR",
+        "value": "1.4924"
+    },
+    {
+        "miscInfoClass": "StringMiscInfo",
+        "miscInfoNumber": 66181515,
+        "ticket": "eJxNTjEOwyAM3PuKvACLIVEHxN6hj7AoaZDAjsAZ+vsSEpRMvjvbd2cSrvYxDMaT5N+OKi6SA32t46TcsjqmskWpisI4o/pwwkDqHYrzMSJ53sqLZs4JJTAZON8Pr9O/4VtG45Hr2TTppx71aKDRaxtIrDawj24A95bQq3f1UP5Rdz3u",
+        "owningExternalSystemCode": "",
+        "code": "OFCD",
+        "value": "840015289"
+    },
+    {
+        "miscInfoClass": "StringMiscInfo",
+        "miscInfoNumber": 66181520,
+        "ticket": "eJxNTkEOwyAMu+8VfQGMSat2QNx32CMiRrdIkFSQHvr7UVq0nmI7iW2bYHaXYbCBJK8bqrhIRvo4z0n57+yZyhKlKgriBOrNCZDUC4sPMQIFXsqTJs4JBJmsPt53r8O/4VNG45Hr2Tiah7nfrlY3+t8iiTNWb6Mb6HNL3at3dVd+UFQ96g==",
+        "owningExternalSystemCode": "",
+        "code": "OFPD",
+        "value": "M"
+    }
+]

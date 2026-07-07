@@ -1,0 +1,83 @@
+{
+  "brokerFlag": false,
+  "country": "US",
+  "applicationProductOffer": {
+    "msrp": 100000,
+    "residualAmount": 52.34,
+    "totalCapitalizedCost": 100000,
+    "invoice": 0,
+    "term": 36,
+    "capitalReduction": 0,
+    "netTradeInAmount": 0,
+    "estimatedPayment": 10000,
+    "customerMoneyFactor": 9.25,
+    "financedProductTotal": 0,
+    "multipleSecurityDeposit": "1",
+    "securityDeposit": 0
+  },
+  "dealerComments": "Testing Jacob after fix on 882023",
+  "applicationVehicle": {
+    "vehicleType": "Application Vehicle",
+    "vehicleModel": "GLE350W4",
+    "vehicleMake": "Mercedes-Benz",
+    "vehicleCondition": "New",
+    "vehicleYear": 2023,
+    "odometerMileage": 1000
+  },
+  "applicationParties": [
+    {
+      "applicationPartyRole": "PA",
+      "applicationPartyType": "B",
+      "email": "Test@test.com",
+      "currentState": "ON",
+      "bankruptcyIndicator": false,
+      "yearsAtCurrentAddress": 0,
+      "currentStreetAddress": "35001",
+      "currentCity": "TEST",
+      "currentZip": "N1G2X5",
+      "monthsAtCurrentAddress": 0,
+      "phoneNumber": "3434324324",
+      "repossessionIndicator": false,
+      "yearsAtBusiness": 10,
+      "monthsAtBusiness": 10,
+      "businessTaxID": "87654",
+      "businessName": "Test_bussiness",
+      "officePhoneNumber": "3434324324"
+    },
+    {
+      "applicationPartyRole": "OP",
+      "applicationPartyType": "I",
+      "firstName": "Jacob",
+      "lastName": "Martin",
+      "suffix": "Dr",
+      "currentZip": "N1G2X5",
+      "currentState": "ON",
+      "currentCity": "Ontaerio",
+      "currentStreetAddress": "Test",
+      "yearsAtCurrentAddress": 0,
+      "monthsAtCurrentAddress": 0
+    },
+    {
+      "applicationPartyRole": "GU",
+      "applicationPartyType": "I",
+      "mortgageBalance": 0,
+      "salary": 0,
+      "monthlyMortgageRent": 0,
+      "mortgageValue": 0,
+      "otherIncome": 0
+    }
+  ],
+  "salesPersonFirstName": "Testuser",
+  "applicationType": "Business",
+  "dealerUserFirstName": "Testuser",
+  "dealerNumberNA": 70007,
+  "sourceNumber": "12345",
+  "mbadvantageSourceID": 2442,
+  "applicationProduct": {
+    "financeType": "LSE"
+  },
+  "salesPersonLastName": "D0X16071",
+  "dealerUserLastName": "D0X16071",
+  "dealerUpdateNumber": 0,
+  "applicationID": "2308081538030"
+}

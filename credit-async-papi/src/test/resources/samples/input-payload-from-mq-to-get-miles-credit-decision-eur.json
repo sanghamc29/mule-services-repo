@@ -1,0 +1,22 @@
+{
+    "data": {
+        "schema": "FdTB-Amg5Q_m7bYT6qh-Jw",
+        "payload": {
+            "EU_CurrencyIsoCode__c": null,
+            "EU_EventType__c": "Miles Credit Decision",
+            "EU_Market__c": "PT",
+            "CreatedById": "00576000002AjWpAAK",
+            "EU_ApplicationFormId__c": "13X76000000L3dXEAS",
+            "EU_UniqueId__c": null,
+            "EU_IntegrationLogId__c": "a3Z76000000LubLEAS",
+            "CreatedDate": "2024-12-20T07:55:22Z",
+            "EU_Message__c": null
+        },
+        "event": {
+            "EventUuid": "38294057-24b6-4f60-bf97-35bbc1173760",
+            "replayId": 1739530,
+            "EventApiName": "EU_MulesoftIntegrationAsync__e"
+        }
+    },
+    "channel": "/event/Application_And_Credit__chn"
+}

@@ -1,0 +1,35 @@
+[{
+    "mbCustomerId": "504033972",
+    "customerIdType": "NIF",
+    "businessPartnerType": "BusinessPartnerCompany",
+    "company": {
+        "companyActivity": "Instalação de canalizações",
+        "companyFoundingDate": "1997-11-26",
+        "companyRegistrationNumber": "504033972",
+        "industry": "1711",
+        "legalForm": "UNIP",
+        "name": "TERMOFLUITECNICA - INSTALAÇÕES TÉCNICAS, SOCIEDADE UNIPESSOAL, LDA",
+        "taxId": "504033972",
+        "customerId": "504033972",
+        "customerIdType": "NIF",
+        "corporateCustomer": false,
+        "startUp": false,
+        "contactDetails": {},
+        "addresses": [
+            {
+                "addressCurrent": true,
+                "addressLine1": "AVENIDA DIOGO CÃO, LOTE 1 1ºB, BAIRRO DAS DESCOBERTAS",
+                "addressSince": "1997-11-26",
+                "addressType": "MAIN_ADDRESS",
+                "city": "VALE DA AMOREIRA",
+                "country": "PT",
+                "houseNumber": 0,
+                "inCountrySince": "1997-11-26",
+                "zipcode": "2835-203",
+				 "formattedAddress": "Numero civico: 0"
+
+            }
+        ],
+        "bankAccount": {}
+    }
+}]

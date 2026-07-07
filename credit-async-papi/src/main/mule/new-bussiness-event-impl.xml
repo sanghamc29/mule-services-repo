@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:anypoint-mq="http://www.mulesoft.org/schema/mule/anypoint-mq"
+	xmlns:tracing="http://www.mulesoft.org/schema/mule/tracing" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/tracing http://www.mulesoft.org/schema/mule/tracing/current/mule-tracing.xsd
+http://www.mulesoft.org/schema/mule/anypoint-mq http://www.mulesoft.org/schema/mule/anypoint-mq/current/mule-anypoint-mq.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<sub-flow name="new-business-event-from-alfa-subflow" doc:id="fe0a57b1-3ec9-4af7-a823-bb5b4b1bb13f" >
+		<set-variable value="#[message]" doc:name="Set originalMessage" doc:id="56fb87e9-c26a-40db-8b37-c70a6436f151" variableName="originalMessage" />
+		<try doc:name="Try" doc:id="44a0725a-f243-4125-acc8-b37c53a7edb8">
+				<flow-ref doc:name="sync new business event from MQ" doc:id="518b19d1-1df1-4c95-bfca-e4dfa3b5b7c5" name="sync-new-business-event-subflow" />
+				<anypoint-mq:ack doc:name="Acknowledge MQ message" doc:id="df0f0b6b-1f6f-40f1-94ea-7b0feb8d727d" config-ref="anypoint-mq-config" ackToken="#[vars.originalMessage.attributes.ackToken]" />
+				<error-handler>
+					<on-error-propagate enableNotifications="false" logException="false" doc:name="On Error Propagate" doc:id="82b910e7-b1a6-4c3e-8d27-8ff52b8ba135" type="HTTP:CONNECTIVITY, HTTP:SERVICE_UNAVAILABLE, HTTP:TIMEOUT, HTTP:TOO_MANY_REQUESTS">
+						<logger level="ERROR" doc:name="Log Message" doc:id="78936fd1-9b43-40e2-b39e-1b7164f96152" message='#["Error: " ++ (error.detailedDescription as String) ++ " occured while processing new business event from the Alfa MBFS Credit queue. Not acknowledge message for event: " ++ (vars.originalMessage.attributes.properties.inspectionSfdcId default "no event")]' />
+						<anypoint-mq:nack doc:name="NOT Acknowledge MQ Message" doc:id="93770a5f-e45a-417a-a74a-558410c450f8" config-ref="anypoint-mq-config" ackToken="#[vars.originalMessage.attributes.ackToken]" />
+					</on-error-propagate>
+					<on-error-continue enableNotifications="false" logException="false" doc:name="On Error Continue" doc:id="c3a0e766-280c-4aa6-bc91-ccff61b0ced8" type="ANY">
+						<logger level="ERROR" doc:name="Log Message" doc:id="5bbf42a9-d37d-4a6e-922b-922dace4708f" message='#["Error: " ++ (error.detailedDescription as String) ++ " occured while processing new business event from Alfa MBFS Credit queue. Moving message to DLQ for an event: " ++ (vars.originalMessage.attributes.properties.inspectionSfdcId default "no eventType")]' />
+						<anypoint-mq:publish doc:name="Publish originalMessage to DLQ" doc:id="756526e2-50f4-481e-81fe-63b2c510750a" config-ref="anypoint-mq-config" destination="${mq.events.dlq}" messageId="#[vars.originalMessage.attributes.headers.messageId]" messageGroupId="#[vars.originalMessage.attributes.headers.messageGroupId]">
+							<anypoint-mq:body><![CDATA[#[output application/json
+---
+{
+	originalPayload: vars.originalMessage.payload,
+	errorMessage: error.detailedDescription
+}]]]></anypoint-mq:body>
+							<anypoint-mq:properties><![CDATA[#[output application/java
+---
+{
+	"correlationId" : vars.originalMessage.attributes.properties.correlationId default "no correlationId"	
+}]]]></anypoint-mq:properties>
+						</anypoint-mq:publish>
+						<anypoint-mq:ack doc:name="Acknowledge MQ message" doc:id="46dd4095-52da-48c7-ab2f-c4976f8758d4" config-ref="anypoint-mq-config" ackToken="#[vars.originalMessage.attributes.ackToken]" />
+					</on-error-continue>
+				</error-handler>
+			</try>
+	</sub-flow>
+	<sub-flow name="sync-new-business-event-subflow" doc:id="3ec51e26-c89a-410f-be59-414117eddd93" >
+		<ee:transform doc:name="set payload for alfa sapi" doc:id="48891bad-54cd-4907-a3fe-5928a3a72456" >
+			<ee:message />
+			<ee:variables >
+				<ee:set-variable variableName="scheduleNumber" ><![CDATA[%dw 2.0
+output application/java
+---
+payload.entities[0].subId]]></ee:set-variable>
+				<ee:set-variable variableName="agreementNumber" ><![CDATA[%dw 2.0
+output application/java
+---
+payload.entities[0].id]]></ee:set-variable>
+				<ee:set-variable variableName="originalPayload" ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<http:request method="GET" doc:name="Get financial agreement details from alfa" doc:id="7818a662-648a-4354-ad1b-012db07babd1" config-ref="http-Alfa-sapi-configuration" path="/finanicalAgreements/{agreementNumber}" >
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"agreementNumber" : vars.agreementNumber
+}]]]></http:uri-params>
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"scheduleNumber" : vars.scheduleNumber
+}]]]></http:query-params>
+		</http:request>
+		<ee:transform doc:name="set payload to update booked financial agreement number" doc:id="7314fa44-9948-47ec-90f1-90ccbf3df61a">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"bookedFinancialAgreementNumber":payload.financialAgreementNo,
+	"contractStatus": "B",
+	"contractBookedDate": (now() as DateTime) as String {format: "yyyy-MM-dd"}	
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+				<ee:set-variable variableName="uniqueApplicationId" ><![CDATA[%dw 2.0
+output application/java
+---
+payload.creditApplicationNum
+]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+		<http:request method="PATCH" doc:name="update application with booked financial agreement number" doc:id="229ab08a-766a-4162-a991-b9ef4571d41c" config-ref="http-salesforce-sapi-config" path="/applications/{applicationId}/bookedFinancialAgreementNumber" >
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"applicationId" : vars.uniqueApplicationId
+}]]]></http:uri-params>
+		</http:request>
+	</sub-flow>
+	<sub-flow name="Patch-Credit-Application" doc:id="460337b8-fb8a-47a8-8b75-ede285a2ecb3">
+		<http:request method="PATCH" doc:name="Update Application With Consolidated Payload" doc:id="0a7c100b-1652-471a-9db5-cca5f7b56fa5" config-ref="http-salesforce-sapi-config" path="/applications/{applicationId}">
+			<http:uri-params><![CDATA[#[output application/java
+---
+{
+	"applicationId" : vars.uniqueApplicationId
+}]]]></http:uri-params>
+		</http:request>
+	</sub-flow>
+</mule>

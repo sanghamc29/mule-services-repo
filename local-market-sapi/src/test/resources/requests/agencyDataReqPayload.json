@@ -1,0 +1,64 @@
+[
+    {
+        "name": "AP-00020747",
+        "applicationNumber": "AF-00015120",
+        "applicationId": "13X9Z000000ikLhUAI",
+        "applicantId": "13Y9Z000000TLx7UAG",
+        "role": "MainApplicant",
+        "marketUniqueId": "FNTNNN75R13G273T",
+        "customerNumber": "13Y9Z000000TLx7UAG",
+        "customerType": "Individual",
+        "requestType": "Init",
+        "applicantStatusNew": true,
+        "timestamp": "2025-09-04T08:59:36.000+0000",
+        "legalEntity": "MBFSI",
+        "roleFromBusinessType": "Legal Representative;UBO",
+        "addresses": [
+            {
+                "addressType": "MAIN_ADDRESS",
+                "city": "Rome",
+                "country": "RM",
+                "address": "abcdef",
+                "postalCode": "50123"
+            }
+        ],
+        "bankAccounts": [
+            {
+                "accountNumber": "IT15K0300203280399641448819"
+            }
+        ],
+        "phoneNumbers": [
+            {
+                "number": "02 6589 4312"
+            }
+        ],
+        "individualPerson": {
+            "birthDate": "2001-09-07",
+            "provinceCode": "RM",
+            "firstName": "Sid",
+            "gender": "Male",
+            "lastName": "23791",
+            "placeOfBirth": "Rome",
+            "jobTitle": "1",
+            "taxId": "FNTNNN75R13G273T"
+        },
+        "customerFinanceInfo": {
+            "annualRevenue": "6767887",
+            "incomeDocumentMonth": "01",
+            "incomeDocumentYear": "2025",
+            "incomeDocumentType": "Paycheck",
+            "installments": "36",
+            "financedAmount": 38920,
+            "financingType": "FLEA",
+            "assetCondition": "New",
+            "monthlyPayment": "662.55",
+            "residualAmountExclusiveVAT": "24132.9",
+            "downPaymentExclusiveVAT": "4691",
+            "totalAmountOfCreditExclusiveVAT": "46910"
+        },
+        "companyInformation": {
+            "companyActivity": "1",
+            "subgroupOfEconomicActivity": "a3W9Z000000gb5FUAQ"
+        }
+    }
+]

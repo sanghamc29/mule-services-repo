@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<sub-flow name="get-company-affordability-calculations-sub-flow" doc:id="f98ef08c-49b4-4091-aab2-e89266bdef34" >
+		<ee:transform doc:name="Build Company C4 Request" doc:id="6a0ca2cb-5146-4df8-a12c-ac7e3ff0483d">
+			<ee:message>
+				<ee:set-payload resource="dataweaves/build-company-affordability-calculation-request.dwl" />
+			</ee:message>
+		</ee:transform>
+		<logger level="DEBUG" doc:name="Log Request" doc:id="e58a99c4-a376-4c71-859f-ff6db11f4a9a" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.correlationId ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode ++ &#10;&quot;Company Affordability Calculation Start: &quot; ++ now()]" category="com.mercedes-benz.com.local-market-sapi" />
+		<http:request method="POST" doc:name="Company Affordability Calculation Request" doc:id="33435bf7-0a37-446a-9e4c-cf270470c6a8" config-ref="HTTP_LoMapi_Request_configuration" path="${lomapi.companyAffordability.path}">
+			<http:uri-params><![CDATA[#[{
+	countryCode: attributes.headers.'x-country-code'
+}]]]></http:uri-params>
+		</http:request>
+		<logger level="DEBUG" doc:name="Log Response" doc:id="43ab333c-d1e5-4f2d-9e41-e7f44f44a05e" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.correlationId ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode ++ &#10;&quot;Company Affordability Calculation End: &quot; ++ now()]" category="com.mercedes-benz.com.local-market-sapi" />
+		<ee:transform doc:name="Build C4 response" doc:id="1a3472f1-3486-4789-9353-c0033fa4802c">
+			<ee:message>
+				<ee:set-payload resource="dataweaves/build-company-affordability-calculation-response.dwl" />
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+	<sub-flow name="get-person-affordability-calculations-sub-flow" doc:id="a9ed6d88-be7b-4cb9-9895-485c34fe21d8" >
+		<logger level="DEBUG" doc:name="Log Request" doc:id="0a5f4836-3bbd-4ebc-a2b9-f966ad0cee21" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.correlationId ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode ++ &#10;&quot;Person Affordability Calculation Start: &quot; ++ now()]" category="com.mercedes-benz.com.local-market-sapi" />
+		<http:request method="POST" doc:name="Person Affordability Calculation Request" doc:id="7ffa6a40-ecee-4b52-a3b6-cc9f59d85386" config-ref="HTTP_LoMapi_Request_configuration" path="${lomapi.personAffordability.path}" >
+			<http:body ><![CDATA[#[%dw 2.0
+output application/json
+---
+payload]]]></http:body>
+			<http:uri-params ><![CDATA[#[{
+	countryCode: attributes.headers.'x-country-code'
+}]]]></http:uri-params>
+		</http:request>
+		<logger level="DEBUG" doc:name="Log Response" doc:id="e1ae0afa-b459-49f4-874b-a6b08fcb0142" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.correlationId ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode ++ &#10;&quot;Person Affordability Calculation End: &quot; ++ now()]" category="com.mercedes-benz.com.local-market-sapi" />
+		<ee:transform doc:name="Build C4 response" doc:id="9cabf309-f4da-4733-b2b9-1a348beda607" >
+			<ee:message >
+				<ee:set-payload resource="dataweaves/build-company-affordability-calculation-response.dwl" />
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+</mule>

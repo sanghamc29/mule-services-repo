@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<sub-flow name="lomapi-api-impl" doc:id="b5747f1f-b8f1-4423-ae89-51633df62b25" >
+		<logger level="DEBUG" doc:name="Log Request" doc:id="2ff93705-916c-4062-a9da-d7642f5cf060" message="#[output application/java&#10;---&#10;&quot;\'CountryCodeTransaction\': &quot; ++ vars.correlationId ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode ++ &#10;&quot;Request Start Time: &quot; ++ now()]" category="com.mercedes-benz.com.local-market-sapi" />
+		<http:request method="#[vars.httpOperation.method]" doc:name="Lomapi Requester" doc:id="ff78aee1-9a0c-4521-8154-69d83132fc92" config-ref="HTTP_LoMapi_Request_configuration" path="#[vars.httpOperation.path]" outputMimeType="application/json" outputEncoding="UTF-8">
+			<http:headers ><![CDATA[#[%dw 2.0
+output application/json
+---
+vars.httpOperation.headers]]]></http:headers>
+			<http:uri-params><![CDATA[#[%dw 2.0
+output application/json
+---
+vars.httpOperation.uriParams]]]></http:uri-params>
+			<http:query-params ><![CDATA[#[%dw 2.0
+output application/json
+---
+vars.httpOperation.queryParams]]]></http:query-params>
+		</http:request>
+		<logger level="DEBUG" doc:name="Log Response" doc:id="212e9497-b45a-4feb-b470-0dd88ecdb513" message="#[output application/java&#10;---&#10;&quot;\'CountryCodeTransaction\': &quot; ++ vars.correlationId ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode ++ &#10;&quot;Request End Time: &quot; ++ now()]" category="com.mercedes-benz.com.local-market-sapi" />
+	</sub-flow>
+</mule>

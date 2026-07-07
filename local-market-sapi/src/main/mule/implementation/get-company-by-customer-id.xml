@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<sub-flow name="get-company-by-multi-customer-id-sub-flow" doc:id="0340559f-75cb-434a-98ba-d104e21780e8" >
+		<flow-ref doc:name="get enums" doc:id="11f82dda-7dde-43b6-9c0f-1e9f068fbe4a" name="retrieve-translation-values" target="enums" />
+		<ee:transform doc:name="Split CustomerIds &amp; Initialize Response Array" doc:id="49bb3ffb-4ac0-4e35-b11a-5fb56610a404" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="customerIds" ><![CDATA[%dw 2.0
+output application/json
+---
+(vars.customerIds splitBy "," map (id) -> trim(id))]]></ee:set-variable>
+				<ee:set-variable variableName="responseArray" ><![CDATA[%dw 2.0
+output application/json
+---
+[]]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<foreach doc:name="For Each" doc:id="4fdef9ff-cbf9-4c1c-b223-6fbdcd38789f" collection="#[vars.customerIds]">
+			<set-variable value="#[payload]" doc:name="customerId" doc:id="29f95589-ba45-4432-838c-c88aca11a78b" variableName="customerId" />
+				<try doc:name="Try" doc:id="d2d30add-60a8-4edb-b8e5-345b3a9ef2df">
+					<flow-ref doc:name="get-company-by-customer-id-sub-flow" doc:id="26ba525b-8f92-4c2a-86f4-2ea427e80a16" name="get-company-by-customer-id-sub-flow" />
+					<ee:transform doc:name="Prepare Aggregate Response" doc:id="a375ac75-296a-424d-b9e3-459ff36d90fc">
+					<ee:message>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable resource="dataweaves/v-company-search-c2-aggregate-resp.dwl" variableName="responseArray" />
+					</ee:variables>
+				</ee:transform>
+					<error-handler>
+						<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="1cd2f08a-8873-44c5-8dfc-130eaa489304" type="HTTP:BAD_REQUEST">
+					<logger level="INFO" doc:name="Log Error" doc:id="99cf06c7-8aca-4b92-8563-ba687951bdd6" message='#["Error Occurred for Customer ID " ++ vars.customerId default ""]' />
+				</on-error-continue>
+					</error-handler>
+				</try>
+		</foreach>
+		<set-payload value="#[vars.responseArray]" doc:name="Set Payload" doc:id="efc09c0b-93c1-460d-b6d2-2149ed943c3c" />
+	</sub-flow>
+	<sub-flow name="get-company-by-customer-id-sub-flow" doc:id="344992c3-8962-4bfd-9aa5-1de7bbee9a98" >
+		<logger level="DEBUG" doc:name="Log Request" doc:id="2ff93705-916c-4062-a9da-d7642f5cf060" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.correlationId ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode ++ &#10;&quot;Company C2 Search Start: &quot; ++ now()]" category="com.mercedes-benz.com.local-market-sapi" />
+		<http:request method="GET" doc:name="Company C2 Request" doc:id="ff78aee1-9a0c-4521-8154-69d83132fc92" config-ref="HTTP_LoMapi_Request_configuration" path="${lomapi.companyByCustomerId.path}" outputMimeType="application/json" outputEncoding="UTF-8">
+			<http:uri-params ><![CDATA[#[{
+	countryCode: vars.countryCode,
+	customerId: vars.customerId
+}]]]></http:uri-params>
+		</http:request>
+		<logger level="DEBUG" doc:name="Log Response" doc:id="212e9497-b45a-4feb-b470-0dd88ecdb513" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.correlationId ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode ++ &#10;&quot;Company C2 Search End: &quot; ++ now()]" category="com.mercedes-benz.com.local-market-sapi" />
+		<ee:transform doc:name="Build C2 response" doc:id="d8d78e2d-163d-4f92-96b9-931f25001000" >
+			<ee:message >
+				<ee:set-payload resource="dataweaves/p-company-search-c2-response.dwl" />
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+</mule>

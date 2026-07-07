@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="aml-decision-impl-test-suite.xml" />
+	<munit:test name="aml-decision-impl-test-suite-aml-decision-impl-flowTest" doc:id="23d950c0-8732-49a8-9b3b-d5083daac935" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock get AML details Call" doc:id="445b2ecb-cdbf-41b0-aeca-a7c5d04d882e" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="http-salesforce-sapi-config" attributeName="config-ref" />
+					<munit-tools:with-attribute whereValue="${sf.sapi.aml-verify.path}" attributeName="path" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output apllication/json --- readUrl('classpath://samples/mock-payload-get-aml-application-eur.json','application/json')]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Verify AML Sapi Call" doc:id="08ffbf18-0581-4b5e-a209-0a66d2f266eb" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="http-verify-aml-sapi-configuration" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output apllication/json --- readUrl('classpath://samples/mock-payload-post-aml-application-eur.json','application/json')]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock ACK AMQ" doc:id="49cf62f0-7564-42de-af32-64725c40b9c9" processor="anypoint-mq:ack">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="anypoint-mq-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output apllication/json --- readUrl('classpath://samples/mock-payload-post-aml-application-eur.json','application/json')]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event for AML application Event" doc:id="b144468b-e088-41e1-8d0d-13262f206ecf">
+				<munit:payload value="#[output apllication/json --- readUrl('classpath://samples/input-payload-from-mq-to-get-aml-decision-eur.json','application/json')]" />
+				<munit:attributes value='#[output apllication/json&#10;---&#10;{&#10;	"headers": {&#10;		"deliveryCount": 1&#10;	},&#10;	"ackToken": "kasdu2"&#10;}]' />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to aml-decision-impl-flow" doc:id="e56d7bab-3dcb-4c1c-acda-c0b5af0e0685" name="get-aml-decision-and-post-to-verify-plus"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="33358619-f06f-4c5f-ae9c-ec5e838820aa" actual="#[payload[0].status]" expected='#["SUCCESS"]'/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="aml-decision-impl-test-suite-aml-decision-impl-retry-error-flowTest" doc:id="c2354351-a5d4-47f0-9215-729190e16d88" description="Test" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock get AML details Call" doc:id="b1125f20-0b20-4b8c-a390-44b7930cfe48" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="http-salesforce-sapi-config" attributeName="config-ref" />
+					<munit-tools:with-attribute whereValue="${sf.sapi.aml-verify.path}" attributeName="path" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:BAD_GATEWAY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock NACK AMQ" doc:id="5dc6f7ea-3e90-4cc7-b7da-da108ccdfb15" processor="anypoint-mq:nack" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="anypoint-mq-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output apllication/json --- readUrl('classpath://samples/mock-payload-post-aml-application-eur.json','application/json')]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event for AML application Event" doc:id="26c2d456-ca5b-4159-9f98-be9134cb2281" >
+				<munit:payload value="#[output apllication/json --- readUrl('classpath://samples/input-payload-from-mq-to-get-aml-decision-eur.json','application/json')]" />
+				<munit:attributes value='#[output apllication/json&#10;---&#10;{&#10;	"headers": {&#10;		"deliveryCount": 1&#10;	},&#10;	"ackToken": "kasdu2"&#10;}]' />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to aml-decision-impl-flow" doc:id="a17d48f1-ab67-4fba-b272-123f96c4a9c8" name="get-aml-decision-and-post-to-verify-plus" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="Verify call" doc:id="44bf48d3-373a-4a03-8a95-fdb4fe70d577" processor="anypoint-mq:nack">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="daaa79a1-298f-4574-a2c3-b9b2f7c639d8" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="anypoint-mq-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="aml-decision-impl-test-suite-aml-decision-impl-no-retry-error-flowTest" doc:id="cbeea257-d3c5-47c5-8056-ce9803e52c16" description="Test" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock get AML details Call" doc:id="462521c7-6ca8-4500-b929-cf4621d92278" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="http-salesforce-sapi-config" attributeName="config-ref" />
+					<munit-tools:with-attribute whereValue="${sf.sapi.aml-verify.path}" attributeName="path" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:BAD_REQUEST" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock SF Common Sapi Call" doc:id="13308615-6674-49c8-82d2-505ed18c997e" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="update SF IPE status with error" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="http-salesforce-common-sapi-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output apllication/json --- readUrl('classpath://samples/mock-payload-post-aml-application-eur.json','application/json')]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Publish DLQ" doc:id="eb6bd8fd-5b99-412a-938e-d4f8e7d8f297" processor="anypoint-mq:publish" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="anypoint-mq-config" attributeName="config-ref" />
+					<munit-tools:with-attribute whereValue="${mq.amlDecisionOutbound.dlq}" attributeName="destination" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output apllication/json --- readUrl('classpath://samples/mock-payload-post-aml-application-eur.json','application/json')]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Ack AMQ" doc:id="858b0ae2-2e07-435a-bb03-ab49d9a6def8" processor="anypoint-mq:ack" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="b59620b0-0608-4d87-9557-fbaa610a090f" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="anypoint-mq-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output apllication/json --- readUrl('classpath://samples/mock-payload-post-aml-application-eur.json','application/json')]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event for AML application Event" doc:id="404a1eba-58fb-444a-9067-0a783de835dd" >
+				<munit:payload value="#[output apllication/json --- readUrl('classpath://samples/input-payload-from-mq-to-get-aml-decision-eur.json','application/json')]" />
+				<munit:attributes value='#[output apllication/json&#10;---&#10;{&#10;	"headers": {&#10;		"deliveryCount": 1&#10;	},&#10;	"ackToken": "kasdu2"&#10;}]' />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to aml-decision-impl-flow" doc:id="bcd553ef-a577-4ed1-922b-2363c3ea7c05" name="get-aml-decision-and-post-to-verify-plus" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="Verify call" doc:id="25847890-5584-4daa-9ef8-86d36b048de5" processor="anypoint-mq:ack" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="b59620b0-0608-4d87-9557-fbaa610a090f" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="anypoint-mq-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="aml-decision-impl-test-suite-aml-decision-impl-ipe-sf-error-flowTest" doc:id="33157844-c9a8-4c50-a246-a16cd931325b" description="Test" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock get AML details Call" doc:id="71278dc9-d693-4972-8f54-05b3590bec6c" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="http-salesforce-sapi-config" attributeName="config-ref" />
+					<munit-tools:with-attribute whereValue="${sf.sapi.aml-verify.path}" attributeName="path" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:BAD_REQUEST" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock SF Common Sapi Call" doc:id="c8d006a0-6202-4786-bf14-95319a6ea60f" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="update SF IPE status with error" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="http-salesforce-common-sapi-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="HTTP:BAD_GATEWAY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Publish DLQ" doc:id="c940c729-ea75-43fd-8dd4-228e48900e92" processor="anypoint-mq:publish" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="04074e9d-04b3-40b6-bcff-584e0486d618" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="anypoint-mq-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output apllication/json --- readUrl('classpath://samples/mock-payload-post-aml-application-eur.json','application/json')]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Ack AMQ" doc:id="68e56688-6710-43a2-8d0f-1bda301ff0d8" processor="anypoint-mq:ack" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="3dcc46f7-e70e-4b9b-b137-9d662dc0cc29" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="anypoint-mq-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output apllication/json --- readUrl('classpath://samples/mock-payload-post-aml-application-eur.json','application/json')]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event for AML application Event" doc:id="c5ee5994-bff3-4f11-a0e1-230338edc615" >
+				<munit:payload value="#[output apllication/json --- readUrl('classpath://samples/input-payload-from-mq-to-get-aml-decision-eur.json','application/json')]" />
+				<munit:attributes value='#[output apllication/json&#10;---&#10;{&#10;	"headers": {&#10;		"deliveryCount": 1&#10;	},&#10;	"ackToken": "kasdu2"&#10;}]' />
+			</munit:set-event>
+			<try doc:name="Try" doc:id="bf96a16d-ca53-4ed3-880b-4a2774aa5594" >
+				<flow-ref doc:name="Flow-ref to aml-decision-impl-flow" doc:id="2b6fee24-86b2-4d8e-9eed-887b976480a7" name="get-aml-decision-and-post-to-verify-plus" />
+				<error-handler >
+					<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="348911c3-2732-453c-ad60-c500a1c31efa" >
+						<logger level="INFO" doc:name="Logger" doc:id="3aa115a5-0f00-425f-afd1-0e052966a811" message="Test Executed"/>
+					</on-error-continue>
+				</error-handler>
+			</try>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="Verify call" doc:id="bc0a8611-a3e9-4127-9643-e6d60b453fb1" processor="anypoint-mq:ack" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="3dcc46f7-e70e-4b9b-b137-9d662dc0cc29" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="anypoint-mq-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

@@ -1,0 +1,10 @@
+{
+  "vehicleModel": "S500",
+  "vehicleYear": "2023",
+  "odometerMileage": 100000,
+  "vin": "01234567890X",
+  "dealerNumber": "70090",
+  "applicationId": "1001",
+  "country": "US",
+  "condition": "New"
+}

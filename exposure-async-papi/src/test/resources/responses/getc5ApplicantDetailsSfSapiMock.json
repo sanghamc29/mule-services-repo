@@ -1,0 +1,390 @@
+[
+{"customerInfo":{
+  "name": "Company Co",
+  "officialRegistrationNumber": "20009280 0000",
+  "vatNumber": "BE1234567891",
+  "establishmentDate": "2008-07-08",
+  "startOfBusinessDate": "2008-07-08",
+  "taxLiability": "VAT Liable",
+  "legalEntity": "Sociedades por Quotas",
+  "customerType": "Individual",
+  "customerReference": "100002",
+  "individualPerson": {
+  	"customerNumber": "13Y9Z000000QM9lUAG",
+    "personUniqueId": "10000707",
+    "firstName": "Adam",
+    "middleName": "Paul",
+    "lastName": "Smith",
+    "birthDate": "1988-08-08",
+    "country": "PT",
+    "language": "pt",
+    "placeOfBirth": "LISBON",
+    "countryOfBirth": "PT",
+    "jobTitle": "Carpenter",
+    "countryResidence": "PT",
+    "individualType": "Customer"
+  },
+  "affiliatedCompany": {
+    "companyName": "Company 1",
+    "companyId": 98347509,
+    "companyIdType": "NIF",
+    "affiliationType": "parentCompany",
+    "countryId": "PT",
+    "companyFlag": true,
+    "shareValueDirect": 100,
+    "shareValueIndirect": 0
+  },
+  "addresses": [
+    {
+      "addressId": "23287213",
+      "addressType": "Primary",
+      "address": "Longstreet",
+      "additionalAddresses": "Longstreet",
+      "city": "Ghent",
+      "postalCode": "9000",
+      "state": "GE",
+      "country": "BE"
+    }
+  ],
+  "phoneNumbers": [
+    {
+      "phoneNumberId": "10000309",
+      "number": "0465 123 456",
+      "localPhoneNumber": "2474002342",
+      "phoneType": "Main (Work)",
+      "zonalCode": "024",
+      "countryCode": "32"
+    }
+  ],
+  "electronicReferences": [
+    {
+      "referenceAddress": "test@portgal.pr",
+      "referenceType": "E-mail (Main)",
+      "referenceId": "41199698"
+    }
+  ],
+  "bankAccounts": [
+    {
+      "generalLedgerAccountNumber": "350291",
+      "bankAccountId": "100001",
+      "bankName": "CAIXA GERAL DE DEPOSITOS, SA",
+      "bankUniqueId": "100001",
+      "accountNumber": "BE12345678910112",
+      "checkType": "IBAN",
+      "description": "Hatchback",
+      "accountType": "External BankAccount",
+      "accountState": "Open",
+      "bankBranchCode": "KREDBECD"
+    }
+  ],
+  "paymentPreferences": [
+    {
+      "paymentUniqueId": "100001",
+      "bankAccountId": "600001",
+      "paymentMethod": "",
+      "preferenceStatus": "",
+      "paymentReference": "",
+      "validFrom": "",
+      "validTo": "",
+      "isPreferred": true,
+      "leasingCompanyId": "1",
+      "paymentCommunication": "001510000"
+    }
+  ],
+  "sectorCode": "NAICS",
+  "tradingName": "John Doe",
+  "legalName": "John Doe Inc",
+  "customerState": "Active (Fleet)",
+  "groupCompany": "1234",
+  "carFleetSize": 20,
+  "commercialFleetSize": 15,
+  "knowYourCustomerSource": "",
+  "brokerCompanies": [
+    {
+      "brokerCompanyNumber": "100001",
+      "tradingName": "Company Co"
+    }
+  ],
+  "leasingCompanies": [
+    {
+      "leasingCompanyNumber": "100001"
+    }
+  ],
+  "languageCode": "123",
+  "lastModified": "",
+  "customerFinanceInfo": {
+    "annualRevenue": "",
+    "financingType": "",
+    "financeProductCode": "",
+    "assetCondition": "",
+    "installments": "",
+    "totalAmountOfCreditInclusiveVAT": "",
+    "totalAmountOfCreditExclusiveVAT": "",
+    "residualAmountInclusiveVAT": "",
+    "residualAmountExclusiveVAT": "",
+    "downPaymentInclusiveVAT": "",
+    "downPaymentExclusiveVAT": "",
+    "financedAmountInclusiveVAT": "",
+    "financedAmountExclusiveVAT": "",
+    "yearOfIncomeDocument": "",
+    "annualIncome": "",
+    "incomeDocumetType": "",
+    "incomeDocumetMonth": "",
+    "incomeDocumetYear": ""
+  },
+  "documents": [
+    {
+      "objID": "22456543",
+      "country": "PT",
+      "legalEntity": "MBFS_PT",
+      "segment": "PrivFinancing",
+      "partnerID": "2345",
+      "bpType": "Customer",
+      "bpDescription": "Individual customer",
+      "vatNo": "2393455",
+      "referenceNo": "567888",
+      "contractID": "34555",
+      "contractType": "PT",
+      "contractDescription": "PT",
+      "contractStartDate": "1970-01-01T13:00:00Z",
+      "contractEndDate": "1970-01-01T13:00:00Z",
+      "caseID": "000119538-01",
+      "caseType": "CRA",
+      "caseDescription": "PT",
+      "caseDate": "1970-01-01T13:00:00Z",
+      "status": "PT",
+      "statusDate": "1970-01-01T13:00:00Z",
+      "docTypeNumber": "35",
+      "docTypeName": "eSignAuditLog CreditConsent",
+      "docDescription": "eSignAuditLog CreditConsent document",
+      "referenceID": "54675",
+      "archiveDate": "1970-01-01T13:00:00Z",
+      "scanDate": "1970-01-01T13:00:00Z",
+      "notificationTo": "PT",
+      "uniqueIdentifier": "119cb015-e2c1-4289-8e78-464a263cabd1",
+      "docName": "eSignAuditLog CreditConsent_e1f9bbad-f5a9-4a72-9958-b0215b23e543.pdf",
+      "fileMimeType": "application/pdf",
+      "rmStatus": "",
+      "rmStatusDate": "19700101",
+      "creationDate": "1970-01-01T13:00:00Z",
+      "createdBy": "User1",
+      "modifiedBy": "User2",
+      "modifiedDate": "1970-01-01T13:00:00Z"
+    }
+  ],
+  "role": "Main Applicant",
+  "marketUniqueId": "234DB34SD234324SDF",
+  "timestamp": "2025-05-06T08:18:00.000Z",
+  "applicationNumber": "12455a65",
+  "requestType": "initial",
+  "relatedToMainApplicant": {
+    "individualPerson": {
+      "personUniqueId": "10000707",
+      "firstName": "Adam",
+      "middleName": "Paul",
+      "lastName": "Smith",
+      "birthDate": "1988-08-08",
+      "country": "PT",
+      "language": "pt",
+      "placeOfBirth": "LISBON",
+      "countryOfBirth": "PT",
+      "jobTitle": "Carpenter",
+      "countryResidence": "PT",
+      "individualType": "Customer"
+    }
+  }
+}},{"customerInfo":{
+  "name": "Company Co",
+  "officialRegistrationNumber": "20009280 0000",
+  "vatNumber": "BE1234567891",
+  "establishmentDate": "2008-07-08",
+  "startOfBusinessDate": "2008-07-08",
+  "taxLiability": "VAT Liable",
+  "legalEntity": "Sociedades por Quotas",
+  "customerType": "Individual",
+  "customerReference": "100002",
+  "individualPerson": {
+    "personUniqueId": "10000707",
+    "customerNumber": "13Y9Z000000QC3eUAG",
+    "firstName": "Adam",
+    "middleName": "Paul",
+    "lastName": "Smith",
+    "birthDate": "1988-08-08",
+    "country": "PT",
+    "language": "pt",
+    "placeOfBirth": "LISBON",
+    "countryOfBirth": "PT",
+    "jobTitle": "Carpenter",
+    "countryResidence": "PT",
+    "individualType": "Customer"
+  },
+  "affiliatedCompany": {
+    "companyName": "Company 1",
+    "companyId": 98347509,
+    "companyIdType": "NIF",
+    "affiliationType": "parentCompany",
+    "countryId": "PT",
+    "companyFlag": true,
+    "shareValueDirect": 100,
+    "shareValueIndirect": 0
+  },
+  "addresses": [
+    {
+      "addressId": "23287213",
+      "addressType": "Primary",
+      "address": "Longstreet",
+      "additionalAddresses": "Longstreet",
+      "city": "Ghent",
+      "postalCode": "9000",
+      "state": "GE",
+      "country": "BE"
+    }
+  ],
+  "phoneNumbers": [
+    {
+      "phoneNumberId": "10000309",
+      "number": "0465 123 456",
+      "localPhoneNumber": "2474002342",
+      "phoneType": "Main (Work)",
+      "zonalCode": "024",
+      "countryCode": "32"
+    }
+  ],
+  "electronicReferences": [
+    {
+      "referenceAddress": "test@portgal.pr",
+      "referenceType": "E-mail (Main)",
+      "referenceId": "41199698"
+    }
+  ],
+  "bankAccounts": [
+    {
+      "generalLedgerAccountNumber": "350291",
+      "bankAccountId": "100001",
+      "bankName": "CAIXA GERAL DE DEPOSITOS, SA",
+      "bankUniqueId": "100001",
+      "accountNumber": "BE12345678910112",
+      "checkType": "IBAN",
+      "description": "Hatchback",
+      "accountType": "External BankAccount",
+      "accountState": "Open",
+      "bankBranchCode": "KREDBECD"
+    }
+  ],
+  "paymentPreferences": [
+    {
+      "paymentUniqueId": "100001",
+      "bankAccountId": "600001",
+      "paymentMethod": "",
+      "preferenceStatus": "",
+      "paymentReference": "",
+      "validFrom": "",
+      "validTo": "",
+      "isPreferred": true,
+      "leasingCompanyId": "1",
+      "paymentCommunication": "001510000"
+    }
+  ],
+  "sectorCode": "NAICS",
+  "tradingName": "John Doe",
+  "legalName": "John Doe Inc",
+  "customerState": "Active (Fleet)",
+  "groupCompany": "1234",
+  "carFleetSize": 20,
+  "commercialFleetSize": 15,
+  "knowYourCustomerSource": "",
+  "brokerCompanies": [
+    {
+      "brokerCompanyNumber": "100001",
+      "tradingName": "Company Co"
+    }
+  ],
+  "leasingCompanies": [
+    {
+      "leasingCompanyNumber": "100001"
+    }
+  ],
+  "languageCode": "123",
+  "lastModified": "",
+  "customerFinanceInfo": {
+    "annualRevenue": "",
+    "financingType": "",
+    "financeProductCode": "",
+    "assetCondition": "",
+    "installments": "",
+    "totalAmountOfCreditInclusiveVAT": "",
+    "totalAmountOfCreditExclusiveVAT": "",
+    "residualAmountInclusiveVAT": "",
+    "residualAmountExclusiveVAT": "",
+    "downPaymentInclusiveVAT": "",
+    "downPaymentExclusiveVAT": "",
+    "financedAmountInclusiveVAT": "",
+    "financedAmountExclusiveVAT": "",
+    "yearOfIncomeDocument": "",
+    "annualIncome": "",
+    "incomeDocumetType": "",
+    "incomeDocumetMonth": "",
+    "incomeDocumetYear": ""
+  },
+  "documents": [
+    {
+      "objID": "22456543",
+      "country": "PT",
+      "legalEntity": "MBFS_PT",
+      "segment": "PrivFinancing",
+      "partnerID": "2345",
+      "bpType": "Customer",
+      "bpDescription": "Individual customer",
+      "vatNo": "2393455",
+      "referenceNo": "567888",
+      "contractID": "34555",
+      "contractType": "PT",
+      "contractDescription": "PT",
+      "contractStartDate": "1970-01-01T13:00:00Z",
+      "contractEndDate": "1970-01-01T13:00:00Z",
+      "caseID": "000119538-01",
+      "caseType": "CRA",
+      "caseDescription": "PT",
+      "caseDate": "1970-01-01T13:00:00Z",
+      "status": "PT",
+      "statusDate": "1970-01-01T13:00:00Z",
+      "docTypeNumber": "35",
+      "docTypeName": "eSignAuditLog CreditConsent",
+      "docDescription": "eSignAuditLog CreditConsent document",
+      "referenceID": "54675",
+      "archiveDate": "1970-01-01T13:00:00Z",
+      "scanDate": "1970-01-01T13:00:00Z",
+      "notificationTo": "PT",
+      "uniqueIdentifier": "119cb015-e2c1-4289-8e78-464a263cabd1",
+      "docName": "eSignAuditLog CreditConsent_e1f9bbad-f5a9-4a72-9958-b0215b23e543.pdf",
+      "fileMimeType": "application/pdf",
+      "rmStatus": "",
+      "rmStatusDate": "19700101",
+      "creationDate": "1970-01-01T13:00:00Z",
+      "createdBy": "User1",
+      "modifiedBy": "User2",
+      "modifiedDate": "1970-01-01T13:00:00Z"
+    }
+  ],
+  "role": "Main Applicant",
+  "marketUniqueId": "234DB34SD234324SDF",
+  "timestamp": "2025-05-06T08:18:00.000Z",
+  "applicationNumber": "12455a65",
+  "requestType": "initial",
+  "relatedToMainApplicant": {
+    "individualPerson": {
+      "personUniqueId": "10000707",
+      "firstName": "Adam",
+      "middleName": "Paul",
+      "lastName": "Smith",
+      "birthDate": "1988-08-08",
+      "country": "PT",
+      "language": "pt",
+      "placeOfBirth": "LISBON",
+      "countryOfBirth": "PT",
+      "jobTitle": "Carpenter",
+      "countryResidence": "PT",
+      "individualType": "Customer"
+    }
+  }}
+}]

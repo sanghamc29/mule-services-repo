@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<sub-flow name="process-applicantsDetails-subflow" doc:id="ddc86cc7-7d80-49f5-b724-d37f4df1b7b0" >
+		<ee:transform doc:name="Prepare HTTP Req Mapping SF Applicant Details" doc:id="c90459c4-13c4-4909-bec3-70113a48141d" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" >
+			<ee:message />
+			<ee:variables >
+				<ee:set-variable variableName="httpOperation"><![CDATA[%dw 2.0
+output application/java
+---
+"placeholder"]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="sf-accounts-sapi-call-subflow" doc:id="3b09b896-be73-4f8b-a66b-93d8a97ef2ff" name="sf-accounts-sapi-call-subflow" target="applicantsDetails"/>
+		<ee:transform doc:name="Prepare HTTP Req Mapping Lomapi Sapi-person" doc:id="938f82b4-01d5-4f02-8f86-a42aef70b32a">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+vars.applicantsDetails ]]></ee:set-payload>
+				</ee:message>
+				<ee:variables>
+					<ee:set-variable variableName="httpOperation"><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"host": Mule::p('local-market-sapi.host'),
+	"port": Mule::p('local-market-sapi.port'),
+	"method": Mule::p('local-market-sapi.agencyData.method'),
+	"path": Mule::p('local-market-sapi.agencyData.path'),
+	"timeout": Mule::p('local-market-sapi.response.timeout'),
+	"headers": {
+		"x-client-id": Mule::p('local-market-sapi.client-id'),
+		"x-client-secret": Mule::p('secure::local-market-sapi.client-secret'),
+		"x-correlation-id": vars.correlationId,
+		"x-country-code": vars.countryCode
+	}
+}
+]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+		<flow-ref doc:name="local-market-sapi-call-subflow" doc:id="e023c331-d046-43ba-80c4-293736cccfc2" name="local-market-sapi-call-subflow" />
+	</sub-flow>
+</mule>

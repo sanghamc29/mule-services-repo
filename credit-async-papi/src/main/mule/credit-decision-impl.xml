@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:anypoint-mq="http://www.mulesoft.org/schema/mule/anypoint-mq" xmlns:tracing="http://www.mulesoft.org/schema/mule/tracing"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/tracing http://www.mulesoft.org/schema/mule/tracing/current/mule-tracing.xsd
+http://www.mulesoft.org/schema/mule/anypoint-mq http://www.mulesoft.org/schema/mule/anypoint-mq/current/mule-anypoint-mq.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="get-credit-decision-flow" doc:id="d6dca7b7-3e76-4788-ba88-b30236f73138" >
+		<logger level="INFO" doc:name="Log Credit Decision ApplicationId" doc:id="84d11f2a-adf9-4b43-acf9-50d666ee09db" message="#[import try from dw::Runtime&#10;output application/java --- &quot;\'Received a platform event from salesforce\': &quot; ++ &quot; \'applicationId\': &quot; ++ (vars.appID) ++ if(p('log.payloadFlag') == 'true'  and  try(() -&gt; isEmpty(payload)).success) (&quot;\'Payload\': &quot; ++ write(payload,&quot;application/json&quot;)) else &quot;&quot;]" />
+		<set-variable value="#[message]" doc:name="Set originalMessage" doc:id="73c591d5-2670-42e8-9e95-d05b9f85bf79" variableName="originalMessage" />
+		<flow-ref doc:name="Get Credit App Details" doc:id="b6c72347-f2a6-4277-9d1f-4fc92beaaadb" name="get-cedit-app-details-flow" />
+		<flow-ref doc:name="Get and Save Credit Decision" doc:id="906c3c33-dbd1-4a4c-b1e9-89f8bdb18e56" name="get-credit-decision-and-update-crm-subflow" />
+		<anypoint-mq:ack doc:name="Acknowledge MQ" doc:id="b011ed64-c727-482c-91c5-18562fe7a9a5" config-ref="anypoint-mq-config" ackToken="#[vars.ackId]" />
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="3320f0a3-f075-4512-88ca-e28e3ccd09e5" type="CUSTOM:FAILED_LOADING_CREDIT_APP">
+				<logger level="INFO" doc:name="Log Graceful Termination" doc:id="33e8bcc5-7405-42bb-a1b7-b5d67fe29ada" message='"Loading credit app data failed, SF has been updated and the transaction is being closed - messages is consumed from AMQ successfully"' />
+				<anypoint-mq:ack doc:name="Acknowledge MQ" doc:id="955951aa-fa18-4e0e-a4c2-8460a469e859" config-ref="anypoint-mq-config" ackToken="#[vars.ackId]" />
+			</on-error-continue>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="6875e536-357e-48cb-92dc-d1f6f7bff2f4" type="ANY">
+						<logger level="ERROR" doc:name="Log Failure" doc:id="88d42c4f-aff0-44ea-aeb5-e0eaff8e9b65" message='#["Error: " ++ (error.detailedDescription as String) ++ " occured while publishing application details to mba sapi. Moving message to DLQ"]' />
+						<anypoint-mq:publish doc:name="Publish application details to DLQ" doc:id="6471491b-bd22-4d8f-8604-fb2d70928f4e" config-ref="anypoint-mq-config" destination="${mq.decisionOutbound.dlq}">
+							<anypoint-mq:body><![CDATA[#[%dw 2.0
+output application/json
+---
+{
+	"originalPayload": vars.appDetails,
+	//"errorMessage": if(!isEmpty(payload.error))payload.error else (error.detailedDescription as String) 
+     "errorMessage" : error
+}]]]></anypoint-mq:body>
+							<anypoint-mq:properties><![CDATA[#[output application/java
+---
+{
+	"correlationId" : vars.originalMessage.attributes.properties.correlationId default "no correlationId"	
+}]]]></anypoint-mq:properties>
+						</anypoint-mq:publish>
+						<anypoint-mq:ack doc:name="Acknowledge MQ" doc:id="b8ca1d4c-801f-4052-ba3d-ca0e952e2ffe" config-ref="anypoint-mq-config" ackToken="#[vars.ackId]" />
+					</on-error-continue>
+		</error-handler>
+	</flow>
+	<flow name="get-cedit-app-details-flow" doc:id="bfab451e-fb0e-4bae-a7f1-68fef1cb89d9">
+		<until-successful maxRetries="${EHRetry.maxCount}" doc:name="Until Successful" doc:id="96cf7476-39ef-4fb8-8c10-a45cb0f76b99" millisBetweenRetries="${EHRetry.intervalBetweenRetries}">
+			<try doc:name="Try" doc:id="9f291b25-09cf-48cd-b4d9-9da322254b0d" >
+				<http:request method="GET" doc:name="Get Application By Id" doc:id="68fb20ef-d34c-434d-b438-f492272e060b" config-ref="http-salesforce-sapi-config" path="/applications/{applicationId}">
+			<http:body><![CDATA[#[null]]]></http:body>
+			<http:headers><![CDATA[#[output application/java
+---
+{
+	"x-country-code": vars.appDetails.data.payload.EU_Market__c default ""
+}]]]></http:headers>
+			<http:uri-params><![CDATA[#[output application/java
+---
+{
+	"applicationId" : vars.appID
+}]]]></http:uri-params>
+			<http:query-params><![CDATA[#[output application/java 
+--- 
+"applicantId": vars.appDetails.data.payload.EU_Message__c default ""]]]></http:query-params>
+		</http:request>
+				<error-handler >
+					<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="2e5053b9-8120-467d-9152-b375d4b86742" type="HTTP:BAD_REQUEST, HTTP:CLIENT_SECURITY, HTTP:FORBIDDEN, HTTP:METHOD_NOT_ALLOWED, HTTP:NOT_ACCEPTABLE, HTTP:NOT_FOUND, HTTP:PARSING, HTTP:SECURITY, HTTP:TOO_MANY_REQUESTS, HTTP:UNAUTHORIZED, HTTP:UNSUPPORTED_MEDIA_TYPE" >
+						<ee:transform doc:name="store error" doc:id="3d27927f-3a9a-4c7b-a65c-282be4d991ad" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+error.errorMessage.payload]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+						<logger level="ERROR" doc:name="Log Unrecoverable Error" doc:id="17040f09-060c-42b0-b2b9-3ecc8a4a16bf" message='"Unrecoverable error detected while loading credit application data. No retry logic will be applied"' />
+					</on-error-continue>
+				</error-handler>
+			</try>
+		</until-successful>
+		<choice doc:name="Check if Credit App is Loaded" doc:id="90d11841-af25-4933-a996-73c85f7aea22" >
+			<when expression='#[!isEmpty(payload.error)]'>
+				<raise-error doc:name="Raise error" doc:id="ad6209e2-96ea-4efa-890f-a9765afa35b2" type="CUSTOM:APPLICALTION_LOAD_FAILED" description='"Failed loading credit application details from CRM"'/>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Build Payload with agencyName and newBureauRequiredFlag" doc:id="89b29bb1-923f-4d5d-a59b-e79ff5ea54b3">
+					<ee:message>
+						<ee:set-payload resource="dataweaves/build-payload-with-agencyname-and-newbureaurequiredflag.dwl" />
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="salesforceAttributes"><![CDATA[%dw 2.0
+output application/java
+---
+{
+	applicationFormEvaluationId: payload.mbadvantageSourceID
+}]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</otherwise>
+		</choice>
+		<error-handler>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="a087dea0-dc10-49ed-be4a-f0e37388cecc" type="ANY">
+				<logger level="ERROR" doc:name="Log Error" doc:id="7c622c16-3d14-4d58-85be-470a802c6aa4" message='"Loading credit application details failed!"' />
+				<flow-ref doc:name="Notify CRM About Failure" doc:id="13b2324c-90b0-4cd0-bfd6-af14dd105d88" name="update-failure-in-crm-subflow" />
+				<raise-error doc:name="Raise error" doc:id="af1d3d20-dfcc-4cc5-8829-9d6bcceaac67" type="CUSTOM:FAILED_LOADING_CREDIT_APP" />
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow doc:id="7662fa15-f22d-4cb7-a6f9-b925e054f42b" name="get-credit-decision-and-update-crm-subflow">
+		<http:request method="POST" doc:name="Get Credit Decision from Credit Platform" doc:id="1d214a97-054f-45fc-938e-2ef371f20c2e" config-ref="http-credit-sapi-config" path="/applications/{applicationId}/creditDecisions" sendCorrelationId="ALWAYS">
+					<http:headers ><![CDATA[#[output application/java 
+--- 
+"x-country-code": vars.appDetails.data.payload.EU_Market__c default ""]]]></http:headers>
+			<http:uri-params><![CDATA[#[output application/java
+---
+{
+	applicationId : vars.appID
+}]]]></http:uri-params>
+					<http:query-params><![CDATA[#[output application/java
+---
+{
+	"market" : payload.country default vars.appDetails.data.payload.EU_Market__c,
+	"requestReason" : if(!isEmpty(vars.creditCheckRequestReason)) vars.creditCheckRequestReason else vars.appDetails.requestReason
+						
+						
+}]]]></http:query-params>
+				</http:request>
+		<ee:transform doc:name="Appened IPE Id From PE" doc:id="d87952eb-396a-4ea5-9aab-8ddccde749fd" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json skipNullOn="everywhere"
+---
+payload ++ ("ipeId": vars.platformEventLogId) ++ (vars.salesforceAttributes default "")]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<http:request method="POST" doc:name="Update Credit Application with Credit decision" doc:id="a6bfb98c-2490-4604-9f27-e263aa3bb27e" config-ref="http-salesforce-sapi-config" path="/applications/{ApplicationId}/creditDecisions" sendCorrelationId="ALWAYS">
+					<http:headers ><![CDATA[#[output application/java 
+--- 
+"x-country-code": vars.appDetails.data.payload.EU_Market__c default ""]]]></http:headers>
+			<http:uri-params><![CDATA[#[output application/java
+---
+{
+	ApplicationId : vars.appID
+}]]]></http:uri-params>
+			<http:query-params ><![CDATA[#[output application/java
+---
+country: vars.appDetails.data.payload.EU_Market__c default ""]]]></http:query-params>
+				</http:request>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="9c4f87a2-7f14-4266-a844-e2cc60c782da" type="ANY">
+				<logger level="ERROR" doc:name="Log Error" doc:id="70908330-bf31-4f1e-b36e-0e6d7880526f" message='"Getting credit decision and submitting it to CRM failed!"' />
+				<flow-ref doc:name="Notify CRM About Failure" doc:id="713ce1d6-c3ff-4019-8f76-dc2cdd812de9" name="update-failure-in-crm-subflow" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+	<sub-flow name="update-failure-in-crm-subflow" doc:id="5dd210cd-726a-44f7-bdb4-34c0a9f35db1" >
+		<ee:transform doc:name="Prepare Error Info" doc:id="6af4edd5-fc51-4f2b-badd-81376643afcf">
+							<ee:message>
+								<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+
+var raw = error.errorMessage.payload
+var errPayload =
+    if (raw is Object) raw
+    else if (raw is String and !isBlank(raw)) (read(raw, "application/json") default {})
+    else if (raw is Binary and sizeOf(raw) > 0) (read(raw, "application/json") default {})
+    else {}
+
+---
+{
+  uniqueId: vars.platformEventLogId,
+  errorStatus: "Failed",
+  errorCode: (errPayload.error.errorCode) default (error.errorCode default error.errorType.identifier),
+  errorMessage: ((errPayload.error.errorDescription) default (error.description default "Unhandled Exception Details - Check Log trace")) ++ ", " ++ ((errPayload.error.errorMessage) default "Unhandled Exception Message - Check Log trace"),
+  errorDateTime: now(),
+  correlationId: correlationId
+}]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+		<http:request method="POST" doc:name="Save Error Into CRM" doc:id="8b465d13-5be4-40d7-929b-c112bf2ff753" config-ref="http-salesforce-common-sapi-config" path="/businessExceptions/errors">
+							<http:uri-params><![CDATA[#[output application/java
+---
+{
+	ApplicationId : vars.appID
+}]]]></http:uri-params>
+						</http:request>
+		<logger level="INFO" doc:name="Log Success Error Save" doc:id="14f4248f-2d99-47eb-905c-62611f1df2ea" message='"Error was successfully saved into CRM"'/>
+	</sub-flow>
+	
+</mule>

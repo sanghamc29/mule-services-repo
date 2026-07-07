@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="sync-credit-decision-to-miles-test-suite.xml" />
+	<munit:test name="sync-credit-decision-to-miles-test-suite-miles-credit-decision-impl-flowTest" doc:id="5211dda9-10bf-44d4-aa19-4a46cdf75752" description="Test" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock get credit decsion details Call" doc:id="f5f6ee96-5f25-4918-aef3-827aba9da0c3" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="http-salesforce-sapi-config" attributeName="config-ref" />
+					<munit-tools:with-attribute whereValue="${sf.sapi.creditDecision.path}" attributeName="path" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output apllication/json --- readUrl('classpath://samples/mock-payload-get-credit-decision-details-miles-eur.json','application/json')]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock Miles Credit Sapi Call" doc:id="0bb3ea06-d382-403f-9815-268b5eb12d41" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="HTTP_Miles_Sapi_Request_configuration" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:attributes value="#[{&#10;	statusCode: 204&#10;}]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock ACK AMQ" doc:id="f10baa99-15e7-4dea-897a-bbcaf5559906" processor="anypoint-mq:ack" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="anypoint-mq-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:attributes value="#[{&#10;	statusCode: 204&#10;}]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event for Miles Credit decision application Event" doc:id="36464baa-ad24-419e-a800-5b346443a5e2" >
+				<munit:payload value="#[output apllication/json --- readUrl('classpath://samples/input-payload-from-mq-to-get-miles-credit-decision-eur.json','application/json')]" />
+				<munit:attributes value='#[output apllication/json&#10;---&#10;{&#10;	"headers": {&#10;		"deliveryCount": 1&#10;	},&#10;	"ackToken": "kasdu2"&#10;}]' />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to miles-credit-decision-impl-flow" doc:id="36a42bbe-2022-49ab-b074-592b737dadd9" name="miles-credit-decision-impl-flow" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="dbc9a3d9-b8cf-4b96-af15-90214ec7b5c9" actual="#[attributes.statusCode]" expected='#[204]' />
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

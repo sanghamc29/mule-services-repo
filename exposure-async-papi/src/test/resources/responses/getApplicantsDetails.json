@@ -1,0 +1,22 @@
+[
+  {
+    "applicationNumber": "Finance Lease",
+    "role": "Primary",
+    "marketUniqueId": "IN-MKT-001",
+    "customerNumber": "001XYZ000abc123",
+    "customerType": "Individual",
+    "requestType": "revision",
+    "timestamp": "2025-06-15T10:30:00Z",
+    "legalEntity": "LegalEntityName"
+  },
+  {
+    "applicationNumber": "Finance Lease",
+    "role": "Primary",
+    "marketUniqueId": "IN-MKT-001",
+    "customerNumber": "001XYZ000abc124",
+    "customerType": "Individual",
+    "requestType": "revision",
+    "timestamp": "2025-06-15T10:30:00Z",
+    "legalEntity": "LegalEntityName"
+  }
+]

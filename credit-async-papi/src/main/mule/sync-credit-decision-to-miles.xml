@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:anypoint-mq="http://www.mulesoft.org/schema/mule/anypoint-mq"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/anypoint-mq http://www.mulesoft.org/schema/mule/anypoint-mq/current/mule-anypoint-mq.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+
+<flow name="miles-credit-decision-impl-flow" doc:id="ee4bb661-c3c5-4d35-b24d-2ebb970d7265" >
+		<http:request method="GET" doc:name="GET Credit Decision Details Request" doc:id="6e756772-a0ea-4bc4-814d-114ba15f8fcd" config-ref="http-salesforce-sapi-config" path="${sf.sapi.creditDecision.path}">
+			<http:headers ><![CDATA[#[output application/java 
+--- 
+{
+	"x-country-code": vars.originalPayload.data.payload.EU_Market__c default "",
+	"x-correlation-id": vars.correlationId default ""	
+}]]]></http:headers>
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	applicationId : vars.applicationFormId
+}]]]></http:uri-params>
+		</http:request>
+		<http:request method="${miles-sapi.credit.method}" doc:name="Miles SAPI Request" doc:id="38cae29f-e109-4864-968d-c4c5efd5ba73" config-ref="HTTP_Miles_Sapi_Request_configuration" path="${miles-sapi.credit.path}">
+			<http:body ><![CDATA[#[%dw 2.0
+output application/json
+---
+payload]]]></http:body>
+			<http:headers ><![CDATA[#[output application/java 
+--- 
+{
+	"x-country-code": vars.originalPayload.data.payload.EU_Market__c default "",
+	"x-correlation-id": vars.correlationId default ""	
+}]]]></http:headers>
+			<http:uri-params ><![CDATA[#[{
+	applicationId: payload.externalId
+}]]]></http:uri-params>
+		</http:request>
+		<anypoint-mq:ack doc:name="Ack" doc:id="7bec437b-a773-4c02-9dd4-2e3c2eb3e7a8" config-ref="anypoint-mq-config" ackToken="#[vars.ackId]" />
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="39075a93-1c47-4099-a49f-b6f8471ea08c" type="HTTP:BAD_GATEWAY, HTTP:CONNECTIVITY, HTTP:INTERNAL_SERVER_ERROR, HTTP:RETRY_EXHAUSTED, HTTP:SERVICE_UNAVAILABLE, HTTP:TIMEOUT, HTTP:TOO_MANY_REQUESTS, HTTP:GATEWAY_TIMEOUT">
+				<logger level="INFO" doc:name="Logger" doc:id="c2161fdf-13d3-412b-998d-2d2b8b0bf949" message="Error message: #[error.errorMessage.payload] ---------------- retrying via queue"/>
+				<anypoint-mq:nack doc:name="Nack" doc:id="daaa79a1-298f-4574-a2c3-b9b2f7c639d8" config-ref="anypoint-mq-config" ackToken="#[vars.ackId]"/>
+			</on-error-continue>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="4c8ff68b-d5e3-48d9-b4dd-2bdbe0811a0f" type="ANY">
+				<logger level="INFO" doc:name="Logger" doc:id="d7639b89-a384-4e3c-8dbc-1c10120f8471" message="Error message: #[error.errorMessage.payload] ---------------- retrying via queue" />
+				<flow-ref doc:name="miles-custom-sf-error-object-ipe" doc:id="0273daa0-8d65-431a-a7c6-156e0fdc8619" name="miles-credit-decision-custom-sf-error-object-ipe" />
+				<anypoint-mq:ack doc:name="Ack" doc:id="b59620b0-0608-4d87-9557-fbaa610a090f" config-ref="anypoint-mq-config" ackToken="#[vars.ackId]"/>
+			</on-error-continue>
+		</error-handler>
+	
+</flow>
+	<sub-flow name="miles-credit-decision-custom-sf-error-object-ipe" doc:id="b04119df-8522-4dda-9eff-275eeb6d4336" >
+		<try doc:name="Try" doc:id="58976cb4-6b46-4b10-819c-c76ae949e33c" >
+			<ee:transform doc:name="payload to update SF IPE status" doc:id="9bca9243-ba5e-41bc-a134-39bfb8608ef6">
+							<ee:message>
+								<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"uniqueId": vars.originalPayload.data.payload.EU_IntegrationLogId__c,
+	"errorStatus": "Failed",
+	"errorCode":  error.errorMessage.payload.error.errorCode as String default error.errorType.identifier,
+	"errorMessage": (error.errorMessage.payload.error.errorMessage default "")
+					++ " : " ++ (error.errorMessage.payload.error.errorDescription default ""),
+	"errorDateTime": vars.originalPayload.data.payload.CreatedDate
+}]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+			<http:request method="POST" doc:name="update SF IPE status with error" doc:id="fa9cd6d4-f923-4941-807f-e3ca916aa0d4" config-ref="http-salesforce-common-sapi-config" path="${common-sf.sapi.businessExceptions.path}">
+				<http:headers><![CDATA[#[output application/java 
+--- 
+{
+	"x-country-code": vars.originalPayload.data.payload.EU_Market__c default "",
+	"x-correlation-id": vars.correlationId default ""	
+}]]]></http:headers>
+
+						</http:request>
+			<logger level="INFO" doc:name="Ipe Logger" doc:id="05d1e90f-6b64-4d9a-8259-0dbfd09be5d3" message="IPE Object Pushed to SF " />
+			<error-handler >
+				<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="3f3c26e3-ab0f-414c-9aad-e8489cffe272" >
+					<anypoint-mq:publish doc:name="Publish to AML DLQ" doc:id="04074e9d-04b3-40b6-bcff-584e0486d618" config-ref="anypoint-mq-config" destination="${mq.amlDecisionOutbound.dlq}">
+						<anypoint-mq:body><![CDATA[#[vars.originalPayload]]]></anypoint-mq:body>
+						<anypoint-mq:properties ><![CDATA[#[output application/java
+---
+{
+	"correlationId" : vars.correlationId default "no correlationId"	
+}]]]></anypoint-mq:properties>
+					</anypoint-mq:publish>
+					<anypoint-mq:ack doc:name="Acknowledge MQ" doc:id="3dcc46f7-e70e-4b9b-b137-9d662dc0cc29" config-ref="anypoint-mq-config" ackToken="#[vars.ackId]" />
+				</on-error-propagate>
+			</error-handler>
+		</try>
+	</sub-flow>
+</mule>

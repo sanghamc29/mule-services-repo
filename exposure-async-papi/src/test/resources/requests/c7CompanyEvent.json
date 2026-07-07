@@ -1,0 +1,16 @@
+{
+  "data": {
+    "schema": "yYH0eNj5CsrtnrqErFnBRw",
+    "payload": {
+      "EU_CurrencyIsoCode__c": null,
+      "EU_EventType__c": "C7",
+      "EU_Market__c": "IT",
+      "CreatedById": "00576000002AfoaAAC",
+      "EU_ApplicationFormId__c": "13X76000000L932EAC",
+      "EU_UniqueId__c": "a3Z76000000LxrOEAS",
+      "EU_IntegrationLogId__c": null,
+      "CreatedDate": "2025-02-05T10:28:44.026Z",
+      "EU_Message__c": "13y9z000000NLIHUA4"
+    }
+  }
+}

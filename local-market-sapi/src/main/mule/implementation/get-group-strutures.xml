@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<sub-flow name="get-group-struture-sub-flow" doc:id="51e395b7-7563-4960-b602-4fca91147551" >
+		<ee:transform doc:name="build C3 Request" doc:id="777aa686-2408-4fa7-829b-934ee73a72ef" >
+			<ee:message >
+				<ee:set-payload resource="dataweaves/build-group-structure-request.dwl" />
+			</ee:message>
+		</ee:transform>
+		<logger level="DEBUG" doc:name="Log Request" doc:id="4c847be8-51e2-43f3-94c8-ec5dc7895923" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.correlationId ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode ++ &#10;&quot;Get Group Structure Start: &quot; ++ now()]" category="com.mercedes-benz.com.local-market-sapi"/>
+		<http:request method="POST" doc:name="Group Structure Request" doc:id="4b195087-6b67-4062-9a8d-17391668abd4" config-ref="HTTP_LoMapi_Request_configuration" path="${lomapi.groupStructure.path}">
+			<http:uri-params ><![CDATA[#[{
+	countryCode: attributes.headers.'x-country-code'
+}]]]></http:uri-params>
+		</http:request>
+		<logger level="DEBUG" doc:name="Log Request" doc:id="1be608a4-117d-4956-b4e9-e8efd8976910" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.correlationId ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode ++ &#10;&quot;Get Group Structure End: &quot; ++ now()]" category="com.mercedes-benz.com.local-market-sapi"/>
+	</sub-flow>
+</mule>

@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+    <sub-flow name="c5-fraud-check-orchestration-flow" doc:id="ac001f53-d8a0-46cf-84ba-c3a9f40cf76f" >
+        <flow-ref doc:name="Ref to c5-fraud-check-get-applicant-details" doc:id="94be20e8-c1b2-46b5-9265-32688b598dd8" name="c5-fraud-check-get-applicant-details"/>
+        <flow-ref doc:name="Ref to c5-fraud-check-lomapi-request-flow" doc:id="2db9cbc8-0ea9-49a6-af79-b1e5569c4d0e" name="c5-fraud-check-lomapi-request-flow" />
+        <flow-ref doc:name="Ref to c5-fraud-check-sf-applicants-flag-update" doc:id="613e60dd-eaf8-44c1-aada-dde92174b52b" name="c5-fraud-check-sf-applicants-flag-update" />
+        <flow-ref doc:name="Ref to c5-get-sf-documents-for-applicants" doc:id="a359e6db-6fbf-4554-9267-a7393871ccec" name="c5-get-sf-documents-for-applicants"/>
+        <flow-ref doc:name="Ref to c5-sf-document-update" doc:id="27e6f774-ff93-4129-88f5-31b63d53e859" name="c5-sf-document-update" />
+        <choice doc:name="failedRecord?" doc:id="07bc6a0f-bd1e-450d-a587-9ba342924a43" >
+            <when expression="#[vars.fraudCheckData.isSuccessful contains false]">
+                <logger level="ERROR" doc:name="ERROR:Error Log" doc:id="a1e8d6b5-7c1a-48c9-8ff3-60361b13c9e0" message="C5 Partially Failed for applicationId: #[vars.applicationFormId]."/>
+                <set-variable value="#[true]" doc:name="Set fraudCheckFailed" doc:id="5830c720-2816-4b2a-8b45-a1d80c168da0" variableName="fraudCheckFailed" />
+                <flow-ref doc:name="Ref to c5-fraud-check-sf-applicants-flag-update" doc:id="43ea19d2-44da-4102-a91c-aaa06953d0f3" name="c5-fraud-check-sf-applicants-flag-update" />
+                <flow-ref doc:name="Ref to custom-sf-error-object-ipe" doc:id="90613493-da9b-47d2-a7d8-f2896d2de175" name="custom-sf-error-object-ipe"/>
+            </when>
+        </choice>
+    </sub-flow>
+    <sub-flow name="c5-fraud-check-get-applicant-details" doc:id="03c896ae-20e3-433c-922b-310a8d4ec2d5">
+        <ee:transform doc:name="Prepare HTTP Req Mapping SF Applicant Details" doc:id="86b6b205-8fbe-49b4-a750-d5f9a64bdce5" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message />
+            <ee:variables>
+                <ee:set-variable variableName="httpOperation"><![CDATA[%dw 2.0
+output application/java
+---
+"placeholder"]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <flow-ref doc:name="sf-accounts-sapi-call-subflow" doc:id="dbe9e13e-d2ae-427a-8a21-720c92dff48b" name="sf-accounts-sapi-call-subflow" />
+        <ee:transform doc:name="fraudCheckData" doc:id="72b39888-af02-4938-b7f3-14b7df17c9b3" >
+            <ee:message >
+            </ee:message>
+            <ee:variables >
+                <ee:set-variable variableName="fraudCheckData"><![CDATA[%dw 2.0
+output application/java
+---
+"placeholder"]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+    </sub-flow>
+    <sub-flow name="c5-fraud-check-lomapi-request-flow" doc:id="c6713f7c-98aa-459e-aa15-5298d0236bf0" >
+        <choice doc:name="foundApplicant?" doc:id="2cd7d8ae-a6ef-4a0c-917a-88de1f1f52cc">
+            <when expression="#[not isEmpty(payload)]">
+                <try doc:name="Try" doc:id="4845a35a-19ac-45c1-8964-aad1a018fb07">
+            <parallel-foreach doc:name="Parallel For Each" doc:id="612dc432-749e-4568-98a3-e004f6ba4209">
+                        <ee:transform doc:name="Prepare HTTP Req Mapping Lomapi Sapi" doc:id="c9d18699-13e0-4239-95a4-3fe0f2939b77" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json skipNullOn="everywhere"
+---
+payload]]></ee:set-payload>
+                </ee:message>
+                <ee:variables>
+                        <ee:set-variable variableName="httpOperation"><![CDATA[%dw 2.0
+output application/java
+---
+"placeholder"]]></ee:set-variable>
+                </ee:variables>
+            </ee:transform>
+                        <flow-ref doc:name="local-market-sapi-call-subflow" doc:id="f8088aef-bf3f-4783-bb2c-534b97a48a40" name="local-market-sapi-call-subflow" />
+        </parallel-foreach>
+                    <ee:transform doc:name="var fraudCheckData" doc:id="f687c91c-8926-4647-a197-2701a84e13bb">
+            <ee:message>
+            </ee:message>
+            <ee:variables>
+                    <ee:set-variable variableName="fraudCheckData"><![CDATA[%dw 2.0
+output application/java
+---
+"placeholder"]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+            <error-handler>
+                <on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="78f97f55-e335-4f57-848e-23f407700262" when='#[(error.errorMessage.payload.failures..errorType.identifier dw::core::Arrays::every (["BAD_REQUEST","NOT_FOUND"] contains $)) and error.errorMessage.payload.failures..errorType.identifier != null ]'>
+                    <ee:transform doc:name="var fraudCheckData" doc:id="f51f6f18-95ba-4dd7-8cb7-835f046b6ff8">
+                        <ee:message>
+                        </ee:message>
+                        <ee:variables>
+                            <ee:set-variable variableName="fraudCheckData"><![CDATA[%dw 2.0
+output application/java
+---
+"placeholder"]]></ee:set-variable>
+                        </ee:variables>
+                    </ee:transform>
+                </on-error-continue>
+            </error-handler>
+        </try>
+            </when>
+        </choice>
+    </sub-flow>
+    <sub-flow name="c5-fraud-check-sf-applicants-flag-update" doc:id="370403cf-3bb1-4ede-9153-55c041da2782">
+        <ee:transform doc:name="SF account httpRequest and payload" doc:id="d8aaee05-7b84-43cb-8e3c-41e3ca8686ea">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+src/main/mule/implementation/c5-fraud-check.xml]]></ee:set-payload>
+            </ee:message>
+            <ee:variables>
+                <ee:set-variable variableName="httpOperation"><![CDATA[%dw 2.0
+output application/java
+---
+"placeholder"]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <choice doc:name="Flags to Update?" doc:id="ad846e3a-2d70-4ec9-a88d-3fec37176715" >
+            <when expression="#[not isEmpty(payload)]">
+                <flow-ref doc:name="sf-accounts-sapi-call-subflow" doc:id="4db87c53-e886-4906-aea2-1ca6f349f476" name="sf-accounts-sapi-call-subflow" />
+                <ee:transform doc:name="update var fraudCheckData" doc:id="9e636a58-af68-4260-9a26-e97f996f2e84">
+            <ee:message>
+            </ee:message>
+            <ee:variables>
+                <ee:set-variable variableName="fraudCheckData"><![CDATA[%dw 2.0
+output application/java
+---
+"placeholder"]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+            </when>
+        </choice>
+    </sub-flow>
+    <sub-flow name="c5-get-sf-documents-for-applicants" doc:id="327df38e-ad8c-4185-83da-77d91b3cf5ea">
+        <choice doc:name="Documents to fetch?" doc:id="f4583ca5-1cb1-4925-ac1e-01ad2d091071" >
+            <when expression="#[(vars.fraudCheckData filter not isEmpty($.document)).isSuccessful default [] contains true]">
+                <ee:transform doc:name="get documents httpRequest and payload" doc:id="946ac92e-f420-4d2a-8aa6-885183d02f41">
+            <ee:message>
+            </ee:message>
+            <ee:variables>
+                <ee:set-variable variableName="httpOperation"><![CDATA[%dw 2.0
+output application/java
+---
+"placeholder"]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+                <flow-ref doc:name="sf-commons-sapi-call-subflow" doc:id="2c623d57-fde6-4990-8b55-ba703d269f28" name="sf-commons-sapi-call-subflow" target="getDocumentResponse" />
+                <ee:transform doc:name="extract Not_found records" doc:id="aee48abf-c813-4c70-a35e-b38d04a28c1a">
+            <ee:message>
+            </ee:message>
+            <ee:variables>
+                <ee:set-variable variableName="fraudCheckData"><![CDATA[%dw 2.0
+output application/java
+---
+"placeholder"]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+            </when>
+        </choice>
+    </sub-flow>
+    <sub-flow name="c5-sf-document-update" doc:id="47144a50-6d0c-412a-bf1c-de9739472690" >
+        <choice doc:name="Documents to Update?" doc:id="bd897078-d59c-4c66-acd7-f42b80418dd7" >
+            <when expression="#[vars.fraudCheckData.isSuccessful default [] contains true]">
+                <ee:transform doc:name="SF document update httpRequest and payload" doc:id="0a5e8c77-42b7-4671-bdcf-c805a99df5e6">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+src/main/mule/implementation/c5-fraud-check.xml]]></ee:set-payload>
+            </ee:message>
+            <ee:variables>
+                <ee:set-variable variableName="httpOperation"><![CDATA[%dw 2.0
+output application/java
+---
+"placeholder"]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+                <flow-ref doc:name="sf-commons-sapi-call-subflow" doc:id="99e2bf37-739f-4ad6-9a5c-92d97155c8cf" name="sf-commons-sapi-call-subflow" target="docUploadResponse" />
+                <ee:transform doc:name="update var fraudCheckData" doc:id="708b3c30-da1f-4c3f-af9d-e90d870b21ac">
+            <ee:message>
+            </ee:message>
+            <ee:variables>
+                <ee:set-variable variableName="fraudCheckData"><![CDATA[%dw 2.0
+output application/java
+---
+"placeholder"]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+            </when>
+        </choice>
+    </sub-flow>
+</mule>

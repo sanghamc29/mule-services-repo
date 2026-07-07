@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:anypoint-mq="http://www.mulesoft.org/schema/mule/anypoint-mq" xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties" xmlns:vm="http://www.mulesoft.org/schema/mule/vm" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation=" http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd  http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd http://www.mulesoft.org/schema/mule/anypoint-mq http://www.mulesoft.org/schema/mule/anypoint-mq/current/mule-anypoint-mq.xsd">
+    <configuration-properties doc:name="Configuration properties" doc:id="0656042c-f751-474a-90fb-aaec39c07141" file="default-properties.yaml" />
+    <http:request-config name="http-salesforce-sapi-config" doc:name="HTTP Request configuration" doc:id="c15cd8da-b1b8-4a38-a9e6-679ab0474a85" basePath="${sf.sapi.basePath}" responseTimeout="${sf.sapi.response.timeout}">
+        <http:request-connection host="${sf.sapi.host}" port="${sf.sapi.port}" protocol="${sf.sapi.protocol}" />
+        <http:default-headers>
+            <http:default-header key="x-client-id" value="${client.id}" />
+            <http:default-header key="x-client-secret" value="${secure::client.secret}" />
+        </http:default-headers>
+    </http:request-config>
+    <http:request-config name="http-mba-sapi-config" doc:name="HTTP Request configuration" doc:id="c0757fde-45f9-4cc3-9a4a-56f12f41297d" basePath="${mba.sapi.basePath}" responseTimeout="${mba.sapi.response.timeout}">
+        <http:request-connection host="${mba.sapi.host}" port="${mba.sapi.port}" protocol="${mba.sapi.protocol}" />
+        <http:default-headers>
+            <http:default-header key="x-client-id" value="${client.id}" />
+            <http:default-header key="x-client-secret" value="${secure::client.secret}" />
+        </http:default-headers>
+    </http:request-config>
+    <http:request-config name="http-vip-sapi-config" doc:name="HTTP Request configuration" doc:id="41969dae-51cc-4d39-8986-b4ffe4c39f7d" basePath="${vip.sapi.basePath}" responseTimeout="${vip.sapi.response.timeout}">
+        <http:request-connection host="${vip.sapi.host}" port="${vip.sapi.port}" protocol="${vip.sapi.protocol}" />
+        <http:default-headers>
+            <http:default-header key="x-client-id" value="${client.id}" />
+            <http:default-header key="x-client-secret" value="${secure::client.secret}" />
+        </http:default-headers>
+    </http:request-config>
+    <http:request-config name="http-credit-sapi-config" doc:name="HTTP Request configuration" doc:id="7bf347a2-8489-430c-9ee5-64ea544e5ba4" basePath="${credit.sapi.basePath}" responseTimeout="${credit.sapi.response.timeout}">
+        <http:request-connection host="${credit.sapi.host}" port="${credit.sapi.port}" protocol="${credit.sapi.protocol}" />
+        <http:default-headers>
+            <http:default-header key="x-client-id" value="${client.id}" />
+            <http:default-header key="x-client-secret" value="${secure::client.secret}" />
+        </http:default-headers>
+    </http:request-config>
+    <secure-properties:config name="secure-properties-config" doc:name="Secure Properties Config" doc:id="f62d15a7-3278-4610-b9d5-6e360a4adad0" file="secure-properties.yaml" key="${encryption.key}">
+        <secure-properties:encrypt algorithm="Blowfish" />
+    </secure-properties:config>
+    <salesforce:sfdc-config name="salesforce-config" doc:name="Salesforce Config" doc:id="5ad66607-c0a1-457b-87ee-b9119ba29898">
+        <salesforce:jwt-connection consumerKey="${secure::sf.consumerKey}" keyStore="${sf.keystore}" storePassword="${secure::sf.storePass}" certificateAlias="${sf.certAlias}" principal="${sf.principal}" tokenEndpoint="${sf.tokenEndpoint}" audienceUrl="${sf.aud}" />
+    </salesforce:sfdc-config>
+    <http:request-config name="http-csl-sapi-config" doc:name="HTTP Request configuration" doc:id="b1b56806-ac66-4791-a74e-2eec5500f6f9" basePath="${csl.sapi.basePath}" responseTimeout="${csl.sapi.response.timeout}">
+        <http:request-connection protocol="${csl.sapi.protocol}" host="${csl.sapi.host}" port="${csl.sapi.port}" />
+        <http:default-headers>
+            <http:default-header key="x-client-id" value="${client.id}" />
+            <http:default-header key="x-client-secret" value="${secure::client.secret}" />
+        </http:default-headers>
+    </http:request-config>
+    <http:request-config name="http-vehicle-pricing-sapi-configuration" doc:name="HTTP Request configuration" doc:id="703042d4-4297-4822-9c4d-05805dbab22a" basePath="${vehicle-pricing.sapi.basePath}" responseTimeout="${vehicle-pricing.sapi.response.timeout}">
+        <http:request-connection protocol="${vehicle-pricing.sapi.protocol}" host="${vehicle-pricing.sapi.host}" port="${vehicle-pricing.sapi.port}" />
+        <http:default-headers>
+            <http:default-header key="x-client-id" value="${client.id}" />
+            <http:default-header key="x-client-secret" value="${secure::client.secret}" />
+        </http:default-headers>
+    </http:request-config>
+    <http:request-config name="http-Alfa-sapi-configuration" doc:name="HTTP Request configuration" doc:id="cbcb4a54-86c2-408f-9fd5-802362d1af3e" basePath="${alfa.sapi.basePath}" responseTimeout="${alfa.sapi.response.timeout}">
+        <http:request-connection protocol="${alfa.sapi.protocol}" host="${alfa.sapi.host}" port="${alfa.sapi.port}" />
+        <http:default-headers>
+            <http:default-header key="x-client-id" value="${client.id}" />
+            <http:default-header key="x-client-secret" value="${secure::client.secret}" />
+        </http:default-headers>
+    </http:request-config>
+    <http:request-config name="http-verify-aml-sapi-configuration" doc:name="HTTP Request configuration" doc:id="38eabe31-96d5-4ccb-bcc9-bbba9a01c08e" basePath="${verify-aml.sapi.basePath}" responseTimeout="${verify-aml.sapi.response.timeout}">
+        <http:request-connection protocol="${verify-aml.sapi.protocol}" host="${verify-aml.sapi.host}" port="${verify-aml.sapi.port}" />
+        <http:default-headers>
+            <http:default-header key="x-client-id" value="${client.id}" />
+            <http:default-header key="x-client-secret" value="${secure::client.secret}" />
+        </http:default-headers>
+    </http:request-config>
+    <http:request-config name="http-salesforce-common-sapi-config" doc:name="HTTP Request configuration" doc:id="fdc26d67-5841-4715-9947-3fbe4000f3d5" basePath="${common-sf.sapi.basePath}" responseTimeout="${common-sf.sapi.response.timeout}">
+        <http:request-connection host="${common-sf.sapi.host}" port="${common-sf.sapi.port}" protocol="${common-sf.sapi.protocol}" />
+        <http:default-headers>
+            <http:default-header key="x-client-id" value="${client.id}" />
+            <http:default-header key="x-client-secret" value="${secure::client.secret}" />
+        </http:default-headers>
+    </http:request-config>
+    <anypoint-mq:config name="anypoint-mq-config" doc:name="Anypoint MQ Config" doc:id="14ecbef5-6cbc-4a57-b8b6-d679c1a74c52">
+        <anypoint-mq:connection url="${mq.url}" clientId="${mq.clientId}" clientSecret="${secure::mq.clientSecret}" />
+    </anypoint-mq:config>
+    <anypoint-mq:circuit-breaker name="circuit-breaker" tripTimeout="10" doc:name="Circuit breaker" doc:id="031ee5cf-3524-4e66-97bb-f5c194c7fc6c" errorsThreshold="2" tripTimeoutUnit="SECONDS" onErrorTypes="HTTP:CONNECTIVITY, HTTP:SERVICE_UNAVAILABLE, HTTP:TIMEOUT, HTTP:TOO_MANY_REQUESTS" />
+	<http:request-config name="HTTP_Miles_Sapi_Request_configuration" doc:name="HTTP Request configuration" doc:id="0800cb05-d55a-42b5-be88-6f342aded7ad" basePath="${miles-sapi.basePath}" responseTimeout="${miles-sapi.response.timeout}">
+        <http:request-connection protocol="${miles-sapi.protocol}" host="${miles-sapi.host}" port="${miles-sapi.port}" />
+        <http:default-headers>
+            <http:default-header key="x-client-id" value="${client.id}" />
+            <http:default-header key="x-client-secret" value="${secure::client.secret}" />
+        </http:default-headers>
+    </http:request-config>
+</mule>

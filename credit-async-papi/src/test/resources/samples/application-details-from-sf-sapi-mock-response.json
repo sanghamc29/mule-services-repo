@@ -1,0 +1,89 @@
+{
+  "applicationID": "13X760000008RPwEAM",
+  "country": "PT",
+  "dealerNumberNA": "GC0008803",
+  "mbadvantageSourceID": "16e760000000069AAA",
+  "disableAutomaticCreditApproval": false,
+  "legalEntity": "MBFS",
+  "applicationVehicle": {
+    "vehicleMake": "Mercedes-Benz",
+    "vehicleCondition": "00001",
+    "vin": "MH481234n",
+    "msrpMmr": 90085,
+    "vehicleCategory": "PC",
+    "odometerMileage": 0,
+    "vehicleModel": "Mercedes-AMG A 35 4MATIC Limousine",
+    "firstRegistrationDate": "2024-11-14",
+    "listPriceExclVAT": 90085
+  },
+  "applicationParties": [
+    {
+      "currentCity": "Lisbon",
+      "currentStreetAddress": "R. Artilharia 1 nº112",
+      "countryOfBirth": "PT",
+      "currentZip": "1070-015",
+      "applicationPartyType": "Business",
+      "applicationPartyId": "13Y760000004G0tEAE",
+      "firstName": "test123",
+      "businessTaxID": "500049424",
+      "businessName": "Cloud Knicks",
+      "dateOfBirth": "1972-04-04",
+      "monthlySalary": 12344,
+      "employmentStatus": "Employed",
+      "occupation": "Science Professionals",
+      "lastName": "Ltest123",
+      "maritalStatus": "Single",
+      "secondLastName": "Mtest123",
+      "individualTaxID": "500049424",
+      "nationality": "PT",
+      "role": "MainApplicant",
+      "partnerName": "Cloud Knicks",
+      "formationDate": "2012-01-01",
+      "localIndustryCode": "66300",
+      "financialExpenseAmount": 1233,
+      "yearsAtBusiness": 2012,
+      "monthsAtBusiness": 101,
+      "totalBookValueOfActiveContracts": 20000,
+      "numberOfYearsCustomer": 2,
+      "numberOfActiveContracts": 1,
+      "numberOfDependents": 3,
+      "typeOfBusiness": "Retail Small Business",
+      "domesticIncomeOnly": true,
+      "debtServiceToIncome": 0,
+      "groupExposureApproved": 30000,
+      "groupExposureInApproval": 50000,
+      "customerLegacyData": {
+        "paymentBehaviour": "ok",
+        "numberOfApplicationsInApproval": 2,
+        "deniedContracts": 1,
+        "deniedContractsDate": "2017-11-09",
+        "deniedContractsFlag": false,
+        "exposureActive": 20000,
+        "exposureApproved": 30000,
+        "exposureOutstanding": 0,
+        "exposureTotal": 100000,
+        "restructuredContracts": 1,
+        "restructuredContractsArray": [
+          {
+            "code": "COV",
+            "date": "2021-08-20"
+          }
+        ],
+        "unpaidInstallmentsFlag": false,
+        "legalProcessFlag": false,
+        "newCustomerFlag": false
+      }
+    }
+  ],
+  "applicationProductOffer": {
+    "amountFinanced": 103873.5,
+    "capitalReduction": 9840,
+    "estimatedPayment": 101699.33,
+    "vehiclePrice": 779415.33,
+    "term": 36,
+    "residualAmount": 1008.6
+  },
+  "applicationProduct": {
+    "financeType": "5TOGO/5050"
+  }
+}

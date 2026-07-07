@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<sub-flow name="post-agencyFeedback-sub-flow" doc:id="344992c3-8962-4bfd-9aa5-1de7bbee9a98" >
+		<flow-ref doc:name="get enums" doc:id="cdc4fc11-2c03-4383-aced-f04104e62c70" name="retrieve-translation-values" target="enums" />
+		<ee:transform doc:name="Prepare Request" doc:id="30f13614-c377-4dcc-84fa-fc2111e7a762" >
+			<ee:message >
+				<ee:set-payload resource="dataweaves/build-c7-request.dwl" />
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="orgPayload" ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+				<ee:set-variable resource="dataweaves/build-agency-feedback-http-request.dwl" variableName="httpOperation" />
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="Ref lomapi-api-impl" doc:id="1eb6f4e1-8f47-417f-a595-0d032886069b" name="lomapi-api-impl" />
+		<ee:transform doc:name="Prepare Response" doc:id="4bbefcd0-b9d2-449b-8954-e3a9f6ce15fc" >
+			<ee:message >
+				<ee:set-payload resource="dataweaves/build-c7-response.dwl" />
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+</mule>

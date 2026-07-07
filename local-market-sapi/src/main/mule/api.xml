@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:java="http://www.mulesoft.org/schema/mule/java" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/java http://www.mulesoft.org/schema/mule/java/current/mule-java.xsd">
+    <flow name="api-main" doc:id="16b579c6-790a-4da0-bfb1-6836266c42c1">
+        <http:listener config-ref="HTTP_Listener_config" path="${api.http.listener.path}">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <ee:transform doc:name="x-correlation-id" doc:id="ece171ed-e1f2-4934-8ac2-16ab7ef64b2c">
+            <ee:message />
+            <ee:variables>
+                <ee:set-variable variableName="correlationId"><![CDATA[attributes.headers.'x-correlation-id']]></ee:set-variable>
+                <ee:set-variable variableName="countryCode"><![CDATA[attributes.headers.'x-country-code']]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <logger level="INFO" doc:name="Log Request" doc:id="c7ceeacc-f798-4464-9799-b76bcbc6077d" message="#[output application/java&#xA;---&#xA;&quot;\'Transaction\': &quot; ++ correlationId ++ &#xA;&quot; \'HTTP Method\': &quot; ++ attributes.method ++ &#xA;&quot; \'URI\': &quot; ++ attributes.requestUri ++ &#xA;(if(p('log.payloadFlag') == 'true') (&quot;\'Payload\': &quot; ++ write(payload,&quot;application/json&quot;)) else &quot;&quot;) ++&#xA;&#xA;// Log Country Code if exists&#xA;(if(!isEmpty(attributes.headers.'x-country-code')) (&quot;\'CountryCode\': &quot; ++ attributes.headers.'x-country-code') else &quot;&quot;)]" />
+        <apikit:router config-ref="api-config" />
+        <logger level="INFO" doc:name="Log Response" doc:id="f7201cfd-097e-436f-a7a1-cfd1616e9003" message="#[output application/java&#xA;---&#xA;&quot;\'Transaction\': &quot; ++ correlationId ++ &quot; \'Response HTTP Status\': &quot; ++ vars.httpStatus default &quot;&quot; ++ if(p('log.payloadFlag') == 'true') (&quot;\'Payload\': &quot; ++ write(payload,&quot;application/json&quot;)) else &quot;&quot;]" />
+        <error-handler ref="global-error-handler" />
+    </flow>
+    <http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="8288702f-f4fe-40bb-ac7f-4ab7365378d0">
+        <http:listener-connection port="${http.port}" host="${api.http.listener.host}" />
+    </http:listener-config>
+    <apikit:config name="api-config" api="resource::c83a2291-ce49-4c83-a453-39a63be34c6c:local-market-sapi:1.0.45:raml:zip:api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" queryParamsStrictValidation="true" />
+    <flow name="get:\customers\affordabilityCalculations\company:api-config">
+        <flow-ref doc:name="get-company-affordability-calculations-sub-flow" doc:id="d2277cc3-d895-46bf-8b41-7c9626056373" name="get-company-affordability-calculations-sub-flow" />
+    </flow>
+    <flow name="get:\customers:api-config">
+        <ee:transform doc:name="Capture Request Params" doc:id="618b8952-5a9a-4af8-8841-0273a9b0e484">
+            <ee:message />
+            <ee:variables>
+                <ee:set-variable variableName="countryCode"><![CDATA[attributes.headers.'x-country-code']]></ee:set-variable>
+                <ee:set-variable variableName="customerIds"><![CDATA[attributes.queryParams.customerId]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <flow-ref doc:name="get-company-by-multi-customer-id-sub-flow" doc:id="dc562786-6090-4663-9522-52351ec5b959" name="get-company-by-multi-customer-id-sub-flow" />
+    </flow>
+    <flow name="post:\customers\affordabilityCalculations\person:application\json:api-config">
+        <flow-ref doc:name="get-person-affordability-calculations-sub-flow" doc:id="ac9b684e-6de2-4b19-be3b-962fa3eba70e" name="get-person-affordability-calculations-sub-flow" />
+    </flow>
+    <flow name="post:\customers\affiliatedCompanies:application\json:api-config">
+        <flow-ref doc:name="get-group-struture-sub-flow" doc:id="8047eec9-9e21-444d-bba6-5053cb9783ae" name="get-group-struture-sub-flow" />
+    </flow>
+    <flow name="post:\customers\fraudDataCheck\person:application\json:api-config">
+        <flow-ref doc:name="Fpost-person-fraud-check-sub-flow" doc:id="bc7357e3-3e58-4cc8-bbe3-8aa09f3654c2" name="post-person-fraud-check-sub-flow" />
+    </flow>
+    <flow name="post:\customers\agencyData:application\json:api-config" doc:id="db0a4cfb-881d-40a5-b029-c64b791692a7">
+        <flow-ref doc:name="Ref post-agencyData-sub-flow" doc:id="27c88874-026d-419a-abdc-b2e4c3a78992" name="post-agencyData-sub-flow" />
+    </flow>
+    <flow name="post:\customers\agencyFeedback:application\json:api-config">
+		<flow-ref doc:name="Ref post-agencyFeedback-sub-flow" doc:id="3cc9ab45-30b8-4714-8889-732c0b33a72d" name="post-agencyFeedback-sub-flow"/>
+    </flow>
+</mule>

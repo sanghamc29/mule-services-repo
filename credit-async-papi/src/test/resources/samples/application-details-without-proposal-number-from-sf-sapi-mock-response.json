@@ -1,0 +1,40 @@
+{
+  "coApplicantIndicator": true,
+  "brokerFlag": false,
+  "dealerComments": "Test For Sales force again on 8123 for cobuyer.",
+  "salesPersonFirstName": "sit",
+  "applicationType": "Individual",
+  "dealerUserFirstName": "KKAMLES",
+  "dealerNumberNA": "70000",
+  "sourceNumber": "12345",
+  "country": "US",
+  "mbadvantageSourceID": "1372",
+  "salesPersonLastName": "test",
+  "dealerUserLastName": "KKAMLES",
+  "dealerUpdateNumber": 0,
+  "applicationID": "2308021602190",
+  "tradeInVehicleIndicator": false,
+  "applicationParties": [
+    {
+      "applicationPartyType": "I",
+      "applicationPartyRole": "GU",
+      "bankruptcyIndicator": false,
+      "repossessionIndicator": false,
+      "monthlyMortgageRent": 0,
+      "mortgageBalance": 0,
+      "mortgageValue": 0,
+      "otherIncome": 0,
+      "salary": 0.0
+    }
+  ],
+  "applicationProductOffer": {
+    
+  },
+  "applicationProduct": {
+    "financeType": "LSE",
+    "programID": "0"
+  },
+  "applicationVehicle": {
+    
+  }
+}

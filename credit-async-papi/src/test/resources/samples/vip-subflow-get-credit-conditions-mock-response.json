@@ -1,0 +1,21 @@
+{
+  "programID": 6332,
+  "programCode": "N56",
+  "programName": "NEW-LSE Std New Lease 2023",
+  "term": 36,
+  "rateUnit": "M",
+  "rates": {
+    "S": 0.00275,
+    "1": 0.00305,
+    "2": 0.0034,
+    "3": 0.0044,
+    "4": 0.00535
+  },
+  "residualUnit": "P",
+  "residuals": {
+    "10000": 3,
+    "12000": 2,
+    "15000": 0,
+    "20000": -5
+  }
+}

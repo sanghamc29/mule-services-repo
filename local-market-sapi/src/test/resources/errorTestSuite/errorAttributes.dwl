@@ -1,0 +1,33 @@
+{
+  "headers": {
+    "x-client-id": "sfsdsdv",
+    "x-client-secret": "dsadf",
+    "x-country-code": "pt",
+    "x-correlation-id": "21832a90-f2ea-4b78-800c-32f92cf39197",
+    "content-type": "application/json",
+    "user-agent": "PostmanRuntime/7.37.3",
+    "accept": "*/*",
+    "cache-control": "no-cache",
+    "postman-token": "06abb8cc-4da0-4b66-8d6b-93e109c07e22",
+    "host": "localhost:8081",
+    "accept-encoding": "gzip, deflate, br",
+    "connection": "keep-alive",
+    "content-length": "228"
+  },
+  "clientCertificate": null,
+  "method": "POST",
+  "scheme": "http",
+  "queryParams": {},
+  "requestUri": "/api/local-market-sapi/v1/groupStructure",
+  "queryString": "",
+  "version": "HTTP/1.1",
+  "maskedRequestPath": "/groupStructure",
+  "listenerPath": "/api/local-market-sapi/v1/*",
+  "localAddress": "/127.0.0.1:8081",
+  "relativePath": "/api/local-market-sapi/v1/groupStructure",
+  "uriParams": {},
+  "rawRequestUri": "/api/local-market-sapi/v1/groupStructure",
+  "rawRequestPath": "/api/local-market-sapi/v1/groupStructure",
+  "remoteAddress": "/127.0.0.1:63596",
+  "requestPath": "/api/local-market-sapi/v1/groupStructure"
+}

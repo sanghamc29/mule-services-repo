@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<sub-flow name="post-person-fraud-check-sub-flow" doc:id="adba8156-b49c-44aa-9728-b327f375cf70" >
+		<flow-ref doc:name="get enums" doc:id="01598bb6-e87b-4f64-9d3f-abafe5124fd6" name="retrieve-translation-values" target="enums"/>
+		<ee:transform doc:name="Build Person Fraud Check C5 Request" doc:id="23772da4-bf6d-4eb4-984c-50df908cb640" >
+			<ee:message >
+				<ee:set-payload resource="dataweaves/build-person-fraud-check-request.dwl" />
+			</ee:message>
+		</ee:transform>
+		<logger level="DEBUG" doc:name="Log Request" doc:id="09b11e6e-620a-42ee-9dda-5221a5c09c7d" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.correlationId ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode ++ &#10;&quot;Person Fraud Check C5 Start: &quot; ++ now()]" category="com.mercedes-benz.com.local-market-sapi" />
+		<http:request method="POST" doc:name="Person Fraud Check C5 Request" doc:id="6a07a831-e52d-4d00-83bb-21b2bed60474" config-ref="HTTP_LoMapi_Request_configuration" path="${lomapi.personFraudCheck.path}" >
+			<http:uri-params ><![CDATA[#[{
+	countryCode: attributes.headers.'x-country-code'
+}]]]></http:uri-params>
+		</http:request>
+		<logger level="DEBUG" doc:name="Log Response" doc:id="daff1a6f-1ac8-450e-91e4-a6d41894d4ee" message="#[output application/java&#10;---&#10;&quot;\'Transaction\': &quot; ++ vars.correlationId ++&#10;&quot;\'CountryCode\': &quot; ++ vars.countryCode ++ &#10;&quot;Person Fraud Check C5  End: &quot; ++ now()]" category="com.mercedes-benz.com.local-market-sapi" />
+		<ee:transform doc:name="Build Person Fraud Check C5 response" doc:id="c787cfd5-c42a-4a1f-a1c3-12c7b5ae686e" >
+			<ee:message >
+				<ee:set-payload resource="dataweaves/build-person-fraud-check-response.dwl" />
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+</mule>

@@ -1,0 +1,19 @@
+{
+  "cashFlow": "ok",
+  "cashFlowResult": "1234,99",
+  "goodCustomer": "true/ false",
+  "numberOfArrears": 0,
+  "paymentBehaviour": "string",
+  "numberOfYearsCustomer": 3,
+  "individualExposure": "72534,23",
+  "arrearsAmount": "734,45",
+  "activeContractsAmount": "44734,43",
+  "issuedContractsAmount": "74734,33",
+  "proposalsApprovedAmount": "54243,22",
+  "deniedContracts": 0,
+  "DSTI": "72534,23",
+  "deniedContractsDate": "20232-02-02",
+  "restructuredContracts": 1,
+  "restructuredContractsCode": "“MORATORIA”",
+  "restructuredContractsDate": "20232-02-02"
+}

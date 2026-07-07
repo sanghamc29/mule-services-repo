@@ -1,0 +1,51 @@
+[
+    {
+        "documentName": "ID Document",
+        "applicantId": "13Y9Z000000QQV7UAO",
+        "contentDocumentId": null,
+        "contentDocumentLinkId": null,
+        "documentCheckListItemId": "0dd9Z0000009Qw9QAE"
+    },
+    {
+        "documentName": "Brand POS",
+        "applicantId": "13Y9Z000000QQV7UAO",
+        "contentDocumentId": null,
+        "contentDocumentLinkId": null,
+        "documentCheckListItemId": "0dd9Z0000009QwAQAU"
+    },
+    {
+        "documentName": "Fiscal ID Card",
+        "applicantId": "13Y9Z000000QQV7UAO",
+        "contentDocumentId": null,
+        "contentDocumentLinkId": null,
+        "documentCheckListItemId": "0dd9Z0000009QwBQAU"
+    },
+    {
+        "documentName": "Salary slip",
+        "applicantId": "13Y9Z000000QQV7UAO",
+        "contentDocumentId": null,
+        "contentDocumentLinkId": null,
+        "documentCheckListItemId": "0dd9Z0000009QwCQAU"
+    },
+    {
+        "documentName": "Additional documents",
+        "applicantId": "13Y9Z000000QQV7UAO",
+        "contentDocumentId": null,
+        "contentDocumentLinkId": null,
+        "documentCheckListItemId": "0dd9Z0000009QwDQAU"
+    },
+    {
+        "documentName": "Vehicle registration certificate",
+        "applicantId": "13Y9Z000000QQV7UAO",
+        "contentDocumentId": null,
+        "contentDocumentLinkId": null,
+        "documentCheckListItemId": "0dd9Z0000009QwEQAU"
+    },
+    {
+        "documentName": "Experian Scipafi Document",
+        "applicantId": "13Y9Z000000QQV7UAO",
+        "contentDocumentId": null,
+        "contentDocumentLinkId": null,
+        "documentCheckListItemId": "0dd9Z0000009QwFQAU"
+    }
+]

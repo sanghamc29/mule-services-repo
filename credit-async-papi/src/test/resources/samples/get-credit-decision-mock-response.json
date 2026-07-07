@@ -1,0 +1,98 @@
+{
+  "scoringId": "7429e128-67a5-4ea8-9774-1571502007d4",
+  "creditDecisionCode": "R",
+  "creditDecision": "Refer",
+  "creditDecisonBusinessPolicyRules": [
+    {
+      "policyRuleId": 59,
+      "policyRuleLabel": "Proposals in approval",
+      "policyRuleText": "The applicant has applications in approval process.",
+      "policyRuleTriggered": "1",
+      "policyRuleType": "Refer"
+    },
+    {
+      "policyRuleId": 67,
+      "policyRuleLabel": "Balance Sheet",
+      "policyRuleText": "The customer has no balance sheet available",
+      "policyRuleTriggered": "1",
+      "policyRuleType": "Refer"
+    },
+    {
+      "policyRuleId": 68,
+      "policyRuleLabel": "Cash Flow",
+      "policyRuleText": "Customer has negative cash flow",
+      "policyRuleTriggered": "1",
+      "policyRuleType": "Refer"
+    },
+    {
+      "policyRuleId": 79,
+      "policyRuleLabel": "Restructured Contracts",
+      "policyRuleText": "The customer had restructured contracts in the past",
+      "policyRuleTriggered": "1",
+      "policyRuleType": "Refer"
+    }
+  ],
+  "customScore": "301",
+  "customScoreClass": "6",
+  "masterPD": "4.96",
+  "euroTaxAvailableFlag": false,
+  "informationDBAvailable": true,
+  "localSourceAvailableFlag": false,
+  "ageOfVehicleMonth": -1,
+  "ageOfCompanyMonths": 152,
+  "quoteRevisionFlag": false,
+  "highRiskBprFlag": false,
+  "triggeredOneBprFlag": true,
+  "reports": [
+    {
+      "applicationPartyId": "13Y760000004G0tEAE",
+      "creditDecisionCode": "R",
+      "creditDecision": "Refer",
+      "creditDecisonBusinessPolicyRules": [
+        {
+          "policyRuleId": 59,
+          "policyRuleLabel": "Proposals in approval",
+          "policyRuleText": "The applicant has applications in approval process.",
+          "policyRuleTriggered": "1",
+          "policyRuleType": "Refer"
+        },
+        {
+          "policyRuleId": 67,
+          "policyRuleLabel": "Balance Sheet",
+          "policyRuleText": "The customer has no balance sheet available",
+          "policyRuleTriggered": "1",
+          "policyRuleType": "Refer"
+        },
+        {
+          "policyRuleId": 68,
+          "policyRuleLabel": "Cash Flow",
+          "policyRuleText": "Customer has negative cash flow",
+          "policyRuleTriggered": "1",
+          "policyRuleType": "Refer"
+        },
+        {
+          "policyRuleId": 79,
+          "policyRuleLabel": "Restructured Contracts",
+          "policyRuleText": "The customer had restructured contracts in the past",
+          "policyRuleTriggered": "1",
+          "policyRuleType": "Refer"
+        }
+      ],
+      "customScore": "301",
+      "customScoreClass": "6",
+      "masterPD": "4.96",
+      "euroTaxAvailableFlag": false,
+      "informationDBAvailable": true,
+      "localSourceAvailableFlag": false,
+      "ageOfVehicleMonth": -1,
+      "ageOfCompanyMonrhs": 152,
+      "quoteRevisionFlag": false,
+      "highRiskBprFlag": false,
+      "triggeredOneBprFlag": true,
+      "worstRating": {
+        
+      },
+      "applicantRole": ""
+    }
+  ]
+}

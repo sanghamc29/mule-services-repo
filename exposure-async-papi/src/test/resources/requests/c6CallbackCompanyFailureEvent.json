@@ -1,0 +1,15 @@
+{
+  "eventType": "Agency Documents Upload",
+  "entities": [
+    {
+      "type": "Init",
+      "id": "214123412341234",
+      "country": "IT",
+      "applicationFormId": "AFP-00008080",
+      "uniqueId": null,
+      "createdDate": "2025-07-23T11:27:14.010459Z",
+      "eventName": ""
+    }
+  ],
+  "eventMetadata": "{\n  \"statusCode\": 400,\n  \"message\": \"Some fields are invalid: customer id\",\n  \"pdfDocuments\": null,\n  \"richtextDocuments\": [\n    \n  ]\n}"
+}

@@ -1,0 +1,13 @@
+{
+    "msrpBase": 12250,
+    "msrp": 13577,
+    "msrpRequestDate": "2023-11-17",
+    "carfaxGrade": "G",
+    "adjustments": {
+        "mileage": 0,
+        "location": 0,
+        "condition": 372.4,
+        "carfax": 0,
+        "options": 954.68
+    }
+}

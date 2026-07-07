@@ -1,0 +1,20 @@
+{
+  "status": "SUCCESS",
+  "recordsProcessed": 2,
+  "message": "Salesforce operation completed successfully",
+  "timestamp": "2024-01-15T10:30:00Z",
+  "data": [
+    {
+      "applicantId": "A1",
+      "accountId": "ACC1",
+      "status": "Updated",
+      "customerId": "CUST1"
+    },
+    {
+      "applicantId": "A2", 
+      "accountId": "ACC2",
+      "status": "Updated",
+      "customerId": "CUST2"
+    }
+  ]
+}

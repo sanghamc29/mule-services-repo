@@ -1,0 +1,9 @@
+[{
+  "applicantId": "13Y9Z000000QM9lUAG",
+  "status" : "success",
+  "message": "Flag updated successfully for Applicant 13Y9Z000000QM9lUAG"
+},{
+  "applicantId": "13Y9Z000000QC3eUAG",
+  "status" : "failed",
+  "message": "Error while updating flags"
+}]

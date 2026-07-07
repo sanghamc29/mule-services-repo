@@ -1,0 +1,8 @@
+client.secret: "![nOL1AW8eNUyxDDB8HeTE+IHfM1if20k8m4AaMdsweyguCXPIRe4kaQ==]"
+miles-sapi.client.secret: "![9OdCl7pe4mbKxihdIYwYXuH5lcAHFDmwijSWhCwOJDUf4x0z7TNbUQ==]"
+sf:
+  storePass: "![FRzZ76NQd0MDTkInXKML0A==]"
+  consumerKey: "![rKVXbRHWRcDnMuZLUsLWWmZ1V5wDDkVj0MQAggYuvB6AEQCKZprO3dl6q/kOfUk1+aQ4iA0p1y8NmPaLuHWFeubl1PDjgaXWWSkibo1WaxPvnnyZ6EUPCw==]"
+  
+mq:
+  clientSecret: "![GSdwl0bd9/xIlGmofMz/iznLP+ikwCLxIPZlf80iuov8DAQ+ODOvsw==]"
